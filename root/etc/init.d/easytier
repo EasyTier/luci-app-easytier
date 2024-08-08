@@ -221,11 +221,11 @@ start_et() {
 		procd_set_param stderr 1
 		procd_set_param respawn
 		procd_close_instance
-
-                [ -z "$tcp_port" ] && tcp_port="11010"
-                [ -z "$ws_port" ] && ws_port="11011"
-                [ -z "$wss_port" ] && wss_port="11012"
-                [ -z "$wg_port" ] && wg_port="11011"
+                if [ "$listenermode" = "ON" ] ; then
+                    [ -z "$tcp_port" ] && tcp_port="11010"
+                    [ -z "$ws_port" ] && ws_port="11011"
+                    [ -z "$wss_port" ] && wss_port="11012"
+                    [ -z "$wg_port" ] && wg_port="11011"
                     uci -q delete firewall.easytier_tcp_udp
 		    uci set firewall.easytier_tcp_udp=rule
 		    uci set firewall.easytier_tcp_udp.name="easytier_tcp_udp"
@@ -243,7 +243,7 @@ start_et() {
 		    uci set firewall.easytier_wss.proto="all"
 		    uci set firewall.easytier_wss.dest_port="$wss_port"
 		    uci set firewall.easytier_wss.enabled="1"
-		if [ "$ws_port" = "$wg_port" ] ; then
+		  if [ "$ws_port" = "$wg_port" ] ; then
 		    uci -q delete firewall.easytier_wg_ws
 		    uci set firewall.easytier_wg_ws=rule
 		    uci set firewall.easytier_wg_ws.name="easytier_wg_ws"
@@ -252,7 +252,7 @@ start_et() {
 		    uci set firewall.easytier_wg_ws.proto="all"
 		    uci set firewall.easytier_wg_ws.dest_port="$ws_port"
 		    uci set firewall.easytier_wg_ws.enabled="1"
-		else
+		  else
 		    uci -q delete firewall.easytier_ws
 		    uci set firewall.easytier_ws=rule
 		    uci set firewall.easytier_ws.name="easytier_ws"
@@ -270,7 +270,8 @@ start_et() {
 		    uci set firewall.easytier_wg.proto="all"
 		    uci set firewall.easytier_wg.dest_port="$wg_port"
 		    uci set firewall.easytier_wg.enabled="1"
-		fi
+		  fi
+                fi
 		[ -z "$tunname" ] && tunname="tun0"
 	        if [ -z "$(uci -q get network.EasyTier)" ];  then				
 			uci set network.EasyTier='interface'
