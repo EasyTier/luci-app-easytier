@@ -12,10 +12,11 @@ jobs:
           sudo timedatectl set-timezone Asia/Shanghai
           wget -qO /opt/sdk.tar.xz https://downloads.openwrt.org/releases/22.03.5/targets/rockchip/armv8/openwrt-sdk-22.03.5-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64.tar.xz
           tar -xJf /opt/sdk.tar.xz -C /opt
+          cp -R ${{ github.workspace }} /opt/luci-app-easytier
       - name: 开始编译
         run: |
           cd /opt/openwrt-sdk*/package
-          cp -R ${{ github.workspace }} .
+          cp -R /opt/luci-app-easytier .
           cd /opt/openwrt-sdk*
           ./scripts/feeds update -a
           make defconfig
