@@ -29,5 +29,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: luci-app-easytier
-          path: /opt/openwrt-sdk*/bin/packages/aarch64_generic/base/*.ipk
+          path: /opt/openwrt-sdk*/bin/packages/aarch64_generic/base/*
      
