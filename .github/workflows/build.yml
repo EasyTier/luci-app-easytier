@@ -24,10 +24,10 @@ jobs:
           make package/luci-app-easytier/compile V=s -j1
           cd /opt/openwrt-sdk*/bin/packages/aarch64_generic/base
           ls
-          mv *.ipk luci-app-easytier_all.ipk
+          mv *.ipk /opt/luci-app-easytier_all.ipk
       - name: 上传
         uses: actions/upload-artifact@v4
         with:
           name: luci-app-easytier
-          path: /opt/openwrt-sdk*/bin/packages/aarch64_generic/base/luci-app-easytier_all.ipk
+          path: /opt/luci-app-easytier_all.ipk
      
