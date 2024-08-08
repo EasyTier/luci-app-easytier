@@ -171,7 +171,7 @@ log = s:taboption("general",Flag, "log", translate("启用日志"),
 log.rmempty = false
 
 check = s:taboption("general",Flag, "check", translate("通断检测"),
-        translate("开启通断检测后，可以指定对端的设备IP，当所有指定的IP都ping不通时将会重启vnt程序"))
+        translate("开启通断检测后，可以指定对端的设备IP，当所有指定的IP都ping不通时将会重启easytier程序"))
 
 checkip=s:taboption("general",DynamicList,"checkip",translate("检测IP"),
         translate("确保这里的对端设备IP地址填写正确且可访问，若填写错误将会导致无法ping通，程序反复重启"))
