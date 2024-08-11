@@ -3,7 +3,7 @@ local http = luci.http
 local nixio = require "nixio"
 
 m = Map("easytier")
-m.description = translate('一个简单、安全、去中心化的内网穿透 VPN 组网方案，使用 Rust 语言和 Tokio 框架实现。 项目地址：<a href="https://github.com/EasyTier/EasyTier">github.com/EasyTier/EasyTier</a>&nbsp;&nbsp;<a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jhP2Z4UsEZ8wvfGPLrs0VwLKn_uz0Q_p&authKey=OGKSQLfg61YPCpVQuvx%2BxE7hUKBVBEVi9PljrDKbHlle6xqOXx8sOwPPTncMambK&noverify=0&group_code=949700262">QQ群</a>')
+m.description = translate('一个简单、安全、去中心化的内网穿透 VPN 组网方案，使用 Rust 语言和 Tokio 框架实现。 项目地址：<a href="https://github.com/EasyTier/EasyTier">github.com/EasyTier/EasyTier</a>&nbsp;&nbsp;<a href="http://easytier.rs">官网文档</a>&nbsp;&nbsp;<a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jhP2Z4UsEZ8wvfGPLrs0VwLKn_uz0Q_p&authKey=OGKSQLfg61YPCpVQuvx%2BxE7hUKBVBEVi9PljrDKbHlle6xqOXx8sOwPPTncMambK&noverify=0&group_code=949700262">QQ群</a>')
 
 -- easytier
 m:section(SimpleSection).template  = "easytier/easytier_status"
@@ -28,54 +28,68 @@ btncq.write = function()
 end
 
 network_name = s:taboption("general", Value, "network_name", translate("网络名称"),
-	translate("用于识别此 VPN 网络的网络名称（这是 --network-name 参数）"))
+	translate("用于识别此 VPN 网络的网络名称（--network-name 参数）"))
 network_name.password = true
 network_name.placeholder = "test"
 
 network_secret = s:taboption("general", Value, "network_secret", translate("网络密钥"),
-	translate("用于验证此节点是否属于 VPN 网络的网络密钥（这是 --network-secret 参数）"))
+	translate("用于验证此节点是否属于 VPN 网络的网络密钥（--network-secret 参数）"))
 network_secret.password = true
 network_secret.placeholder = "test"
 
-mode = s:taboption("general",ListValue, "mode", translate("接口模式"),
-	translate("不指定ip地址将不会建立tun网卡，单纯作为服务器运行"))
-mode:value("不指定")
-mode:value("自动分配")
-mode:value("静态指定")
-
+ip_dhcp = s:taboption("general",Flag, "ip_dhcp", translate("启用dhcp"),
+	translate("由Easytier自动确定并设置IP地址，默认从10.0.0.1开始。警告：在使用DHCP时，如果网络中出现IP冲突，IP将自动更改。（-d 参数）"))
+	
 ipaddr = s:taboption("general",Value, "ipaddr", translate("接口IP地址"),
-	translate("此 VPN 节点的 IPv4 地址，如果为空，此节点将仅转发数据包，不会创建 TUN 设备 （这是 -i 参数）"))
-ipaddr.optional = false
+	translate("此VPN节点的IPv4地址，如果为空，则此节点将仅转发数据包，不会创建TUN设备（-i 参数）"))
 ipaddr.datatype = "ip4addr"
 ipaddr.placeholder = "10.0.0.1"
-ipaddr:depends("mode", "静态指定")
 
 peeradd = s:taboption("general",DynamicList, "peeradd", translate("对等节点"),
-	translate("初始连接的对等节点 （这是 -p 参数）"))
+	translate("初始连接的对等节点 （-p 参数）"))
 peeradd.placeholder = "udp://22.1.1.1:11010"
 
 external_node = s:taboption("general", Value, "external_node", translate("共享节点地址"),
-	translate("使用公共共享节点来发现对等节点 （这是 -e 参数）"))
+	translate("使用公共共享节点来发现对等节点 （-e 参数）"))
 external_node.placeholder = "tcp://easytier.public.kkrainbow.top:11010"
 external_node.password = true
 
 proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("代理网络"),
-	translate("将本地网络导出到 VPN 中的其他对等点 （这是 -n 参数）"))
+	translate("将本地网络导出到 VPN 中的其他对等点 （-n 参数）"))
 
 rpc_portal = s:taboption("general", Value, "rpc_portal", translate("门户地址端口"),
-	translate("用于管理的 RPC 门户地址。0 表示随机端口，12345 表示监听本地主机的 12345 端口，0.0.0.0:12345 表示在所有接口上监听 12345 端口。默认值为 0，首选 15888 （这是 -r 参数）"))
+	translate("用于管理的 RPC 门户地址。0 表示随机端口，12345 表示监听本地主机的 12345 端口，0.0.0.0:12345 表示在所有接口上监听 12345 端口。默认值为 0，首选 15888 （-r 参数）"))
 rpc_portal.placeholder = "0"
 rpc_portal.datatype = "range(1,65535)"
 
-listenermode = s:taboption("general",ListValue, "listenermode", translate("监听模式"))
-listenermode:value("OFF")
+listenermode = s:taboption("general",ListValue, "listenermode", translate("监听端口"),
+	translate("OFF:不监听任何端口，只连接到对等节点 （--no-listener 参数）"))
 listenermode:value("ON")
+listenermode:value("OFF")
 
-listeners = s:taboption("general",Value, "listeners", translate("监听端口"),
-	translate("接受连接的监听器，只需要填端口号：11010，表示 tcp/udp 将在 11010 上监听，ws/wg 将在 11011 上监听，wss 将在 11012 上监听"))
-listeners.datatype = "range(1,65535)"
-listeners.placeholder = "11010"
-listeners:depends("listenermode", "ON")
+tcp_port = s:taboption("general",Value, "tcp_port", translate("tcp/udp端口"),
+	translate("tcp/udp协议，端口号：11010，表示 tcp/udp 将在 11010 上监听"))
+tcp_port.datatype = "range(1,65535)"
+tcp_port.placeholder = "11010"
+tcp_port:depends("listenermode", "ON")
+
+ws_port = s:taboption("general",Value, "ws_port", translate("ws端口"),
+	translate("ws协议，端口号：11010，表示 ws 将在 11010 上监听"))
+ws_port.datatype = "range(1,65535)"
+ws_port.placeholder = "11010"
+ws_port:depends("listenermode", "ON")
+
+wss_port = s:taboption("general",Value, "wss_port", translate("wss端口"),
+	translate("wss协议，端口号：11011，表示 wss 将在 11011 上监听"))
+wss_port.datatype = "range(1,65535)"
+wss_port.placeholder = "11011"
+wss_port:depends("listenermode", "ON")
+
+wg_port = s:taboption("general",Value, "wg_port", translate("wg端口"),
+	translate("wireguard协议，端口号：11011，表示 wg 将在 11011 上监听"))
+wg_port.datatype = "range(1,65535)"
+wg_port.placeholder = "11011"
+wg_port:depends("listenermode", "ON")
 
 local model = fs.readfile("/proc/device-tree/model") or ""
 local hostname = fs.readfile("/proc/sys/kernel/hostname") or ""
@@ -84,52 +98,86 @@ hostname = hostname:gsub("\n", "")
 local device_name = (model ~= "" and model) or (hostname ~= "" and hostname) or "OpenWrt"
 device_name = device_name:gsub(" ", "_")
 desvice_name = s:taboption("general", Value, "desvice_name", translate("主机名"),
-    translate("用于标识此设备的主机名 （这是 --hostname 参数）"))
+    translate("用于标识此设备的主机名 （--hostname 参数）"))
 desvice_name.placeholder = device_name
 desvice_name.default = device_name
 
 instance_name = s:taboption("general",Value, "instance_name", translate("实例名称"),
-	translate("用于在同一台机器中标识此 VPN 节点的实例名称 （这是 --instance-name 参数）"))
+	translate("用于在同一台机器中标识此 VPN 节点的实例名称 （--instance-name 参数）"))
 instance_name.placeholder = "default"
 
 vpn_portal = s:taboption("general",Value, "vpn_portal", translate("VPN门户URL"),
-	translate("定义 VPN 门户的 URL，允许其他 VPN 客户端连接。<br> 示例：wg://0.0.0.0:11010/10.14.14.0/24，表示 VPN 门户是一个在 vpn.example.com:11010 上监听的 WireGuard 服务器，并且 VPN 客户端位于 10.14.14.0/24 网络中（这是 --vpn-portal 参数）"))
+	translate("定义 VPN 门户的 URL，允许其他 VPN 客户端连接。<br> 示例：wg://0.0.0.0:11010/10.14.14.0/24，表示 VPN 门户是一个在 vpn.example.com:11010 上监听的 WireGuard 服务器，并且 VPN 客户端位于 10.14.14.0/24 网络中（--vpn-portal 参数）"))
 vpn_portal.placeholder = "wg://0.0.0.0:11010/10.14.14.0/24"
 
 mtu = s:taboption("general",Value, "mtu", translate("MTU"),
 	translate("TUN 设备的 MTU，默认值为非加密时的 1420，加密时为 1400"))
 mtu.datatype = "range(1,1500)"
-mtu.placeholder = "1400"
+mtu.placeholder = "1300"
 
-
-default_protocol = s:taboption("general",Value, "default_protocol", translate("默认协议"),
-	translate("连接对等节点时使用的默认协议（这是 --default-protocol 参数）"))
+default_protocol = s:taboption("general",ListValue, "default_protocol", translate("默认协议"),
+	translate("连接对等节点时使用的默认协议（--default-protocol 参数）"))
+default_protocol:value("-")
+default_protocol:value("tcp")
+default_protocol:value("udp")
+default_protocol:value("ws")
+default_protocol:value("wss")
+default_protocol:value("wg")
+	
+tunname = s:taboption("general",Value, "tunname", translate("虚拟网卡名称"),
+	translate("自定义虚拟网卡TUN接口的名称（--dev-name 参数）"))
+tunname.placeholder = "easytier"	
 
 disable_encryption = s:taboption("general",Flag, "disable_encryption", translate("禁用加密"),
-	translate("禁用对等节点通信的加密，若关闭加密则其他节点也必须关闭加密 （这是 -u 参数）"))
+	translate("禁用对等节点通信的加密，若关闭加密则其他节点也必须关闭加密 （-u 参数）"))
 
 multi_thread = s:taboption("general",Flag, "multi_thread", translate("启用多线程"),
-	translate("使用多线程运行时，默认为单线程 （这是 --multi-thread 参数）"))
+	translate("使用多线程运行时，默认为单线程 （--multi-thread 参数）"))
 	
 disable_ipv6 = s:taboption("general",Flag, "disable_ipv6", translate("禁用ipv6"),
-	translate("禁用ipv6 （这是 --disable-ipv6 参数）"))
+	translate("不使用ipv6 （--disable-ipv6 参数）"))
 	
 latency_first = s:taboption("general",Flag, "latency_first", translate("启用延迟优先"),
-	translate("优先考虑延迟? （这是 --latency-first 参数）"))
+	translate("延迟优先模式，将尝试使用最低延迟路径转发流量，默认使用最短路径 （--latency-first 参数）"))
 	
 exit_node = s:taboption("general",Flag, "exit_node", translate("启用出口节点"),
-	translate("允许此节点成为出口节点 （这是 --enable-exit-node 参数）"))
+	translate("允许此节点成为出口节点 （--enable-exit-node 参数）"))
 	
-exit_nodes = s:taboption("general",Value, "exit_nodes", translate("出口节点地址"),
-	translate("转发所有流量的出口节点，虚拟 IPv4 地址，优先级由列表顺序确定（这是 --exit-nodes 参数）"))
-exit_nodes:depends("exit_node", "1")
+exit_nodes = s:taboption("general",DynamicList, "exit_nodes", translate("出口节点地址"),
+	translate("转发所有流量的出口节点，虚拟 IPv4 地址，优先级由列表顺序确定（--exit-nodes 参数）"))
+	
+smoltcp = s:taboption("general",Flag, "smoltcp", translate("启用smoltcp堆栈"),
+	translate("为子网代理启用smoltcp堆栈（--use-smoltcp 参数）"))
+smoltcp.rmempty = false
+
+no_tun = s:taboption("general",Flag, "no_tun", translate("无tun模式"),
+	translate("不创建TUN设备，可以使用子网代理访问节点（ --no-tun 参数）"))
+no_tun.rmempty = false
+
+manual_routes = s:taboption("general",DynamicList, "manual_routes", translate("路由CIDR"),
+	translate("手动分配路由CIDR，将禁用子网代理和从对等节点传播的wireguard路由。（--manual-routes 参数）"))
+manual_routes.placeholder = "192.168.0.0/16"
+
+relay_network = s:taboption("general",Flag, "relay_network", translate("转发白名单网络的流量"),
+	translate("仅转发白名单网络的流量，默认允许所有网络"))
+relay_network.rmempty = false
+
+whitelist = s:taboption("general",DynamicList, "whitelist", translate("白名单网络"),
+	translate("仅转发白名单网络的流量，输入是通配符字符串，例如：'*'（所有网络），'def*'（以def为前缀的网络）<br>可以指定多个网络。如果参数为空，则禁用转发。（--relay-network-whitelist 参数）"))
+whitelist:depends("relay_network", "1")
+
+relaymode = s:taboption("general",ListValue, "relaymode", translate("P2P/转发"),
+	translate("禁用P2P:禁用P2P通信，只通过-p指定的节点转发数据包 （--disable-p2p 参数）<br>允许转发P2P:转发所有对等节点的RPC数据包，即使对等节点不在转发网络白名单中。这可以帮助白名单外网络中的对等节点建立P2P连接。 （--relay-all-peer-rpc 参数）"))
+relaymode:value("-", translate("默认"))
+relaymode:value("disable_p2p", translate("禁用P2P"))
+relaymode:value("relay_all", translate("允许转发P2P"))
 
 log = s:taboption("general",Flag, "log", translate("启用日志"),
 	translate("运行日志在/tmp/easytier.log,可在上方日志查看"))
 log.rmempty = false
 
 check = s:taboption("general",Flag, "check", translate("通断检测"),
-        translate("开启通断检测后，可以指定对端的设备IP，当所有指定的IP都ping不通时将会重启vnt程序"))
+        translate("开启通断检测后，可以指定对端的设备IP，当所有指定的IP都ping不通时将会重启easytier程序"))
 
 checkip=s:taboption("general",DynamicList,"checkip",translate("检测IP"),
         translate("确保这里的对端设备IP地址填写正确且可访问，若填写错误将会导致无法ping通，程序反复重启"))
@@ -327,6 +375,9 @@ http.setfilehandler(
             if string.sub(meta.file, -4) == ".zip" then
                 local file_path = dir .. meta.file
                 os.execute("unzip -q " .. file_path .. " -d " .. dir)
+                local extracted_dir = "/tmp/easytier-linux-*/"
+                os.execute("mv " .. extracted_dir .. "easytier-cli /tmp/easytier-cli")
+                os.execute("mv " .. extracted_dir .. "easytier-core /tmp/easytier-core")
                if nixio.fs.access("/tmp/easytier-cli") then
                     um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-cli上传成功，重启一次插件才生效")
                 end
@@ -334,8 +385,8 @@ http.setfilehandler(
                     um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-core上传成功，重启一次插件才生效")
                 end
                end
-                os.execute("chmod a+x /tmp/easytier-core")
-                os.execute("chmod a+x /tmp/easytier-cli")                
+                os.execute("chmod +x /tmp/easytier-core")
+                os.execute("chmod +x /tmp/easytier-cli")                
         end
     end
 )

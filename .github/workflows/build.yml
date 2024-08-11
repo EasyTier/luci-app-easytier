@@ -1,0 +1,33 @@
+name: 编译luci-app-easytier
+
+on:
+  workflow_dispatch:
+jobs:
+ build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 下载工具链
+        run: |
+          sudo timedatectl set-timezone Asia/Shanghai
+          wget -qO /opt/sdk.tar.xz https://downloads.openwrt.org/releases/22.03.5/targets/rockchip/armv8/openwrt-sdk-22.03.5-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+          tar -xJf /opt/sdk.tar.xz -C /opt
+          cp -R ${{ github.workspace }} /opt/luci-app-easytier
+      - name: 开始编译
+        run: |
+          cd /opt/openwrt-sdk*/package
+          cp -R /opt/luci-app-easytier .
+          cd /opt/openwrt-sdk*
+          ./scripts/feeds update -a
+          make defconfig
+          cd /opt/openwrt-sdk*
+          make package/luci-app-easytier/compile V=s -j1
+          cd /opt/openwrt-sdk*/bin/packages/aarch64_generic/base
+          ls
+          mv *.ipk /opt/luci-app-easytier_all.ipk
+      - name: 上传
+        uses: actions/upload-artifact@v4
+        with:
+          name: luci-app-easytier
+          path: /opt/luci-app-easytier_all.ipk
+     
