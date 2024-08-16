@@ -166,11 +166,13 @@ whitelist = s:taboption("general",DynamicList, "whitelist", translate("白名单
 	translate("仅转发白名单网络的流量，输入是通配符字符串，例如：'*'（所有网络），'def*'（以def为前缀的网络）<br>可以指定多个网络。如果参数为空，则禁用转发。（--relay-network-whitelist 参数）"))
 whitelist:depends("relay_network", "1")
 
-relaymode = s:taboption("general",ListValue, "relaymode", translate("P2P/转发"),
-	translate("禁用P2P:禁用P2P通信，只通过-p指定的节点转发数据包 （--disable-p2p 参数）<br>允许转发P2P:转发所有对等节点的RPC数据包，即使对等节点不在转发网络白名单中。这可以帮助白名单外网络中的对等节点建立P2P连接。 （--relay-all-peer-rpc 参数）"))
-relaymode:value("-", translate("默认"))
-relaymode:value("disable_p2p", translate("禁用P2P"))
-relaymode:value("relay_all", translate("允许转发P2P"))
+disable_p2p = s:taboption("general",Flag, "disable_p2p", translate("禁用P2P"),
+	translate("禁用P2P通信，只通过-p指定的节点转发数据包"))
+disable_p2p.rmempty = false
+
+relay_all = s:taboption("general",Flag, "relay_all", translate("允许转发"),
+	translate("转发所有对等节点的RPC数据包，即使对等节点不在转发网络白名单中。<br>这可以帮助白名单外网络中的对等节点建立P2P连接。"))
+relay_all.rmempty = false
 
 log = s:taboption("general",Flag, "log", translate("启用日志"),
 	translate("运行日志在/tmp/easytier.log,可在上方日志查看"))
