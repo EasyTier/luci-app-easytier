@@ -101,9 +101,11 @@ start_et() {
                 pgrep -f easytier_check | xargs kill -9 >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1
-		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network relaymode
+
+		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p
 		local tcp_port ws_port wss_port wg_port desvice_name instance_name vpn_portal mtu default_protocol disable_encryption whitelist
-		local multi_thread disable_ipv6 latency_first exit_node exit_nodes smoltcp no_tun manual_routes log check checkip proxy_network 
+		local multi_thread disable_ipv6 latency_first exit_node exit_nodes smoltcp no_tun manual_routes log check checkip proxy_network relay_all
+
 		config_get network_name "$cfg" 'network_name'
                 config_get network_secret "$cfg" 'network_secret'
                 config_get_bool ip_dhcp "$cfg" 'ip_dhcp' '0'
@@ -134,9 +136,10 @@ start_et() {
                 config_get exit_nodes "$cfg" 'exit_nodes'
                 config_get_bool no_tun "$cfg" 'no_tun' '0'
                 config_get manual_routes "$cfg" 'manual_routes'
-                config_get relaymode "$cfg" 'relaymode'
                 config_get_bool log "$cfg" 'log' '0'
                 config_get_bool check "$cfg" 'check' '0'
+                config_get_bool disable_p2p "$cfg" 'disable_p2p' '0'
+                config_get_bool relay_all "$cfg" 'relay_all' '0'
                 config_get checkip "$cfg" 'checkip'
                 
 		procd_open_instance "easytier"
@@ -214,8 +217,8 @@ start_et() {
 		[ "$log" = "1" ] && procd_append_param command --file-log-level "info" 
 		[ "$log" = "1" ] && procd_append_param command --file-log-dir "/tmp"
 		[ "$log" = "0" ] && procd_append_param command --file-log-level "off"
-                [ "$relaymode" = "disable_p2p" ] && procd_append_param command --disable-p2p
-                [ "$relaymode" = "relay_all" ] && procd_append_param command --relay-all-peer-rpc
+    [ "$disable_p2p" = "0" ] || procd_append_param command --disable-p2p
+    [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
 		[ ! -z "$instance_name" ] && ln -sf /tmp/easytier-${instance_name}.${date_time} /tmp/easytier.log
 		
 		procd_set_param limits core="unlimited"
