@@ -281,6 +281,7 @@ start_et() {
 		[ -z "$tunname" ] && tunname="tun0"
 	        if [ -z "$(uci -q get network.EasyTier)" ];  then				
 			uci set network.EasyTier='interface'
+                       uci set network.EasyTier.proto='none'
                        uci set network.EasyTier.device="$tunname"
                        uci set network.EasyTier.ifname="$tunname"
 		fi
