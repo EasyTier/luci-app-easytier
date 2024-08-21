@@ -74,15 +74,15 @@ tcp_port.placeholder = "11010"
 tcp_port:depends("listenermode", "ON")
 
 ws_port = s:taboption("general",Value, "ws_port", translate("ws端口"),
-	translate("ws协议，端口号：11010，表示 ws 将在 11010 上监听"))
+	translate("ws协议，端口号：11011，表示 ws 将在 11011 上监听"))
 ws_port.datatype = "range(1,65535)"
-ws_port.placeholder = "11010"
+ws_port.placeholder = "11011"
 ws_port:depends("listenermode", "ON")
 
 wss_port = s:taboption("general",Value, "wss_port", translate("wss端口"),
-	translate("wss协议，端口号：11011，表示 wss 将在 11011 上监听"))
+	translate("wss协议，端口号：11012，表示 wss 将在 11012 上监听"))
 wss_port.datatype = "range(1,65535)"
-wss_port.placeholder = "11011"
+wss_port.placeholder = "11012"
 wss_port:depends("listenermode", "ON")
 
 wg_port = s:taboption("general",Value, "wg_port", translate("wg端口"),
@@ -107,8 +107,8 @@ instance_name = s:taboption("general",Value, "instance_name", translate("实例�
 instance_name.placeholder = "default"
 
 vpn_portal = s:taboption("general",Value, "vpn_portal", translate("VPN门户URL"),
-	translate("定义 VPN 门户的 URL，允许其他 VPN 客户端连接。<br> 示例：wg://0.0.0.0:11010/10.14.14.0/24，表示 VPN 门户是一个在 vpn.example.com:11010 上监听的 WireGuard 服务器，并且 VPN 客户端位于 10.14.14.0/24 网络中（--vpn-portal 参数）"))
-vpn_portal.placeholder = "wg://0.0.0.0:11010/10.14.14.0/24"
+	translate("定义 VPN 门户的 URL，允许其他 VPN 客户端连接。<br> 示例：wg://0.0.0.0:11011/10.14.14.0/24，表示 VPN 门户是一个在 vpn.example.com:11010 上监听的 WireGuard 服务器，并且 VPN 客户端位于 10.14.14.0/24 网络中（--vpn-portal 参数）"))
+vpn_portal.placeholder = "wg://0.0.0.0:11011/10.14.14.0/24"
 
 mtu = s:taboption("general",Value, "mtu", translate("MTU"),
 	translate("TUN 设备的 MTU，默认值为非加密时的 1420，加密时为 1400"))
@@ -122,7 +122,6 @@ default_protocol:value("tcp")
 default_protocol:value("udp")
 default_protocol:value("ws")
 default_protocol:value("wss")
-default_protocol:value("wg")
 	
 tunname = s:taboption("general",Value, "tunname", translate("虚拟网卡名称"),
 	translate("自定义虚拟网卡TUN接口的名称（--dev-name 参数）"))
@@ -165,6 +164,11 @@ relay_network.rmempty = false
 whitelist = s:taboption("general",DynamicList, "whitelist", translate("白名单网络"),
 	translate("仅转发白名单网络的流量，输入是通配符字符串，例如：'*'（所有网络），'def*'（以def为前缀的网络）<br>可以指定多个网络。如果参数为空，则禁用转发。（--relay-network-whitelist 参数）"))
 whitelist:depends("relay_network", "1")
+
+socks_port = s:taboption("general",Value, "socks_port", translate("socks5端口"),
+	translate("启用 socks5 服务器，允许 socks5 客户端访问虚拟网络，留空则不开启（--socks5 参数）"))
+socks_port.datatype = "range(1,65535)"
+socks_port.placeholder = "1080"
 
 disable_p2p = s:taboption("general",Flag, "disable_p2p", translate("禁用P2P"),
 	translate("禁用P2P通信，只通过-p指定的节点转发数据包"))
