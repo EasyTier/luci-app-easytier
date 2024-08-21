@@ -165,6 +165,11 @@ whitelist = s:taboption("general",DynamicList, "whitelist", translate("白名单
 	translate("仅转发白名单网络的流量，输入是通配符字符串，例如：'*'（所有网络），'def*'（以def为前缀的网络）<br>可以指定多个网络。如果参数为空，则禁用转发。（--relay-network-whitelist 参数）"))
 whitelist:depends("relay_network", "1")
 
+socks_port = s:taboption("general",Value, "socks_port", translate("socks5端口"),
+	translate("启用 socks5 服务器，允许 socks5 客户端访问虚拟网络，留空则不开启（--socks5 参数）"))
+socks_port.datatype = "range(1,65535)"
+socks_port.placeholder = "1080"
+
 disable_p2p = s:taboption("general",Flag, "disable_p2p", translate("禁用P2P"),
 	translate("禁用P2P通信，只通过-p指定的节点转发数据包"))
 disable_p2p.rmempty = false
