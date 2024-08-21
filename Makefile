@@ -6,7 +6,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_VERSION:=1.0.0
+PKG_VERSION:=1.2.2
 PKG_RELEASE:=
 
 LUCI_TITLE:=LuCI support for EasyTier
