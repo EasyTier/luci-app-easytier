@@ -380,7 +380,7 @@ stop_service() {
                 [ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
 	        [ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1 
                 rm -rf /tmp/easytier-cli_peer /tmp/easytier-cli_connector /tmp/easytier-cli_stun /tmp/easytier-cli_route >/dev/null 2>&1
-                rm -rf /tmp/easytier-cli_peer-center /tmp/easytier-cli_vpn-portal /tmp/easytier_cmd >/dev/null 2>&1
+                rm -rf /tmp/easytier-cli_peer-center /tmp/easytier-cli_vpn-portal /tmp/easytier_cmd /tmp/easytier-cli_node >/dev/null 2>&1
                 rm -rf /tmp/easytier-*.* /tmp/easytier.log >/dev/null 2>&1
                 rm -rf /tmp/easytiernew.tag /tmp/easytier.tag >/dev/null 2>&1
                 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 停止运行" >>/tmp/easytier.log
