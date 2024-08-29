@@ -103,7 +103,7 @@ start_et() {
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1
 
-		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p
+		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p disable_udp
 		local tcp_port ws_port wss_port wg_port desvice_name instance_name vpn_portal mtu default_protocol disable_encryption whitelist socks_port
 		local multi_thread disable_ipv6 latency_first exit_node exit_nodes smoltcp no_tun manual_routes log check checkip proxy_network relay_all
 
@@ -140,6 +140,7 @@ start_et() {
                 config_get_bool log "$cfg" 'log' '0'
                 config_get_bool check "$cfg" 'check' '0'
                 config_get_bool disable_p2p "$cfg" 'disable_p2p' '0'
+                config_get_bool disable_udp "$cfg" 'disable_udp' '0'
                 config_get_bool relay_all "$cfg" 'relay_all' '0'
                 config_get checkip "$cfg" 'checkip'
                 config_get socks_port "$cfg" 'socks_port'
@@ -220,6 +221,7 @@ start_et() {
 		[ "$log" = "1" ] && procd_append_param command --file-log-dir "/tmp"
 		[ "$log" = "0" ] && procd_append_param command --file-log-level "off"
                 [ "$disable_p2p" = "0" ] || procd_append_param command --disable-p2p
+                [ "$disable_udp" = "0" ] || procd_append_param command --disable-udp-hole-punching
                 [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
                 [ -z "$socks_port" ] || procd_append_param command --socks5 "$socks_port"
 		[ ! -z "$instance_name" ] && ln -sf /tmp/easytier-${instance_name}.${date_time} /tmp/easytier.log
