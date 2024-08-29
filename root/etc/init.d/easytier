@@ -137,7 +137,7 @@ start_et() {
                 config_get exit_nodes "$cfg" 'exit_nodes'
                 config_get_bool no_tun "$cfg" 'no_tun' '0'
                 config_get manual_routes "$cfg" 'manual_routes'
-                config_get_bool log "$cfg" 'log' '0'
+                config_get log "$cfg" 'log' 'off'
                 config_get_bool check "$cfg" 'check' '0'
                 config_get_bool disable_p2p "$cfg" 'disable_p2p' '0'
                 config_get_bool disable_udp "$cfg" 'disable_udp' '0'
@@ -217,9 +217,9 @@ start_et() {
 		[ "$disable_ipv6" = "0" ] || procd_append_param command --disable-ipv6
 		[ "$latency_first" = "0" ] || procd_append_param command --latency-first
 		[ "$exit_node" = "0" ] || procd_append_param command --enable-exit-node
-		[ "$log" = "1" ] && procd_append_param command --file-log-level "info" 
-		[ "$log" = "1" ] && procd_append_param command --file-log-dir "/tmp"
-		[ "$log" = "0" ] && procd_append_param command --file-log-level "off"
+		[ "$log" = "off" ] || procd_append_param command --file-log-level "$log" 
+		[ "$log" = "off" ] || procd_append_param command --file-log-dir "/tmp"
+		[ "$log" = "off" ] && procd_append_param command --file-log-level "off"
                 [ "$disable_p2p" = "0" ] || procd_append_param command --disable-p2p
                 [ "$disable_udp" = "0" ] || procd_append_param command --disable-udp-hole-punching
                 [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
