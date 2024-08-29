@@ -208,9 +208,28 @@ checktime:depends("check", "1")
 
 local process_status = luci.sys.exec("ps | grep easytier-core| grep -v grep")
 
+btn0 = s:taboption("infos", Button, "btn0")
+btn0.inputtitle = translate("node信息")
+btn0.description = translate("点击按钮刷新，查看本机信息")
+btn0.inputstyle = "apply"
+btn0.write = function()
+if process_status ~= "" then
+   luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli node >/tmp/easytier-cli_node")
+else
+    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_node")
+end
+end
+
+btn0info = s:taboption("infos", DummyValue, "btn0info")
+btn0info.rawhtml = true
+btn0info.cfgvalue = function(self, section)
+    local content = nixio.fs.readfile("/tmp/easytier-cli_node") or ""
+    return string.format("<pre>%s</pre>", luci.util.pcdata(content))
+end
+
 btn1 = s:taboption("infos", Button, "btn1")
 btn1.inputtitle = translate("peer信息")
-btn1.description = translate("点击按钮刷新，查看peer信息")
+btn1.description = translate("点击按钮刷新，查看对端信息")
 btn1.inputstyle = "apply"
 btn1.write = function()
 if process_status ~= "" then
