@@ -52,7 +52,6 @@ peeradd.placeholder = "udp://22.1.1.1:11010"
 external_node = s:taboption("general", Value, "external_node", translate("共享节点地址"),
 	translate("使用公共共享节点来发现对等节点 （-e 参数）"))
 external_node.placeholder = "tcp://easytier.public.kkrainbow.top:11010"
-external_node.password = true
 
 proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("代理网络"),
 	translate("将本地网络导出到 VPN 中的其他对等点 （-n 参数）"))
@@ -171,8 +170,12 @@ socks_port.datatype = "range(1,65535)"
 socks_port.placeholder = "1080"
 
 disable_p2p = s:taboption("general",Flag, "disable_p2p", translate("禁用P2P"),
-	translate("禁用P2P通信，只通过-p指定的节点转发数据包"))
+	translate("禁用P2P通信，只通过-p指定的节点转发数据包 （ --disable-p2p 参数）"))
 disable_p2p.rmempty = false
+
+disable_udp = s:taboption("general",Flag, "disable_udp", translate("禁用UDP"),
+	translate("禁用UDP打洞功能（ --disable-udp-hole-punching 参数）"))
+disable_udp.rmempty = false
 
 relay_all = s:taboption("general",Flag, "relay_all", translate("允许转发"),
 	translate("转发所有对等节点的RPC数据包，即使对等节点不在转发网络白名单中。<br>这可以帮助白名单外网络中的对等节点建立P2P连接。"))
