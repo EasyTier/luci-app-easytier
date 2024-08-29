@@ -220,10 +220,10 @@ start_et() {
 		[ "$log" = "off" ] || procd_append_param command --file-log-level "$log" 
 		[ "$log" = "off" ] || procd_append_param command --file-log-dir "/tmp"
 		[ "$log" = "off" ] && procd_append_param command --file-log-level "off"
-                [ "$disable_p2p" = "0" ] || procd_append_param command --disable-p2p
-                [ "$disable_udp" = "0" ] || procd_append_param command --disable-udp-hole-punching
-                [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
-                [ -z "$socks_port" ] || procd_append_param command --socks5 "$socks_port"
+    [ "$disable_p2p" = "0" ] || procd_append_param command --disable-p2p
+    [ "$disable_udp" = "0" ] || procd_append_param command --disable-udp-hole-punching
+    [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
+    [ -z "$socks_port" ] || procd_append_param command --socks5 "$socks_port"
 		[ ! -z "$instance_name" ] && ln -sf /tmp/easytier-${instance_name}.${date_time} /tmp/easytier.log
 		
 		procd_set_param limits core="unlimited"
