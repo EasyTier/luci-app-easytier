@@ -183,7 +183,7 @@ relay_all.rmempty = false
 
 log = s:taboption("general",ListValue, "log", translate("程序日志"),
 	translate("运行日志在/tmp/easytier.log,可在上方日志查看"))
-log.default = "debug"
+log.default = "info"
 log:value("off",translate("关闭"))
 log:value("info",translate("信息"))
 log:value("debug",translate("调试"))
