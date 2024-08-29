@@ -63,8 +63,8 @@ rpc_portal.datatype = "range(1,65535)"
 
 listenermode = s:taboption("general",ListValue, "listenermode", translate("监听端口"),
 	translate("OFF:不监听任何端口，只连接到对等节点 （--no-listener 参数）"))
-listenermode:value("ON")
-listenermode:value("OFF")
+listenermode:value("ON",translate("监听"))
+listenermode:value("OFF",translate("不监听"))
 
 tcp_port = s:taboption("general",Value, "tcp_port", translate("tcp/udp端口"),
 	translate("tcp/udp协议，端口号：11010，表示 tcp/udp 将在 11010 上监听"))
@@ -116,7 +116,7 @@ mtu.placeholder = "1300"
 
 default_protocol = s:taboption("general",ListValue, "default_protocol", translate("默认协议"),
 	translate("连接对等节点时使用的默认协议（--default-protocol 参数）"))
-default_protocol:value("-")
+default_protocol:value("-",translate("默认"))
 default_protocol:value("tcp")
 default_protocol:value("udp")
 default_protocol:value("ws")
@@ -181,9 +181,14 @@ relay_all = s:taboption("general",Flag, "relay_all", translate("允许转发"),
 	translate("转发所有对等节点的RPC数据包，即使对等节点不在转发网络白名单中。<br>这可以帮助白名单外网络中的对等节点建立P2P连接。"))
 relay_all.rmempty = false
 
-log = s:taboption("general",Flag, "log", translate("启用日志"),
+log = s:taboption("general",ListValue, "log", translate("程序日志"),
 	translate("运行日志在/tmp/easytier.log,可在上方日志查看"))
-log.rmempty = false
+log.default = "debug"
+log:value("off",translate("关闭"))
+log:value("info",translate("信息"))
+log:value("debug",translate("调试"))
+log:value("warn",translate("警告"))
+log:value("trace",translate("跟踪"))
 
 check = s:taboption("general",Flag, "check", translate("通断检测"),
         translate("开启通断检测后，可以指定对端的设备IP，当所有指定的IP都ping不通时将会重启easytier程序"))
