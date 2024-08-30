@@ -179,6 +179,15 @@ start_et() {
                    done
                    fi
                 fi
+                if [ ! -z "$external_node" ] ; then
+                  if [[ "$(grep "list external_node" /etc/config/easytier | awk '{print $3}' | wc -l ) " -eq 1 ]]; then
+                    procd_append_param command -e "$external_node"
+                  else
+                    for external_nodes in $(cat /etc/config/easytier | grep 'list external_node'  | awk -F 'list external_node' '{print $2}' | sed "s/'/\n/g" | tr -d " ' "); do
+                    procd_append_param command -e "$external_nodes"
+                   done
+                   fi
+                fi
                 if [ ! -z "$manual_routes" ] ; then
                   if [[ "$(grep "list manual_routes" /etc/config/easytier | awk '{print $3}' | wc -l ) " -eq 1 ]]; then
                     procd_append_param command --manual-routes "$manual_routes"
@@ -197,7 +206,6 @@ start_et() {
                    done
                    fi
                 fi
-		[ -z "$external_node" ] || procd_append_param command -e "$external_node"
 		[ -z "$rpc_portal" ] || procd_append_param command -r "$rpc_portal"
 		[ -z "$tcp_port" ] || procd_append_param command -l "tcp:$tcp_port"
 		[ -z "$tcp_port" ] || procd_append_param command -l "udp:$tcp_port"
