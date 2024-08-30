@@ -4,6 +4,7 @@
 START=99
 USE_PROCD=1
 size="$(df -k | awk '/\/overlay$/ {sub(/K$/, "", $4); print $4}')"
+[ -z "$size" ] && size="$(df -k /usr/bin | awk 'NR==2 {print $(NF-2) }')"
 
 check () {
 if [ ! -z "$checkip" ] ; then
@@ -62,14 +63,14 @@ start_et() {
                    upsize="$(du -k /tmp/easytier-core | cut -f1)"
                    result=$(expr $size - $upsize)
                    [ -z "$size"] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 获取可用空间失败，请使用ssh手动上传至 ${easytierbin} ${path}/easytier-cli" >>/tmp/easytier.log
-                   if [ $(($(/tmp/easytier-core -h | wc -l))) -gt 3 ] && [ "$result" -gt 4000 ] ; then
+                   if [ $(($(/tmp/easytier-core -h | wc -l))) -gt 3 ] && [ "$result" -gt 1000 ] ; then
                      mv -f /tmp/easytier-core "$easytierbin" 2>/dev/null
                      mv -f /tmp/easytier-cli "${path}/easytier-cli" 2>/dev/null
                      else
                      echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 无法替换，上传的程序不完整或自定义路径的可用空间不足，当前空间剩余${size}kb" >>/tmp/easytier.log
                    fi
                 fi
-                if [ ! -f "$easytierbin" ] && [ "$size" -lt 4000 ] ; then
+                if [ ! -f "$easytierbin" ] && [ "$size" -lt 5000 ] ; then
                     echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 自定义程序路径的可用空间不足，当前可用空间剩余${size}kb,自动切换为内存/tmp/easytier-core" >>/tmp/easytier.log
                     sed -i "/easytierbin/c option easytierbin '/tmp/easytier-core' " /etc/config/easytier 
                     easytierbin=/tmp/easytier-core
@@ -80,7 +81,7 @@ start_et() {
 		 [ -z "$newtag"] && newtag=v1.2.2
 		 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 未找到程序 $easytierbin 开始在线下载${newtag}，下载较慢耐心等候" >>/tmp/easytier.log
                  mkdir -p "$path"
-	         curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "http://gh.ddlc.top/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://hub.gitmirror.com/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip"
+	         curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "http://gh.ddlc.top/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://hub.gitmirror.com/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || wget --no-check-certificate --quiet --timeout=10 --tries=3 -O /tmp/easytier.zip "http://gh.ddlc.top/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip"
 	         unzip -q -o /tmp/easytier.zip -d /tmp
 	         chmod +x /tmp/easytier-linux-${cpucore}-${newtag}/*
 	         mv -f /tmp/easytier-linux-${cpucore}-${newtag}/* ${path}/*
@@ -346,7 +347,7 @@ start_service() {
         fi
 	cputype=$(uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]')
         [ -n "$(echo $cputype | grep -E "linux.*armv.*")" ] && cpucore="arm" 
-        [ -n "$(echo $cputype | grep -E "linux.*armv7.*")" ] && [ -n "$(cat /proc/cpuinfo | grep vfp)" ] && [ ! -d /jffs/clash ] && cpucore="armv7" 
+        [ -n "$(echo $cputype | grep -E "linux.*armv7.*")" ] && [ -n "$(cat /proc/cpuinfo | grep vfp)" ] && cpucore="armv7" 
         [ -n "$(echo $cputype | grep -E "linux.*aarch64.*|linux.*armv8.*")" ] && cpucore="aarch64" 
         [ -n "$(echo $cputype | grep -E "linux.*86.*")" ] && cpucore="i386" 
         [ -n "$(echo $cputype | grep -E "linux.*86_64.*")" ] && cpucore="x86_64" 
