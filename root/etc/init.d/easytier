@@ -4,6 +4,7 @@
 START=99
 USE_PROCD=1
 size="$(df -k | awk '/\/overlay$/ {sub(/K$/, "", $4); print $4}')"
+[ -z "$size" ] && size="$(df -k /usr/bin | awk 'NR==2 {print $(NF-2) }')"
 
 check () {
 if [ ! -z "$checkip" ] ; then
@@ -62,14 +63,14 @@ start_et() {
                    upsize="$(du -k /tmp/easytier-core | cut -f1)"
                    result=$(expr $size - $upsize)
                    [ -z "$size"] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 获取可用空间失败，请使用ssh手动上传至 ${easytierbin} ${path}/easytier-cli" >>/tmp/easytier.log
-                   if [ $(($(/tmp/easytier-core -h | wc -l))) -gt 3 ] && [ "$result" -gt 4000 ] ; then
+                   if [ $(($(/tmp/easytier-core -h | wc -l))) -gt 3 ] && [ "$result" -gt 1000 ] ; then
                      mv -f /tmp/easytier-core "$easytierbin" 2>/dev/null
                      mv -f /tmp/easytier-cli "${path}/easytier-cli" 2>/dev/null
                      else
                      echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 无法替换，上传的程序不完整或自定义路径的可用空间不足，当前空间剩余${size}kb" >>/tmp/easytier.log
                    fi
                 fi
-                if [ ! -f "$easytierbin" ] && [ "$size" -lt 4000 ] ; then
+                if [ ! -f "$easytierbin" ] && [ "$size" -lt 5000 ] ; then
                     echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 自定义程序路径的可用空间不足，当前可用空间剩余${size}kb,自动切换为内存/tmp/easytier-core" >>/tmp/easytier.log
                     sed -i "/easytierbin/c option easytierbin '/tmp/easytier-core' " /etc/config/easytier 
                     easytierbin=/tmp/easytier-core
@@ -80,7 +81,7 @@ start_et() {
 		 [ -z "$newtag"] && newtag=v1.2.2
 		 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 未找到程序 $easytierbin 开始在线下载${newtag}，下载较慢耐心等候" >>/tmp/easytier.log
                  mkdir -p "$path"
-	         curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "http://gh.ddlc.top/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://hub.gitmirror.com/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip"
+	         curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "http://gh.ddlc.top/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://hub.gitmirror.com/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || wget --no-check-certificate --quiet --timeout=10 --tries=3 -O /tmp/easytier.zip "http://gh.ddlc.top/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip"
 	         unzip -q -o /tmp/easytier.zip -d /tmp
 	         chmod +x /tmp/easytier-linux-${cpucore}-${newtag}/*
 	         mv -f /tmp/easytier-linux-${cpucore}-${newtag}/* ${path}/*
@@ -103,7 +104,7 @@ start_et() {
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1
 
-		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p
+		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p disable_udp
 		local tcp_port ws_port wss_port wg_port desvice_name instance_name vpn_portal mtu default_protocol disable_encryption whitelist socks_port
 		local multi_thread disable_ipv6 latency_first exit_node exit_nodes smoltcp no_tun manual_routes log check checkip proxy_network relay_all
 
@@ -137,9 +138,10 @@ start_et() {
                 config_get exit_nodes "$cfg" 'exit_nodes'
                 config_get_bool no_tun "$cfg" 'no_tun' '0'
                 config_get manual_routes "$cfg" 'manual_routes'
-                config_get_bool log "$cfg" 'log' '0'
+                config_get log "$cfg" 'log' 'off'
                 config_get_bool check "$cfg" 'check' '0'
                 config_get_bool disable_p2p "$cfg" 'disable_p2p' '0'
+                config_get_bool disable_udp "$cfg" 'disable_udp' '0'
                 config_get_bool relay_all "$cfg" 'relay_all' '0'
                 config_get checkip "$cfg" 'checkip'
                 config_get socks_port "$cfg" 'socks_port'
@@ -177,6 +179,15 @@ start_et() {
                    done
                    fi
                 fi
+                if [ ! -z "$external_node" ] ; then
+                  if [[ "$(grep "list external_node" /etc/config/easytier | awk '{print $3}' | wc -l ) " -eq 1 ]]; then
+                    procd_append_param command -e "$external_node"
+                  else
+                    for external_nodes in $(cat /etc/config/easytier | grep 'list external_node'  | awk -F 'list external_node' '{print $2}' | sed "s/'/\n/g" | tr -d " ' "); do
+                    procd_append_param command -e "$external_nodes"
+                   done
+                   fi
+                fi
                 if [ ! -z "$manual_routes" ] ; then
                   if [[ "$(grep "list manual_routes" /etc/config/easytier | awk '{print $3}' | wc -l ) " -eq 1 ]]; then
                     procd_append_param command --manual-routes "$manual_routes"
@@ -195,7 +206,6 @@ start_et() {
                    done
                    fi
                 fi
-		[ -z "$external_node" ] || procd_append_param command -e "$external_node"
 		[ -z "$rpc_portal" ] || procd_append_param command -r "$rpc_portal"
 		[ -z "$tcp_port" ] || procd_append_param command -l "tcp:$tcp_port"
 		[ -z "$tcp_port" ] || procd_append_param command -l "udp:$tcp_port"
@@ -216,12 +226,13 @@ start_et() {
 		[ "$disable_ipv6" = "0" ] || procd_append_param command --disable-ipv6
 		[ "$latency_first" = "0" ] || procd_append_param command --latency-first
 		[ "$exit_node" = "0" ] || procd_append_param command --enable-exit-node
-		[ "$log" = "1" ] && procd_append_param command --file-log-level "info" 
-		[ "$log" = "1" ] && procd_append_param command --file-log-dir "/tmp"
-		[ "$log" = "0" ] && procd_append_param command --file-log-level "off"
-                [ "$disable_p2p" = "0" ] || procd_append_param command --disable-p2p
-                [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
-                [ -z "$socks_port" ] || procd_append_param command --socks5 "$socks_port"
+		[ "$log" = "off" ] || procd_append_param command --file-log-level "$log" 
+		[ "$log" = "off" ] || procd_append_param command --file-log-dir "/tmp"
+		[ "$log" = "off" ] && procd_append_param command --file-log-level "off"
+    [ "$disable_p2p" = "0" ] || procd_append_param command --disable-p2p
+    [ "$disable_udp" = "0" ] || procd_append_param command --disable-udp-hole-punching
+    [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
+    [ -z "$socks_port" ] || procd_append_param command --socks5 "$socks_port"
 		[ ! -z "$instance_name" ] && ln -sf /tmp/easytier-${instance_name}.${date_time} /tmp/easytier.log
 		
 		procd_set_param limits core="unlimited"
@@ -344,7 +355,7 @@ start_service() {
         fi
 	cputype=$(uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]')
         [ -n "$(echo $cputype | grep -E "linux.*armv.*")" ] && cpucore="arm" 
-        [ -n "$(echo $cputype | grep -E "linux.*armv7.*")" ] && [ -n "$(cat /proc/cpuinfo | grep vfp)" ] && [ ! -d /jffs/clash ] && cpucore="armv7" 
+        [ -n "$(echo $cputype | grep -E "linux.*armv7.*")" ] && [ -n "$(cat /proc/cpuinfo | grep vfp)" ] && cpucore="armv7" 
         [ -n "$(echo $cputype | grep -E "linux.*aarch64.*|linux.*armv8.*")" ] && cpucore="aarch64" 
         [ -n "$(echo $cputype | grep -E "linux.*86.*")" ] && cpucore="i386" 
         [ -n "$(echo $cputype | grep -E "linux.*86_64.*")" ] && cpucore="x86_64" 
@@ -378,7 +389,7 @@ stop_service() {
                 [ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
 	        [ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1 
                 rm -rf /tmp/easytier-cli_peer /tmp/easytier-cli_connector /tmp/easytier-cli_stun /tmp/easytier-cli_route >/dev/null 2>&1
-                rm -rf /tmp/easytier-cli_peer-center /tmp/easytier-cli_vpn-portal /tmp/easytier_cmd >/dev/null 2>&1
+                rm -rf /tmp/easytier-cli_peer-center /tmp/easytier-cli_vpn-portal /tmp/easytier_cmd /tmp/easytier-cli_node >/dev/null 2>&1
                 rm -rf /tmp/easytier-*.* /tmp/easytier.log >/dev/null 2>&1
                 rm -rf /tmp/easytiernew.tag /tmp/easytier.tag >/dev/null 2>&1
                 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 停止运行" >>/tmp/easytier.log

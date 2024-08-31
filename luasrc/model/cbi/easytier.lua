@@ -49,10 +49,20 @@ peeradd = s:taboption("general",DynamicList, "peeradd", translate("对等节点"
 	translate("初始连接的对等节点 （-p 参数）"))
 peeradd.placeholder = "udp://22.1.1.1:11010"
 
-external_node = s:taboption("general", Value, "external_node", translate("共享节点地址"),
+external_node = s:taboption("general", DynamicList, "external_node", translate("共享节点地址"),
 	translate("使用公共共享节点来发现对等节点 （-e 参数）"))
 external_node.placeholder = "tcp://easytier.public.kkrainbow.top:11010"
-external_node.password = true
+external_node.default = ""
+external_node:value("tcp://easytier.public.kkrainbow.top:11010", translate("tcp://easytier.public.kkrainbow.top:11010"))
+external_node:value("tcp://s1.ct8.pl:11010", translate("tcp://s1.ct8.pl:11010"))
+external_node:value("tcp://c.oee.icu:60006", translate("tcp://c.oee.icu:60006"))
+external_node:value("udp://c.oee.icu:60006", translate("udp://c.oee.icu:60006"))
+external_node:value("wss://c.oee.icu:60007", translate("wss://c.oee.icu:60007"))
+external_node:value("tcp://etvm.oee.icu:31572", translate("tcp://etvm.oee.icu:31572"))
+external_node:value("wss://etvm.oee.icu:30845", translate("wss://etvm.oee.icu:30845"))
+external_node:value("tcp://et.323888.xyz:11010", translate("tcp://et.323888.xyz:11010"))
+external_node:value("udp://et.323888.xyz:11010", translate("udp://et.323888.xyz:11010"))
+external_node:value("wss://et.323888.xyz:11010", translate("wss://et.323888.xyz:11010"))
 
 proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("代理网络"),
 	translate("将本地网络导出到 VPN 中的其他对等点 （-n 参数）"))
@@ -64,8 +74,8 @@ rpc_portal.datatype = "range(1,65535)"
 
 listenermode = s:taboption("general",ListValue, "listenermode", translate("监听端口"),
 	translate("OFF:不监听任何端口，只连接到对等节点 （--no-listener 参数）"))
-listenermode:value("ON")
-listenermode:value("OFF")
+listenermode:value("ON",translate("监听"))
+listenermode:value("OFF",translate("不监听"))
 
 tcp_port = s:taboption("general",Value, "tcp_port", translate("tcp/udp端口"),
 	translate("tcp/udp协议，端口号：11010，表示 tcp/udp 将在 11010 上监听"))
@@ -117,7 +127,7 @@ mtu.placeholder = "1300"
 
 default_protocol = s:taboption("general",ListValue, "default_protocol", translate("默认协议"),
 	translate("连接对等节点时使用的默认协议（--default-protocol 参数）"))
-default_protocol:value("-")
+default_protocol:value("-",translate("默认"))
 default_protocol:value("tcp")
 default_protocol:value("udp")
 default_protocol:value("ws")
@@ -171,16 +181,25 @@ socks_port.datatype = "range(1,65535)"
 socks_port.placeholder = "1080"
 
 disable_p2p = s:taboption("general",Flag, "disable_p2p", translate("禁用P2P"),
-	translate("禁用P2P通信，只通过-p指定的节点转发数据包"))
+	translate("禁用P2P通信，只通过-p指定的节点转发数据包 （ --disable-p2p 参数）"))
 disable_p2p.rmempty = false
+
+disable_udp = s:taboption("general",Flag, "disable_udp", translate("禁用UDP"),
+	translate("禁用UDP打洞功能（ --disable-udp-hole-punching 参数）"))
+disable_udp.rmempty = false
 
 relay_all = s:taboption("general",Flag, "relay_all", translate("允许转发"),
 	translate("转发所有对等节点的RPC数据包，即使对等节点不在转发网络白名单中。<br>这可以帮助白名单外网络中的对等节点建立P2P连接。"))
 relay_all.rmempty = false
 
-log = s:taboption("general",Flag, "log", translate("启用日志"),
+log = s:taboption("general",ListValue, "log", translate("程序日志"),
 	translate("运行日志在/tmp/easytier.log,可在上方日志查看"))
-log.rmempty = false
+log.default = "info"
+log:value("off",translate("关闭"))
+log:value("info",translate("信息"))
+log:value("debug",translate("调试"))
+log:value("warn",translate("警告"))
+log:value("trace",translate("跟踪"))
 
 check = s:taboption("general",Flag, "check", translate("通断检测"),
         translate("开启通断检测后，可以指定对端的设备IP，当所有指定的IP都ping不通时将会重启easytier程序"))
@@ -200,9 +219,28 @@ checktime:depends("check", "1")
 
 local process_status = luci.sys.exec("ps | grep easytier-core| grep -v grep")
 
+btn0 = s:taboption("infos", Button, "btn0")
+btn0.inputtitle = translate("node信息")
+btn0.description = translate("点击按钮刷新，查看本机信息")
+btn0.inputstyle = "apply"
+btn0.write = function()
+if process_status ~= "" then
+   luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli node >/tmp/easytier-cli_node")
+else
+    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_node")
+end
+end
+
+btn0info = s:taboption("infos", DummyValue, "btn0info")
+btn0info.rawhtml = true
+btn0info.cfgvalue = function(self, section)
+    local content = nixio.fs.readfile("/tmp/easytier-cli_node") or ""
+    return string.format("<pre>%s</pre>", luci.util.pcdata(content))
+end
+
 btn1 = s:taboption("infos", Button, "btn1")
 btn1.inputtitle = translate("peer信息")
-btn1.description = translate("点击按钮刷新，查看peer信息")
+btn1.description = translate("点击按钮刷新，查看对端信息")
 btn1.inputstyle = "apply"
 btn1.write = function()
 if process_status ~= "" then
