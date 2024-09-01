@@ -52,17 +52,7 @@ peeradd.placeholder = "udp://22.1.1.1:11010"
 external_node = s:taboption("general", DynamicList, "external_node", translate("共享节点地址"),
 	translate("使用公共共享节点来发现对等节点 （-e 参数）"))
 external_node.placeholder = "tcp://easytier.public.kkrainbow.top:11010"
-external_node.default = ""
-external_node:value("tcp://easytier.public.kkrainbow.top:11010", translate("tcp://easytier.public.kkrainbow.top:11010"))
-external_node:value("tcp://s1.ct8.pl:11010", translate("tcp://s1.ct8.pl:11010"))
-external_node:value("tcp://c.oee.icu:60006", translate("tcp://c.oee.icu:60006"))
-external_node:value("udp://c.oee.icu:60006", translate("udp://c.oee.icu:60006"))
-external_node:value("wss://c.oee.icu:60007", translate("wss://c.oee.icu:60007"))
-external_node:value("tcp://etvm.oee.icu:31572", translate("tcp://etvm.oee.icu:31572"))
-external_node:value("wss://etvm.oee.icu:30845", translate("wss://etvm.oee.icu:30845"))
-external_node:value("tcp://et.323888.xyz:11010", translate("tcp://et.323888.xyz:11010"))
-external_node:value("udp://et.323888.xyz:11010", translate("udp://et.323888.xyz:11010"))
-external_node:value("wss://et.323888.xyz:11010", translate("wss://et.323888.xyz:11010"))
+external_node.default = "tcp://easytier.public.kkrainbow.top:11010"
 
 proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("代理网络"),
 	translate("将本地网络导出到 VPN 中的其他对等点 （-n 参数）"))
