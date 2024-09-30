@@ -305,7 +305,13 @@ start_et() {
 		[ -z "$tunname" ] && tunname="tun0"
 	        if [ -z "$(uci -q get network.EasyTier)" ];  then				
 			uci set network.EasyTier='interface'
-                       uci set network.EasyTier.proto='none'
+                       if [ -z "$ipaddr" ]; then
+				uci set network.EasyTier.proto='none'
+			else
+				uci set network.EasyTier.proto='static'
+				uci set network.EasyTier.ipaddr=$ipaddr
+				uci set network.EasyTier.netmask='255.0.0.0'
+			fi
                        uci set network.EasyTier.device="$tunname"
                        uci set network.EasyTier.ifname="$tunname"
 		fi
