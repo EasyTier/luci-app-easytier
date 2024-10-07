@@ -54,7 +54,7 @@ external_node = s:taboption("general", DynamicList, "external_node", translate("
 external_node.placeholder = "tcp://easytier.public.kkrainbow.top:11010"
 external_node.default = "tcp://easytier.public.kkrainbow.top:11010"
 
-proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("代理网络"),
+proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("子网代理"),
 	translate("将本地网络导出到 VPN 中的其他对等点 （-n 参数）"))
 
 rpc_portal = s:taboption("general", Value, "rpc_portal", translate("门户地址端口"),
