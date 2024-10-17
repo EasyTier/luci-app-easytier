@@ -458,11 +458,11 @@ start_et() {
 start_service() {
 	config_load 'easytier'
 	date_time=$(TZ='Asia/Shanghai' date +'%Y-%m-%d')
-	ecmd=$(uci -q set easytier.@easytier[0].etcmd)
+	ecmd=$(uci -q get easytier.@easytier[0].etcmd)
 	if [ "$ecmd" = "etcmd" ] ; then
-                    ins_name=$(uci -q set easytier.@easytier[0].instance_name)
+                    ins_name=$(uci -q get easytier.@easytier[0].instance_name)
                    else
-                    ins_name=$(cat $config_file | grep "instance_name =" | awk '{print $3}'| tr -d '" ')
+                    ins_name=$(cat /etc/easytier/config.toml | grep "instance_name =" | awk '{print $3}'| tr -d '" ')
           fi
 	if [ ! -z "$ins_name" ] ; then
 	  touch /tmp/easytier-${ins_name}.${date_time}
