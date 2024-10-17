@@ -41,7 +41,7 @@ function act_status()
         local command8 = io.popen("([ -s /tmp/easytiernew.tag ] && cat /tmp/easytiernew.tag ) || ( curl -L -k -s --connect-timeout 3 --user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36' https://api.github.com/repos/EasyTier/EasyTier/releases/latest | grep tag_name | sed 's/[^0-9.]*//g' >/tmp/easytiernew.tag && cat /tmp/easytiernew.tag )")
 	e.etnewtag = command8:read("*all")
 	command8:close()
-        local command9 = io.popen("([ -s /tmp/easytier.tag ] && cat /tmp/easytier.tag ) || ( echo `$(uci -q get easytier.@easytier[0].easytierbin) -V | sed 's/[^0-9.]*//g'` > /tmp/easytier.tag && cat /tmp/easytier.tag && [ ! -s /tmp/easytier.tag ] && echo '？' >> /tmp/easytier.tag && cat /tmp/easytier.tag )")
+        local command9 = io.popen("([ -s /tmp/easytier.tag ] && cat /tmp/easytier.tag ) || ( echo `$(uci -q get easytier.@easytier[0].easytierbin) -V | sed 's/^[^0-9]*//'` > /tmp/easytier.tag && cat /tmp/easytier.tag && [ ! -s /tmp/easytier.tag ] && echo '？' >> /tmp/easytier.tag && cat /tmp/easytier.tag )")
 	e.ettag = command9:read("*all")
 	command9:close()
 
