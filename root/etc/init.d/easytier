@@ -106,7 +106,7 @@ start_et() {
 
 		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p disable_udp
 		local tcp_port ws_port wss_port wg_port desvice_name instance_name vpn_portal mtu default_protocol disable_encryption whitelist socks_port
-		local multi_thread disable_ipv6 latency_first exit_node exit_nodes smoltcp no_tun manual_routes log check checkip proxy_network relay_all ipv6_port
+		local multi_thread disable_ipv6 latency_first exit_node exit_nodes smoltcp no_tun manual_routes log check checkip proxy_network relay_all listener6
 
 		config_get network_name "$cfg" 'network_name'
                 config_get network_secret "$cfg" 'network_secret'
@@ -122,7 +122,7 @@ start_et() {
                 config_get ws_port "$cfg" 'ws_port'
                 config_get wss_port "$cfg" 'wss_port'
                 config_get wg_port "$cfg" 'wg_port'
-                config_get ipv6_port "$cfg" 'ipv6_port'
+                config_get_bool listener6 "$cfg" 'listener6' '0'
                 config_get peeradd "$cfg" 'peeradd'
                 config_get desvice_name "$cfg" 'desvice_name'
                 config_get instance_name "$cfg" 'instance_name'
@@ -213,7 +213,19 @@ start_et() {
 		[ -z "$ws_port" ] || procd_append_param command -l "ws:$ws_port"
 		[ -z "$wss_port" ] || procd_append_param command -l "wss:$wss_port"
 		[ -z "$wg_port" ] || procd_append_param command -l "wg:$wg_port"
-		[ -z "$ipv6_port" ] || procd_append_param command --ipv6-listener "tcp://[::]:$ipv6_port"
+		if [ "$listener6" = "1" ] ; then
+                 if [ -z "$tcp_port" ] && [ -z "$ws_port" ] && [ -z "$wss_port" ] && [ -z "$wg_port" ] ; then
+                     tcp_port="11010"
+                     ws_port="11011"
+                     wss_port="11012"
+                     wg_port="11011"
+                  fi
+                     [ -z "$tcp_port" ] || procd_append_param command -l "tcp://[::]:$tcp_port"
+		     [ -z "$tcp_port" ] || procd_append_param command -l "udp://[::]:$tcp_port"
+		     [ -z "$ws_port" ] || procd_append_param command -l "ws://[::]:$ws_port"
+		     [ -z "$wss_port" ] || procd_append_param command -l "wss://[::]:$wss_port"
+		     [ -z "$wg_port" ] || procd_append_param command -l "wg://[::]:$wg_port"
+                fi
 		[ "$listenermode" = "ON" ] || procd_append_param command --no-listener
 		[ -z "$desvice_name" ] || procd_append_param command --hostname "$desvice_name"
 		[ -z "$instance_name" ] || procd_append_param command -m "$instance_name"
@@ -301,16 +313,6 @@ start_et() {
 		    uci set firewall.easytier_wg.enabled="1"
 		   fi
                 fi
-                   if [ ! -z "$ipv6_port" ] ; then
-		    uci -q delete firewall.easytier_ipv6
-		    uci set firewall.easytier_ipv6=rule
-		    uci set firewall.easytier_ipv6.name="easytier_wg"
-		    uci set firewall.easytier_ipv6.target="ACCEPT"
-		    uci set firewall.easytier_ipv6.src="wan"
-		    uci set firewall.easytier_ipv6.proto="all"
-		    uci set firewall.easytier_ipv6.dest_port="$ipv6_port"
-		    uci set firewall.easytier_ipv6.enabled="1"
-		 fi
 		[ -z "$tunname" ] && tunname="tun0"
                 uci -q delete network.EasyTier >/dev/null 2>&1
 	        if [ -z "$(uci -q get network.EasyTier)" ];  then				
@@ -397,7 +399,6 @@ stop_service() {
 	        uci -q delete firewall.lanfweasytier >/dev/null 2>&1
 	        uci -q delete firewall.wanfweasytier >/dev/null 2>&1
                 uci -q delete firewall.easytier_tcp_udp >/dev/null 2>&1
-                uci -q delete firewall.easytier_wg_ws >/dev/null 2>&1
                 uci -q delete firewall.easytier_wss >/dev/null 2>&1
                 uci -q delete firewall.easytier_ws >/dev/null 2>&1
                 uci -q delete firewall.easytier_wg >/dev/null 2>&1
