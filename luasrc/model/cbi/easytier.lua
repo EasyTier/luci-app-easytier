@@ -29,7 +29,7 @@ btncq.write = function()
 end
 
 etcmd = s:taboption("privacy",ListValue, "etcmd", translate("启动方式"),
-	translate("默认使用命令行方式启动，也可以使用配置文件启动"))
+	translate("默认使用命令行方式启动，也可以使用配置文件启动<br>切换启动方式后将以指定的方式启动，请谨慎选择"))
 etcmd.default = "etcmd"
 etcmd:value("etcmd",translate("命令行"))
 etcmd:value("config",translate("配置文件"))
