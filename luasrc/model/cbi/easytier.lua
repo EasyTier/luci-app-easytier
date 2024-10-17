@@ -90,6 +90,10 @@ listenermode:value("ON",translate("监听"))
 listenermode:value("OFF",translate("不监听"))
 listenermode.default = "OFF"
 
+listener6 = s:taboption("general",Flag, "listener6", translate("同时监听IPV6"),
+	translate("默认只监听IPV4，对等节点只能使用IPV4连接，启用后将同时监听IPV6，例如 -l tcp://[::]:11010"))
+listener6:depends("listenermode", "ON")
+
 tcp_port = s:taboption("general",Value, "tcp_port", translate("tcp/udp端口"),
 	translate("tcp/udp协议，端口号：11010，表示 tcp/udp 将在 11010 上监听"))
 tcp_port.datatype = "range(1,65535)"
