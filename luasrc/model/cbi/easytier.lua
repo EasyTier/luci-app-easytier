@@ -235,7 +235,7 @@ relay_all = s:taboption("privacy",Flag, "relay_all", translate("允许转发"),
 relay_all.rmempty = false
 
 log = s:taboption("general",ListValue, "log", translate("程序日志"),
-	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>详细程度：警告<信息<调试<跟踪"))
+	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>若启动失败，请前往 状态- 系统日志 查看具体启动失败日志<br>详细程度：警告<信息<调试<跟踪"))
 log.default = "info"
 log:value("off",translate("关闭"))
 log:value("warn",translate("警告"))
