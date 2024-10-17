@@ -235,7 +235,7 @@ relay_all = s:taboption("privacy",Flag, "relay_all", translate("允许转发"),
 relay_all.rmempty = false
 
 log = s:taboption("general",ListValue, "log", translate("程序日志"),
-	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>详细程度：错误<警告<信息<调试<跟踪"))
+	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>详细程度：警告<信息<调试<跟踪"))
 log.default = "info"
 log:value("off",translate("关闭"))
 log:value("warn",translate("警告"))
@@ -462,6 +462,19 @@ http.setfilehandler(
                 local file_path = dir .. meta.file
                 os.execute("unzip -q " .. file_path .. " -d " .. dir)
                 local extracted_dir = "/tmp/easytier-linux-*/"
+                os.execute("mv " .. extracted_dir .. "easytier-cli /tmp/easytier-cli")
+                os.execute("mv " .. extracted_dir .. "easytier-core /tmp/easytier-core")
+               if nixio.fs.access("/tmp/easytier-cli") then
+                    um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-cli上传成功，重启一次插件才生效")
+                end
+               if nixio.fs.access("/tmp/easytier-core") then
+                    um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-core上传成功，重启一次插件才生效")
+                end
+               end
+	    if string.sub(meta.file, -7) == ".tar.gz" then
+                local file_path = dir .. meta.file
+                os.execute("tar -xzf " .. file_path .. " -C " .. dir)
+		local extracted_dir = "/tmp/easytier-linux-*/"
                 os.execute("mv " .. extracted_dir .. "easytier-cli /tmp/easytier-cli")
                 os.execute("mv " .. extracted_dir .. "easytier-core /tmp/easytier-core")
                if nixio.fs.access("/tmp/easytier-cli") then
