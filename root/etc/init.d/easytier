@@ -49,10 +49,11 @@ fi
 
 start_et() {
                 local cfg="$1"
-		local enabled easytierbin
+		local enabled easytierbin etcmd
 		config_get_bool enabled "$cfg" 'enabled' '0'
 		[ "$enabled" = "1" ] || return 1
                 config_get easytierbin "$cfg" 'easytierbin' '/tmp/easytier-core'
+                config_get etcmd "$cfg" 'etcmd' 'etcmd'
                 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : easytier-core_${cpucore}开始启动" >>/tmp/easytier.log
                 test -z "`opkg list-installed|grep kmod-tun`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 缺少kmod-tun插件" >>/tmp/easytier.log
                 path=$(dirname "$easytierbin")
@@ -103,7 +104,45 @@ start_et() {
                 pgrep -f easytier_check | xargs kill -9 >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1
+          if [ "$etcmd" = "config" ] ; then 
+                   config_file="/etc/easytier/config.toml"
+                   instance_name=$(cat $config_file | grep "instance_name =" | awk '{print $3}'| tr -d '" ')
+                   socks_port=$(cat $config_file | grep "socks5_proxy" | awk -F ":" '{print $3}'| tr -d '" ')
+                   [ -z "$(grep -F 'listeners = []' $config_file)" ] && listenermode="ON"
+                   tcp_port=$(cat $config_file | grep "tcp://0.0.0.0" | awk -F ":" '{print $3}'| tr -d '", ')
+                   udp_port=$(cat $config_file | grep "udp://0.0.0.0" | awk -F ":" '{print $3}'| tr -d '", ')
+                   ws_port=$(cat $config_file | grep "ws://0.0.0.0" | awk -F ":" '{print $3}'| tr -d '"/, ')
+                   wss_port=$(cat $config_file | grep "wss://0.0.0.0" | awk -F ":" '{print $3}'| tr -d '"/, ')
+                   wg_port=$(cat $config_file | grep "wg://0.0.0.0" | awk -F ":" '{print $3}'| tr -d '", ')
+                   tunname=$(cat $config_file | grep "dev_name =" | awk '{print $3}'| tr -d '", ')
+                   proxy_network=$(grep -F '[[proxy_network]]' $config_file)
+                   wireguard_port=$(cat $config_file | grep "wireguard_listen = " | awk -F ":" '{print $2}'| tr -d '/", ')
+                              
+                   procd_open_instance "easytier"
+	           procd_set_param command "$easytierbin"
+                   procd_append_param command -c "$config_file"
 
+                   if [ ! -z "$udp_port" ] ; then
+                      uci -q delete firewall.easytier_udp
+		      uci set firewall.easytier_udp=rule
+		      uci set firewall.easytier_udp.name="easytier_udp"
+		      uci set firewall.easytier_udp.target="ACCEPT"
+		      uci set firewall.easytier_udp.src="wan"
+		      uci set firewall.easytier_udp.proto="all"
+		      uci set firewall.easytier_udp.dest_port="$udp_port"
+		      uci set firewall.easytier_udp.enabled="1"
+	           fi
+                   if [ ! -z "$wireguard_port" ] ; then
+                       uci -q delete firewall.easytier_wireguard
+		       uci set firewall.easytier_wireguard=rule
+		       uci set firewall.easytier_wireguard.name="easytier_wireguard"
+		       uci set firewall.easytier_wireguard.target="ACCEPT"
+		       uci set firewall.easytier_wireguard.src="wan"
+		       uci set firewall.easytier_wireguard.proto="udp"
+		       uci set firewall.easytier_wireguard.dest_port="$wireguard_port"
+		       uci set firewall.easytier_wireguard.enabled="1"
+	           fi
+         else
 		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p disable_udp
 		local tcp_port ws_port wss_port wg_port desvice_name instance_name vpn_portal mtu default_protocol disable_encryption whitelist socks_port
 		local multi_thread disable_ipv6 latency_first exit_node exit_nodes smoltcp no_tun manual_routes log check checkip proxy_network relay_all listener6
@@ -247,6 +286,7 @@ start_et() {
                 [ "$disable_udp" = "0" ] || procd_append_param command --disable-udp-hole-punching
                 [ "$relay_all" = "0" ] || procd_append_param command --relay-all-peer-rpc
                 [ -z "$socks_port" ] || procd_append_param command --socks5 "$socks_port"
+        fi
 		[ ! -z "$instance_name" ] && ln -sf /tmp/easytier-${instance_name}.${date_time} /tmp/easytier.log
 		
 		procd_set_param limits core="unlimited"
@@ -255,6 +295,7 @@ start_et() {
 		procd_set_param stderr 1
 		procd_set_param respawn
 		procd_close_instance
+
                 if [ ! -z "$socks_port" ] ; then
 		    uci -q delete firewall.easytier_socks5
 		    uci set firewall.easytier_socks5=rule
@@ -362,15 +403,19 @@ start_et() {
 start_service() {
 	config_load 'easytier'
 	date_time=$(TZ='Asia/Shanghai' date +'%Y-%m-%d')
-	ins_name=$(uci -q set easytier.@easytier[0].instance_name)
-	
+	ecmd=$(uci -q set easytier.@easytier[0].etcmd)
+	if [ "$ecmd" = "etcmd" ] ; then
+                    ins_name=$(uci -q set easytier.@easytier[0].instance_name)
+                   else
+                    ins_name=$(cat $config_file | grep "instance_name =" | awk '{print $3}'| tr -d '" ')
+          fi
 	if [ ! -z "$ins_name" ] ; then
 	  touch /tmp/easytier-${ins_name}.${date_time}
 	  ln -sf /tmp/easytier-${ins_name}.${date_time} /tmp/easytier.log
 	else
 	  touch /tmp/easytier-default.${date_time}
           ln -sf /tmp/easytier-default.${date_time} /tmp/easytier.log
-        fi
+          fi
 	cputype=$(uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]')
         [ -n "$(echo $cputype | grep -E "linux.*armv.*")" ] && cpucore="arm" 
         [ -n "$(echo $cputype | grep -E "linux.*armv7.*")" ] && [ -n "$(cat /proc/cpuinfo | grep vfp)" ] && cpucore="armv7" 
@@ -398,10 +443,12 @@ stop_service() {
 	        uci -q delete firewall.easytierfwwan >/dev/null 2>&1
 	        uci -q delete firewall.lanfweasytier >/dev/null 2>&1
 	        uci -q delete firewall.wanfweasytier >/dev/null 2>&1
+                uci -q delete firewall.easytier_udp >/dev/null 2>&1
                 uci -q delete firewall.easytier_tcp_udp >/dev/null 2>&1
                 uci -q delete firewall.easytier_wss >/dev/null 2>&1
                 uci -q delete firewall.easytier_ws >/dev/null 2>&1
                 uci -q delete firewall.easytier_wg >/dev/null 2>&1
+                uci -q delete firewall.easytier_wireguard >/dev/null 2>&1
                 uci -q delete firewall.easytier_socks5 >/dev/null 2>&1
                 [ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
 	        [ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1 
