@@ -159,11 +159,6 @@ disable_encryption = s:taboption("general",Flag, "disable_encryption", translate
 
 multi_thread = s:taboption("general",Flag, "multi_thread", translate("启用多线程"),
 	translate("使用多线程运行时，默认为单线程 （--multi-thread 参数）"))
-	
-ipv6_port = s:taboption("privacy",Value, "ipv6_port", translate("监听IPV6端口"),
-	translate("监听ipv6端口，如果未设置，将在随机UDP端口上监听（--ipv6-listener 参数）"))
-ipv6_port.datatype = "range(1,65535)"
-ipv6_port.placeholder = "11010"
 
 disable_ipv6 = s:taboption("privacy",Flag, "disable_ipv6", translate("禁用ipv6"),
 	translate("不使用ipv6 （--disable-ipv6 参数）"))
@@ -215,10 +210,9 @@ relay_all = s:taboption("privacy",Flag, "relay_all", translate("允许转发"),
 relay_all.rmempty = false
 
 log = s:taboption("general",ListValue, "log", translate("程序日志"),
-	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>详细程度：错误<警告<信息<调试<跟踪"))
+	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>详细程度：警告<信息<调试<跟踪"))
 log.default = "info"
 log:value("off",translate("关闭"))
-log:value("error",translate("错误"))
 log:value("warn",translate("警告"))
 log:value("info",translate("信息"))
 log:value("debug",translate("调试"))
