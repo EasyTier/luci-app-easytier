@@ -122,19 +122,19 @@ listener6:depends("listenermode", "ON")
 tcp_port = s:taboption("general",Value, "tcp_port", translate("tcp/udp端口"),
 	translate("tcp/udp协议，端口号：11010，表示 tcp/udp 将在 11010 上监听"))
 tcp_port.datatype = "range(1,65535)"
-tcp_port.placeholder = "11010"
+tcp_port.default = "11010"
 tcp_port:depends("listenermode", "ON")
 
 ws_port = s:taboption("general",Value, "ws_port", translate("ws端口"),
 	translate("ws协议，端口号：11011，表示 ws 将在 11011 上监听"))
 ws_port.datatype = "range(1,65535)"
-ws_port.placeholder = "11011"
+ws_port.default = "11011"
 ws_port:depends("listenermode", "ON")
 
 wss_port = s:taboption("general",Value, "wss_port", translate("wss端口"),
 	translate("wss协议，端口号：11012，表示 wss 将在 11012 上监听"))
 wss_port.datatype = "range(1,65535)"
-wss_port.placeholder = "11012"
+wss_port.default = "11012"
 wss_port:depends("listenermode", "ON")
 
 wg_port = s:taboption("general",Value, "wg_port", translate("wg端口"),
