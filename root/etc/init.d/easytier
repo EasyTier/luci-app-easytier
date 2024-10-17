@@ -117,6 +117,11 @@ start_et() {
                    tunname=$(cat $config_file | grep "dev_name =" | awk '{print $3}'| tr -d '", ')
                    proxy_network=$(grep -F '[[proxy_network]]' $config_file)
                    wireguard_port=$(cat $config_file | grep "wireguard_listen = " | awk -F ":" '{print $2}'| tr -d '/", ')
+                   v6ws_port=$(cat $config_file | grep 'ws://\[::\]:' | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
+                   v6wss_port=$(cat $config_file | grep 'wss://\[::\]:' | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
+                   v6tcp_port=$(cat $config_file |grep 'tcp://\[::\]:' | sed -n 's/.*:\([0-9]*\).*/\1/p')
+                   v6udp_port=$(cat $config_file |grep 'udp://\[::\]:' | sed -n 's/.*:\([0-9]*\).*/\1/p')
+                   v6wg_port=$(cat $config_file |grep 'wg://\[::\]:' | sed -n 's/.*:\([0-9]*\).*/\1/p')
                               
                    procd_open_instance "easytier"
 	           procd_set_param command "$easytierbin"
@@ -141,6 +146,56 @@ start_et() {
 		       uci set firewall.easytier_wireguard.proto="udp"
 		       uci set firewall.easytier_wireguard.dest_port="$wireguard_port"
 		       uci set firewall.easytier_wireguard.enabled="1"
+	           fi
+                   if [ ! -z "$v6tcp_port" ] ; then
+                      uci -q delete firewall.easytier_v6tcp
+		      uci set firewall.easytier_v6tcp=rule
+		      uci set firewall.easytier_v6tcp.name="easytier_v6tcp"
+		      uci set firewall.easytier_v6tcp.target="ACCEPT"
+		      uci set firewall.easytier_v6tcp.src="wan"
+		      uci set firewall.easytier_v6tcp.proto="tcp"
+		      uci set firewall.easytier_v6tcp.dest_port="$v6tcp_port"
+		      uci set firewall.easytier_v6tcp.enabled="1"
+	           fi
+                   if [ ! -z "$v6udp_port" ] ; then
+                       uci -q delete firewall.easytier_v6udp
+		       uci set firewall.easytier_v6udp=rule
+		       uci set firewall.easytier_v6udp.name="easytier_v6udp"
+		       uci set firewall.easytier_v6udp.target="ACCEPT"
+		       uci set firewall.easytier_v6udp.src="wan"
+		       uci set firewall.easytier_v6udp.proto="udp"
+		       uci set firewall.easytier_v6udp.dest_port="$v6udp_port"
+		       uci set firewall.easytier_v6udp.enabled="1"
+	           fi
+                   if [ ! -z "$v6ws_port" ] ; then
+                      uci -q delete firewall.easytier_v6ws
+		      uci set firewall.easytier_v6ws=rule
+		      uci set firewall.easytier_v6ws.name="easytier_v6ws"
+		      uci set firewall.easytier_v6ws.target="ACCEPT"
+		      uci set firewall.easytier_v6ws.src="wan"
+		      uci set firewall.easytier_v6ws.proto="tcp"
+		      uci set firewall.easytier_v6ws.dest_port="$v6ws_port"
+		      uci set firewall.easytier_v6ws.enabled="1"
+	           fi
+                   if [ ! -z "$v6wss_port" ] ; then
+                       uci -q delete firewall.easytier_v6wss
+		       uci set firewall.easytier_v6wss=rule
+		       uci set firewall.easytier_v6wss.name="easytier_v6wss"
+		       uci set firewall.easytier_v6wss.target="ACCEPT"
+		       uci set firewall.easytier_v6wss.src="wan"
+		       uci set firewall.easytier_v6wss.proto="tcp"
+		       uci set firewall.easytier_v6wss.dest_port="$v6wss_port"
+		       uci set firewall.easytier_v6wss.enabled="1"
+	           fi
+                   if [ ! -z "$v6wg_port" ] ; then
+                      uci -q delete firewall.easytier_v6wg
+		      uci set firewall.easytier_v6wg=rule
+		      uci set firewall.easytier_v6wg.name="easytier_v6wg"
+		      uci set firewall.easytier_v6wg.target="ACCEPT"
+		      uci set firewall.easytier_v6wg.src="wan"
+		      uci set firewall.easytier_v6wg.proto="udp"
+		      uci set firewall.easytier_v6wg.dest_port="$v6wg_port"
+		      uci set firewall.easytier_v6wg.enabled="1"
 	           fi
          else
 		local network_name network_secret ip_dhcp ipaddr peeradd external_node rpc_portal listenermode tunname relay_network disable_p2p disable_udp
@@ -450,6 +505,11 @@ stop_service() {
                 uci -q delete firewall.easytier_wg >/dev/null 2>&1
                 uci -q delete firewall.easytier_wireguard >/dev/null 2>&1
                 uci -q delete firewall.easytier_socks5 >/dev/null 2>&1
+                uci -q delete firewall.easytier_v6tcp >/dev/null 2>&1
+                uci -q delete firewall.easytier_v6udp >/dev/null 2>&1
+                uci -q delete firewall.easytier_v6ws >/dev/null 2>&1
+                uci -q delete firewall.easytier_v6wss >/dev/null 2>&1
+                uci -q delete firewall.easytier_v6wg >/dev/null 2>&1
                 [ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
 	        [ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1 
                 rm -rf /tmp/easytier-cli_peer /tmp/easytier-cli_connector /tmp/easytier-cli_stun /tmp/easytier-cli_route >/dev/null 2>&1
