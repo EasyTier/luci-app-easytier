@@ -254,6 +254,12 @@ start_et() {
 		    uci set firewall.easytier_socks5.enabled="1"
                 fi
                 if [ "$listenermode" = "ON" ] ; then
+                  if [ -z "$tcp_port" ] && [ -z "$ws_port" ] && [ -z "$wss_port" ] && [ -z "$wg_port" ] ; then
+                     tcp_port="11010"
+                     ws_port="11011"
+                     wss_port="11012"
+                     wg_port="11011"
+                  fi
                   if [ ! -z "$tcp_port" ] ; then
                     uci -q delete firewall.easytier_tcp_udp
 		    uci set firewall.easytier_tcp_udp=rule
