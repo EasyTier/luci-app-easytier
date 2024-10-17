@@ -30,7 +30,7 @@ end
 
 etcmd = s:taboption("privacy",ListValue, "etcmd", translate("启动方式"),
 	translate("默认使用命令行方式启动，也可以使用配置文件启动"))
-etcmd.default = "info"
+etcmd.default = "etcmd"
 etcmd:value("etcmd",translate("命令行"))
 etcmd:value("config",translate("配置文件"))
 
