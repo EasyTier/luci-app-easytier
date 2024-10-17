@@ -28,6 +28,31 @@ btncq.write = function()
   os.execute("/etc/init.d/easytier restart &")
 end
 
+etcmd = s:taboption("privacy",ListValue, "etcmd", translate("启动方式"),
+	translate("默认使用命令行方式启动，也可以使用配置文件启动"))
+etcmd.default = "info"
+etcmd:value("etcmd",translate("命令行"))
+etcmd:value("config",translate("配置文件"))
+
+et_config = s:taboption("privacy",TextValue, "et_config", translate("配置文件"),
+	translate("配置文件在/etc/easytier/config.toml<br>命令行的启动参数和此配置文件的参数并不同步，请自行修改<br>配置文件介绍：<a href='https://easytier.rs/guide/network/config-file.html'>点此查看</a>"))
+et_config.rows = 18
+et_config.wrap = "off"
+et_config:depends("etcmd", "config")
+
+et_config.cfgvalue = function(self, section)
+    return nixio.fs.readfile("/etc/easytier/config.toml") or ""
+end
+et_config.write = function(self, section, value)
+    local dir = "/etc/easytier/"
+    local file = dir .. "config.toml"
+    -- 检查目录是否存在，如果不存在则创建
+    if not nixio.fs.access(dir) then
+        nixio.fs.mkdir(dir)
+    end
+    fs.writefile(file, value:gsub("\r\n", "\n"))
+end
+
 network_name = s:taboption("general", Value, "network_name", translate("网络名称"),
 	translate("用于识别此 VPN 网络的网络名称（--network-name 参数）"))
 network_name.password = true
@@ -40,7 +65,7 @@ network_secret.placeholder = "test"
 
 ip_dhcp = s:taboption("general",Flag, "ip_dhcp", translate("启用dhcp"),
 	translate("由Easytier自动确定并设置IP地址，默认从10.0.0.1开始。警告：在使用DHCP时，如果网络中出现IP冲突，IP将自动更改。（-d 参数）"))
-	
+
 ipaddr = s:taboption("general",Value, "ipaddr", translate("接口IP地址"),
 	translate("此VPN节点的IPv4地址，如果为空，则此节点将仅转发数据包，不会创建TUN设备（-i 参数）"))
 ipaddr.datatype = "ip4addr"
@@ -149,10 +174,10 @@ default_protocol:value("tcp")
 default_protocol:value("udp")
 default_protocol:value("ws")
 default_protocol:value("wss")
-	
+
 tunname = s:taboption("privacy",Value, "tunname", translate("虚拟网卡名称"),
 	translate("自定义虚拟网卡TUN接口的名称（--dev-name 参数）"))
-tunname.placeholder = "easytier"	
+tunname.placeholder = "easytier"
 
 disable_encryption = s:taboption("general",Flag, "disable_encryption", translate("禁用加密"),
 	translate("禁用对等节点通信的加密，若关闭加密则其他节点也必须关闭加密 （-u 参数）"))
@@ -210,7 +235,7 @@ relay_all = s:taboption("privacy",Flag, "relay_all", translate("允许转发"),
 relay_all.rmempty = false
 
 log = s:taboption("general",ListValue, "log", translate("程序日志"),
-	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>详细程度：警告<信息<调试<跟踪"))
+	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>详细程度：错误<警告<信息<调试<跟踪"))
 log.default = "info"
 log:value("off",translate("关闭"))
 log:value("warn",translate("警告"))
