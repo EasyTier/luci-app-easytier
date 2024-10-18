@@ -72,34 +72,36 @@ ipaddr.datatype = "ip4addr"
 ipaddr.placeholder = "10.0.0.1"
 
 peeradd = s:taboption("general",DynamicList, "peeradd", translate("对等节点"),
-	translate("初始连接的对等节点 （-p 参数）"))
-peeradd.placeholder = "udp://22.1.1.1:11010"
+	translate("初始连接的对等节点，和下方参数作用一样 （-p 参数）<br>公共服务器可用状态查询：<a href='https://easytier.gd.nkbpal.cn/status/easytier' target='_blank'>点此查询</a>"))
+peeradd.placeholder = "tcp://public.easytier.top:11010"
+peeradd:value("tcp://public.easytier.top:11010", translate("官方公共服务器-广东河源-tcp://public.easytier.top:11010"))
+peeradd:value("tcp://43.136.45.249:11010", translate("广州V4-tcp://43.136.45.249:11010"))
+peeradd:value("tcp://et.ie12vps.xyz:11010", translate("南京V4/V6-tcp://et.ie12vps.xyz:11010"))
+peeradd:value("tcp://minebg.top:11010", translate("广州V4-tcp://minebg.top:11010"))
+peeradd:value("tcp://ah.nkbpal.cn:11010", translate("安徽电信V4-tcp://ah.nkbpal.cn:11010"))
+peeradd:value("udp://ah.nkbpal.cn:11010", translate("安徽电信V4-udp://ah.nkbpal.cn:11010"))
+peeradd:value("wss://ah.nkbpal.cn:11012", translate("安徽电信V4-wss://ah.nkbpal.cn:11012"))
+peeradd:value("tcp://222.186.59.80:11113", translate("江苏镇江V4-tcp://222.186.59.80:11113"))
+peeradd:value("wss://222.186.59.80:11115", translate("江苏镇江V4-wss://222.186.59.80:11115"))
+peeradd:value("tcp://hw.gz.9z1.me:58443", translate("广州V4-tcp://hw.gz.9z1.me:58443"))
+peeradd:value("tcp://c.oee.icu:60006", translate("香港V4/V6-tcp://c.oee.icu:60006"))
+peeradd:value("udp://c.oee.icu:60006", translate("香港V4/V6-udp://c.oee.icu:60006"))
+peeradd:value("wss://c.oee.icu:60007", translate("香港V4/V6-wss://c.oee.icu:60007"))
+peeradd:value("tcp://etvm.oee.icu:31572", translate("日本V4-tcp://etvm.oee.icu:31572"))
+peeradd:value("wss://etvm.oee.icu:30845", translate("日本V4-wss://etvm.oee.icu:30845"))
+peeradd:value("tcp://et.pub.moe.gift:11010", translate("美国科罗拉多V4-tcp://et.pub.moe.gift:11010"))
+peeradd:value("wss://et.pub.moe.gift:11012", translate("美国科罗拉多V4-tcp://et.pub.moe.gift:11012"))
+peeradd:value("tcp://et.323888.xyz:11010", translate("湖北十堰V4-tcp://et.323888.xyz:11010"))
+peeradd:value("udp://et.323888.xyz:11010", translate("湖北十堰V4-udp://et.323888.xyz:11010"))
+peeradd:value("wss://et.323888.xyz:11012", translate("湖北十堰V4-wss://et.323888.xyz:11012"))
+peeradd:value("tcp://s1.ct8.pl:1101", translate("德国萨克森V4-tcp://s1.ct8.pl:1101"))
+peeradd:value("ws://s1.ct8.pl:11012", translate("德国萨克森V4-ws://s1.ct8.pl:11012"))
 
-external_node = s:taboption("general", DynamicList, "external_node", translate("共享节点地址"),
-	translate("使用公共共享节点来发现对等节点 （-e 参数）<br>公共服务器可用状态查询：<a href='https://easytier.gd.nkbpal.cn/status/easytier' target='_blank'>点此查询</a>"))
+external_node = s:taboption("general", Value, "external_node", translate("共享节点地址"),
+	translate("使用公共共享节点来发现对等节点，和上方参数作用一样 （-e 参数）"))
 external_node.default = ""
+external_node.placeholder = "tcp://public.easytier.top:11010"
 external_node:value("tcp://public.easytier.top:11010", translate("官方公共服务器-广东河源-tcp://public.easytier.top:11010"))
-external_node:value("tcp://43.136.45.249:11010", translate("广州V4-tcp://43.136.45.249:11010"))
-external_node:value("tcp://et.ie12vps.xyz:11010", translate("南京V4/V6-tcp://et.ie12vps.xyz:11010"))
-external_node:value("tcp://minebg.top:11010", translate("广州V4-tcp://minebg.top:11010"))
-external_node:value("tcp://ah.nkbpal.cn:11010", translate("安徽电信V4-tcp://ah.nkbpal.cn:11010"))
-external_node:value("udp://ah.nkbpal.cn:11010", translate("安徽电信V4-udp://ah.nkbpal.cn:11010"))
-external_node:value("wss://ah.nkbpal.cn:11012", translate("安徽电信V4-wss://ah.nkbpal.cn:11012"))
-external_node:value("tcp://222.186.59.80:11113", translate("江苏镇江V4-tcp://222.186.59.80:11113"))
-external_node:value("wss://222.186.59.80:11115", translate("江苏镇江V4-wss://222.186.59.80:11115"))
-external_node:value("tcp://hw.gz.9z1.me:58443", translate("广州V4-tcp://hw.gz.9z1.me:58443"))
-external_node:value("tcp://c.oee.icu:60006", translate("香港V4/V6-tcp://c.oee.icu:60006"))
-external_node:value("udp://c.oee.icu:60006", translate("香港V4/V6-udp://c.oee.icu:60006"))
-external_node:value("wss://c.oee.icu:60007", translate("香港V4/V6-wss://c.oee.icu:60007"))
-external_node:value("tcp://etvm.oee.icu:31572", translate("日本V4-tcp://etvm.oee.icu:31572"))
-external_node:value("wss://etvm.oee.icu:30845", translate("日本V4-wss://etvm.oee.icu:30845"))
-external_node:value("tcp://et.pub.moe.gift:11010", translate("美国科罗拉多V4-tcp://et.pub.moe.gift:11010"))
-external_node:value("wss://et.pub.moe.gift:11012", translate("美国科罗拉多V4-tcp://et.pub.moe.gift:11012"))
-external_node:value("tcp://et.323888.xyz:11010", translate("湖北十堰V4-tcp://et.323888.xyz:11010"))
-external_node:value("udp://et.323888.xyz:11010", translate("湖北十堰V4-udp://et.323888.xyz:11010"))
-external_node:value("wss://et.323888.xyz:11012", translate("湖北十堰V4-wss://et.323888.xyz:11012"))
-external_node:value("tcp://s1.ct8.pl:1101", translate("德国萨克森V4-tcp://s1.ct8.pl:1101"))
-external_node:value("ws://s1.ct8.pl:11012", translate("德国萨克森V4-ws://s1.ct8.pl:11012"))
 
 proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("子网代理"),
 	translate("将本地网络导出到 VPN 中的其他对等点，可访问当前局域网内其他设备 （-n 参数）"))

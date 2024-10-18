@@ -274,15 +274,6 @@ start_et() {
                    done
                    fi
                 fi
-                if [ ! -z "$external_node" ] ; then
-                  if [[ "$(grep "list external_node" /etc/config/easytier | awk '{print $3}' | wc -l ) " -eq 1 ]]; then
-                    procd_append_param command -e "$external_node"
-                  else
-                    for external_nodes in $(cat /etc/config/easytier | grep 'list external_node'  | awk -F 'list external_node' '{print $2}' | sed "s/'/\n/g" | tr -d " ' "); do
-                    procd_append_param command -e "$external_nodes"
-                   done
-                   fi
-                fi
                 if [ ! -z "$manual_routes" ] ; then
                   if [[ "$(grep "list manual_routes" /etc/config/easytier | awk '{print $3}' | wc -l ) " -eq 1 ]]; then
                     procd_append_param command --manual-routes "$manual_routes"
@@ -320,6 +311,7 @@ start_et() {
 		     [ -z "$wss_port" ] || procd_append_param command -l "wss://[::]:$wss_port"
 		     [ -z "$wg_port" ] || procd_append_param command -l "wg://[::]:$wg_port"
                 fi
+                [ -z "$external_node" ] || procd_append_param command -e "$external_node"
 		[ "$listenermode" = "ON" ] || procd_append_param command --no-listener
 		[ -z "$desvice_name" ] || procd_append_param command --hostname "$desvice_name"
 		[ -z "$instance_name" ] || procd_append_param command -m "$instance_name"
