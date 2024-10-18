@@ -72,7 +72,7 @@ ipaddr.datatype = "ip4addr"
 ipaddr.placeholder = "10.0.0.1"
 
 peeradd = s:taboption("general",DynamicList, "peeradd", translate("对等节点"),
-	translate("初始连接的对等节点，和下方参数作用一样 （-p 参数）"))
+	translate("初始连接的对等节点，和下方参数作用一样 （-p 参数）<br>公共服务器可用状态查询：<a href='https://easytier.gd.nkbpal.cn/status/easytier' target='_blank'>点此查询</a>"))
 peeradd.placeholder = "tcp://public.easytier.top:11010"
 peeradd:value("tcp://public.easytier.top:11010", translate("官方公共服务器-广东河源-tcp://public.easytier.top:11010"))
 peeradd:value("tcp://43.136.45.249:11010", translate("广州V4-tcp://43.136.45.249:11010"))
@@ -98,7 +98,7 @@ peeradd:value("tcp://s1.ct8.pl:1101", translate("德国萨克森V4-tcp://s1.ct8.
 peeradd:value("ws://s1.ct8.pl:11012", translate("德国萨克森V4-ws://s1.ct8.pl:11012"))
 
 external_node = s:taboption("general", Value, "external_node", translate("共享节点地址"),
-	translate("使用公共共享节点来发现对等节点，和上方参数作用一样 （-e 参数）<br>公共服务器可用状态查询：<a href='https://easytier.gd.nkbpal.cn/status/easytier' target='_blank'>点此查询</a>"))
+	translate("使用公共共享节点来发现对等节点，和上方参数作用一样 （-e 参数）"))
 external_node.default = ""
 external_node.placeholder = "tcp://public.easytier.top:11010"
 external_node:value("tcp://public.easytier.top:11010", translate("官方公共服务器-广东河源-tcp://public.easytier.top:11010"))
