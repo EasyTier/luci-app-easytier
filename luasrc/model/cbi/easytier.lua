@@ -94,8 +94,6 @@ peeradd:value("wss://et.pub.moe.gift:11012", translate("美国科罗拉多V4-tcp
 peeradd:value("tcp://et.323888.xyz:11010", translate("湖北十堰V4-tcp://et.323888.xyz:11010"))
 peeradd:value("udp://et.323888.xyz:11010", translate("湖北十堰V4-udp://et.323888.xyz:11010"))
 peeradd:value("wss://et.323888.xyz:11012", translate("湖北十堰V4-wss://et.323888.xyz:11012"))
-peeradd:value("tcp://s1.ct8.pl:1101", translate("德国萨克森V4-tcp://s1.ct8.pl:1101"))
-peeradd:value("ws://s1.ct8.pl:11012", translate("德国萨克森V4-ws://s1.ct8.pl:11012"))
 
 external_node = s:taboption("general", Value, "external_node", translate("共享节点地址"),
 	translate("使用公共共享节点来发现对等节点，和上方参数作用一样 （-e 参数）"))
