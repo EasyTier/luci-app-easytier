@@ -1,6 +1,6 @@
 # luci-app-easytier
 
-依赖`kmod-tun``luci-lib-fs`需要先在系统软件包里安装好
+依赖`kmod-tun`需要先在系统软件包里安装好
 ### 快速开始
 ```bash
 右上角Fork克隆本项目，去actions手动触发自动编译流程，2分钟后就能获取最新ipk压缩包`luci-app-easytier.zip`解压上传到Openwrt软路由安装即可
