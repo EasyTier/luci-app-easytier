@@ -1,4 +1,3 @@
-local fs = require "luci.fs"
 local http = luci.http
 local nixio = require "nixio"
 
@@ -50,7 +49,7 @@ et_config.write = function(self, section, value)
     if not nixio.fs.access(dir) then
         nixio.fs.mkdir(dir)
     end
-    fs.writefile(file, value:gsub("\r\n", "\n"))
+    nixio.fs.writefile(file, value:gsub("\r\n", "\n"))
 end
 
 network_name = s:taboption("general", Value, "network_name", translate("网络名称"),
@@ -145,8 +144,8 @@ wg_port.datatype = "range(1,65535)"
 wg_port.placeholder = "11011"
 wg_port:depends("listenermode", "ON")
 
-local model = fs.readfile("/proc/device-tree/model") or ""
-local hostname = fs.readfile("/proc/sys/kernel/hostname") or ""
+local model = nixio.fs.readfile("/proc/device-tree/model") or ""
+local hostname = nixio.fs.readfile("/proc/sys/kernel/hostname") or ""
 model = model:gsub("\n", "")
 hostname = hostname:gsub("\n", "")
 local device_name = (model ~= "" and model) or (hostname ~= "" and hostname) or "OpenWrt"
