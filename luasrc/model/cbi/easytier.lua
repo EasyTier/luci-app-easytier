@@ -398,14 +398,14 @@ btn7info.cfgvalue = function(self, section)
 end
 
 btn5 = s:taboption("infos", Button, "btn5")
-btn5.inputtitle = translate("本机启动参数")
-btn5.description = translate("点击按钮刷新，查看本机完整启动参数")
+btn5.inputtitle = translate("Собственные параметры запуска")
+btn5.description = translate("Нажмите кнопку, чтобы обновить, чтобы просмотреть полные параметры запуска.")
 btn5.inputstyle = "apply"
 btn5.write = function()
 if process_status ~= "" then
     luci.sys.call("echo $(cat /proc/$(pidof easytier-core)/cmdline | awk '{print $1}') >/tmp/easytier_cmd")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier_cmd")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier_cmd")
 end
 end
 
@@ -425,7 +425,7 @@ btnrm.write = function()
 end
 
 
-easytierbin = s:taboption("upload", Value, "easytierbin", translate("easytier-core程序路径"),
+easytierbin = s:taboption("upload", Value, "easytierbin", translate("путь к easytier-core"),
 	translate("Настройте путь к easytier-core，Обязательно укажите полный путь и имя. Если по указанному пути недостаточно свободного места, он будет автоматически перемещен в /tmp/easytier-core"))
 easytierbin.placeholder = "/tmp/vnt-cli"
 
