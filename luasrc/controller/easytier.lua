@@ -8,7 +8,7 @@ function index()
                   
         entry({"admin", "vpn", "easytier"}, alias("admin", "vpn", "easytier", "easytier"),_("EasyTier"), 46).dependent = true
 	entry({"admin", "vpn", "easytier", "easytier"}, cbi("easytier"),_("EasyTier"), 47).leaf = true
-	entry({"admin", "vpn",  "easytier",  "easytier_log"}, form("easytier_log"),_("日志"), 48).leaf = true
+	entry({"admin", "vpn",  "easytier",  "easytier_log"}, form("easytier_log"),_("log"), 48).leaf = true
 	entry({"admin", "vpn", "easytier", "get_log"}, call("get_log")).leaf = true
 	entry({"admin", "vpn", "easytier", "clear_log"}, call("clear_log")).leaf = true
 	entry({"admin", "vpn", "easytier", "status"}, call("act_status")).leaf = true
@@ -23,7 +23,7 @@ function act_status()
 	local tagcontent = tagfile:read("*all")
 	tagfile:close()
 	if tagcontent and tagcontent ~= "" then
-        os.execute("start_time=$(cat /tmp/easytier_time) && time=$(($(date +%s)-start_time)) && day=$((time/86400)) && [ $day -eq 0 ] && day='' || day=${day}天 && time=$(date -u -d @${time} +'%H小时%M分%S秒') && echo $day $time > /tmp/command_easytier 2>&1")
+        os.execute("start_time=$(cat /tmp/easytier_time) && time=$(($(date +%s)-start_time)) && day=$((time/86400)) && [ $day -eq 0 ] && day='' || day=${day}день && time=$(date -u -d @${time} +'%час%мин%сек') && echo $day $time > /tmp/command_easytier 2>&1")
         local command_output_file = io.open("/tmp/command_easytier", "r")
         if command_output_file then
             e.etsta = command_output_file:read("*all")
