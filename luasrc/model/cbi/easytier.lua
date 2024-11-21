@@ -161,101 +161,101 @@ instance_name = s:taboption("privacy",Value, "instance_name", translate("Имя 
 instance_name.placeholder = "default"
 
 vpn_portal = s:taboption("privacy",Value, "vpn_portal", translate("VPN URL"),
-	translate("定义 VPN 门户的 URL，允许其他 VPN 客户端连接。<br> 示例：wg://0.0.0.0:11011/10.14.14.0/24，表示 VPN 门户是一个在 vpn.example.com:11010 上监听的 WireGuard 服务器，并且 VPN 客户端位于 10.14.14.0/24 网络中（--vpn-portal 参数）"))
+	translate("Определите URL-адрес VPN-портала, позволяющий подключаться другим VPN-клиентам.  <br> Пример: wg://0.0.0.0:11011/10.14.14.0/24, что указывает на то, что VPN-портал представляет собой сервер WireGuard, прослушивающий vpn.example.com:11010, а VPN-клиент находится в сети по адресу 10.14.14.0/24.（--vpn-portal параметр）"))
 vpn_portal.placeholder = "wg://0.0.0.0:11011/10.14.14.0/24"
 
 mtu = s:taboption("privacy",Value, "mtu", translate("MTU"),
-	translate("TUN 设备的 MTU，默认值为非加密时的 1380，加密时为 1360"))
+	translate("MTU устройства TUN, по умолчанию 1380 для незашифрованного и 1360 для зашифрованного"))
 mtu.datatype = "range(1,1500)"
 mtu.placeholder = "1300"
 
-default_protocol = s:taboption("privacy",ListValue, "default_protocol", translate("默认协议"),
-	translate("连接对等节点时使用的默认协议（--default-protocol 参数）"))
-default_protocol:value("-",translate("默认"))
+default_protocol = s:taboption("privacy",ListValue, "default_protocol", translate("Протокол по умолчанию"),
+	translate("Протокол по умолчанию, используемый при подключении к узлам（--default-protocol параметр）"))
+default_protocol:value("-",translate("По умолчанию"))
 default_protocol:value("tcp")
 default_protocol:value("udp")
 default_protocol:value("ws")
 default_protocol:value("wss")
 
-tunname = s:taboption("privacy",Value, "tunname", translate("虚拟网卡名称"),
-	translate("自定义虚拟网卡TUN接口的名称（--dev-name 参数）"))
+tunname = s:taboption("privacy",Value, "tunname", translate("Имя TUN интерфейса"),
+	translate("Настройка имени интерфейса виртуальной сетевой карты TUN（--dev-name параметр）"))
 tunname.placeholder = "easytier"
 
-disable_encryption = s:taboption("general",Flag, "disable_encryption", translate("禁用加密"),
-	translate("禁用对等节点通信的加密，若关闭加密则其他节点也必须关闭加密 （-u 参数）"))
+disable_encryption = s:taboption("general",Flag, "disable_encryption", translate("Отключить шифрование"),
+	translate("Отключите шифрование для связи с одноранговыми узлами, если шифрование отключено, то другие узлы также должны отключить шифрование （-u параметр）"))
 
-multi_thread = s:taboption("general",Flag, "multi_thread", translate("启用多线程"),
-	translate("使用多线程运行时，默认为单线程 （--multi-thread 参数）"))
+multi_thread = s:taboption("general",Flag, "multi_thread", translate("Включить многопоточность"),
+	translate("По умолчанию устанавливается однопоточный, этот режим для работы с несколькими потоками （--multi-thread параметр）"))
 
-disable_ipv6 = s:taboption("privacy",Flag, "disable_ipv6", translate("禁用ipv6"),
-	translate("不使用ipv6 （--disable-ipv6 参数）"))
+disable_ipv6 = s:taboption("privacy",Flag, "disable_ipv6", translate("Отключить ipv6"),
+	translate("Отключает ipv6 （--disable-ipv6 параметр）"))
 	
-latency_first = s:taboption("general",Flag, "latency_first", translate("启用延迟优先"),
-	translate("延迟优先模式，将尝试使用最低延迟路径转发流量，默认使用最短路径 （--latency-first 参数）"))
+latency_first = s:taboption("general",Flag, "latency_first", translate("Включить приоритет задержки"),
+	translate("Режим Latency-first, будет пытаться пересылать трафик, используя путь с наименьшей задержкой, по умолчанию - кратчайший путь （--latency-first параметр）"))
 	
-exit_node = s:taboption("privacy",Flag, "exit_node", translate("启用出口节点"),
-	translate("允许此节点成为出口节点 （--enable-exit-node 参数）"))
+exit_node = s:taboption("privacy",Flag, "exit_node", translate("Включить выходной узел"),
+	translate("Разрешить этому узлу стать выходным узлом （--enable-exit-node параметр）"))
 	
-exit_nodes = s:taboption("privacy",DynamicList, "exit_nodes", translate("出口节点地址"),
-	translate("转发所有流量的出口节点，虚拟 IPv4 地址，优先级由列表顺序确定（--exit-nodes 参数）"))
+exit_nodes = s:taboption("privacy",DynamicList, "exit_nodes", translate("Адрес выходного узла"),
+	translate("Выходной узел для пересылки всего трафика, виртуальный IPv4-адрес, приоритет определяется порядком списка.（--exit-nodes параметр）"))
 	
-smoltcp = s:taboption("privacy",Flag, "smoltcp", translate("启用smoltcp堆栈"),
-	translate("为子网代理启用smoltcp堆栈（--use-smoltcp 参数）"))
+smoltcp = s:taboption("privacy",Flag, "smoltcp", translate("включить стек smoltcp"),
+	translate("Включить стек smoltcp для прокси-сервера подсети（--use-smoltcp параметр）"))
 smoltcp.rmempty = false
 
-no_tun = s:taboption("privacy",Flag, "no_tun", translate("无tun模式"),
-	translate("不创建TUN设备，可以使用子网代理访问节点（ --no-tun 参数）"))
+no_tun = s:taboption("privacy",Flag, "no_tun", translate(" No tun"),
+	translate("Не создавая устройство TUN, вы можете использовать прокси-сервер подсети для доступа к узлу.（ --no-tun параметр）"))
 no_tun.rmempty = false
 
-manual_routes = s:taboption("privacy",DynamicList, "manual_routes", translate("路由CIDR"),
-	translate("手动分配路由CIDR，将禁用子网代理和从对等节点传播的wireguard路由。（--manual-routes 参数）"))
+manual_routes = s:taboption("privacy",DynamicList, "manual_routes", translate("Маршрутизация CIDR"),
+	translate("Назначение CIDR маршрутизации вручную отключит прокси-серверы подсети и распространение маршрутов WireGuard от узлов.（--manual-routes параметр）"))
 manual_routes.placeholder = "192.168.0.0/16"
 
-relay_network = s:taboption("privacy",Flag, "relay_network", translate("转发白名单网络的流量"),
-	translate("仅转发白名单网络的流量，默认允许所有网络"))
+relay_network = s:taboption("privacy",Flag, "relay_network", translate("Пересылать трафик из сетей из белого списка"),
+	translate("Пересылать трафик только из сетей из белого списка, все сети разрешены по умолчанию."))
 relay_network.rmempty = false
 
-whitelist = s:taboption("privacy",DynamicList, "whitelist", translate("白名单网络"),
-	translate("仅转发白名单网络的流量，输入是通配符字符串，例如：'*'（所有网络），'def*'（以def为前缀的网络）<br>可以指定多个网络。如果参数为空，则禁用转发。（--relay-network-whitelist 参数）"))
+whitelist = s:taboption("privacy",DynamicList, "whitelist", translate("Белые списки сети"),
+	translate("Переадресация трафика только из сетей, включенных в белый список. В качестве входного параметра используется строка с подстановочным знаком, например, '*' (все сети), 'def*' (сети с префиксом def)<br> Можно указать несколько сетей. Если параметр пуст, пересылка отключена.（--relay-network-whitelist 参数）"))
 whitelist:depends("relay_network", "1")
 
-socks_port = s:taboption("privacy",Value, "socks_port", translate("socks5端口"),
-	translate("启用 socks5 服务器，允许 socks5 客户端访问虚拟网络，留空则不开启（--socks5 参数）"))
+socks_port = s:taboption("privacy",Value, "socks_port", translate("socks5 порт"),
+	translate("Включите сервер Socks5 и разрешите клиентам Socks5 доступ к виртуальной сети. Оставьте это поле пустым, чтобы отключить его.（--socks5 параметр）"))
 socks_port.datatype = "range(1,65535)"
 socks_port.placeholder = "1080"
 
-disable_p2p = s:taboption("privacy",Flag, "disable_p2p", translate("禁用P2P"),
-	translate("禁用P2P通信，只通过-p指定的节点转发数据包 （ --disable-p2p 参数）"))
+disable_p2p = s:taboption("privacy",Flag, "disable_p2p", translate("Отключить P2P"),
+	translate("Отключить P2P-коммуникации и пересылать пакеты только через узел, указанный командой -p （ --disable-p2p параметр）"))
 disable_p2p.rmempty = false
 
-disable_udp = s:taboption("privacy",Flag, "disable_udp", translate("禁用UDP"),
-	translate("禁用UDP打洞功能（ --disable-udp-hole-punching 参数）"))
+disable_udp = s:taboption("privacy",Flag, "disable_udp", translate("Отключить UDP"),
+	translate("Отключает UPD（ --disable-udp-hole-punching параметр）"))
 disable_udp.rmempty = false
 
-relay_all = s:taboption("privacy",Flag, "relay_all", translate("允许转发"),
-	translate("转发所有对等节点的RPC数据包，即使对等节点不在转发网络白名单中。<br>这可以帮助白名单外网络中的对等节点建立P2P连接。"))
+relay_all = s:taboption("privacy",Flag, "relay_all", translate("Relay"),
+	translate("Пересылать пакеты RPC всем узлам, даже если узел не находится в белом списке сети пересылки.  <br>Это помогает узлам в сетях за пределами белого списка устанавливать P2P-соединения."))
 relay_all.rmempty = false
 
-log = s:taboption("general",ListValue, "log", translate("程序日志"),
-	translate("运行日志在/tmp/easytier.log,可在上方日志查看<br>若启动失败，请前往 状态- 系统日志 查看具体启动失败日志<br>详细程度：警告<信息<调试<跟踪"))
+log = s:taboption("general",ListValue, "log", translate("log"),
+	translate("Путь журнала отладки /tmp/easytier.log"))
 log.default = "info"
-log:value("off",translate("关闭"))
-log:value("warn",translate("警告"))
-log:value("info",translate("信息"))
-log:value("debug",translate("调试"))
-log:value("trace",translate("跟踪"))
+log:value("off",translate("off-закрытие"))
+log:value("warn",translate("warn-предупреждать"))
+log:value("info",translate("info-информация"))
+log:value("debug",translate("debug-отладка"))
+log:value("trace",translate("trace-отслеживать"))
 
-check = s:taboption("privacy",Flag, "check", translate("通断检测"),
-        translate("开启通断检测后，可以指定对端的设备IP，当所有指定的IP都ping不通时将会重启easytier程序"))
+check = s:taboption("privacy",Flag, "check", translate("обнаружение включения и выключения"),
+        translate("После включения функции обнаружения прохода вы можете указать IP-адрес однорангового устройства на противоположном конце, когда все указанные IP-адреса не могут быть пропингованы, программа easytier будет перезапущена."))
 
-checkip=s:taboption("privacy",DynamicList,"checkip",translate("检测IP"),
-        translate("确保这里的对端设备IP地址填写正确且可访问，若填写错误将会导致无法ping通，程序反复重启"))
+checkip=s:taboption("privacy",DynamicList,"checkip",translate("Проверить IP"),
+        translate("Убедитесь, что IP-адрес однорангового устройства здесь указан правильно и доступен. Если он заполнен неправильно, пинг завершится неудачно, и программа будет перезапущена повторно."))
 checkip.rmempty = true
 checkip.datatype = "ip4addr"
 checkip:depends("check", "1")
 
-checktime = s:taboption("privacy",ListValue, "checktime", translate("间隔时间 (分钟)"),
-        translate("检测间隔的时间，每隔多久检测指定的IP通断一次"))
+checktime = s:taboption("privacy",ListValue, "checktime", translate("Время интервала  (минуты)"),
+        translate("Время интервала обнаружения, как часто указанный IP проверяется на возможность подключения."))
 for s=1,60 do
 checktime:value(s)
 end
@@ -264,14 +264,14 @@ checktime:depends("check", "1")
 local process_status = luci.sys.exec("ps | grep easytier-core| grep -v grep")
 
 btn0 = s:taboption("infos", Button, "btn0")
-btn0.inputtitle = translate("node信息")
-btn0.description = translate("点击按钮刷新，查看本机信息")
+btn0.inputtitle = translate("node инфо")
+btn0.description = translate("Нажмите кнопку, чтобы обновить и просмотреть информацию о локальном компьютере.")
 btn0.inputstyle = "apply"
 btn0.write = function()
 if process_status ~= "" then
    luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli node >/tmp/easytier-cli_node")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_node")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier-cli_node")
 end
 end
 
@@ -283,14 +283,14 @@ btn0info.cfgvalue = function(self, section)
 end
 
 btn1 = s:taboption("infos", Button, "btn1")
-btn1.inputtitle = translate("peer信息")
-btn1.description = translate("点击按钮刷新，查看对端信息")
+btn1.inputtitle = translate("peer инфо")
+btn1.description = translate("Нажмите кнопку, чтобы обновить и просмотреть информацию об одноранговых узлах.")
 btn1.inputstyle = "apply"
 btn1.write = function()
 if process_status ~= "" then
    luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli peer >/tmp/easytier-cli_peer")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_peer")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier-cli_peer")
 end
 end
 
@@ -302,14 +302,14 @@ btn1info.cfgvalue = function(self, section)
 end
 
 btn2 = s:taboption("infos", Button, "btn2")
-btn2.inputtitle = translate("connector信息")
-btn2.description = translate("点击按钮刷新，查看connector信息")
+btn2.inputtitle = translate("connector инфо")
+btn2.description = translate("Нажмите кнопку Обновить, чтобы просмотреть информацию о коннекторе")
 btn2.inputstyle = "apply"
 btn2.write = function()
 if process_status ~= "" then
    luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli connector >/tmp/easytier-cli_connector")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_connector")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier-cli_connector")
 end
 end
 
@@ -321,14 +321,14 @@ btn2info.cfgvalue = function(self, section)
 end
 
 btn3 = s:taboption("infos", Button, "btn3")
-btn3.inputtitle = translate("stun信息")
-btn3.description = translate("点击按钮刷新，查看stun信息")
+btn3.inputtitle = translate("stun инфо")
+btn3.description = translate("Информация об stun")
 btn3.inputstyle = "apply"
 btn3.write = function()
 if process_status ~= "" then
    luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli stun >/tmp/easytier-cli_stun")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_stun")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier-cli_stun")
 end
 end
 
@@ -341,14 +341,14 @@ end
 
 
 btn4 = s:taboption("infos", Button, "btn4")
-btn4.inputtitle = translate("route信息")
-btn4.description = translate("点击按钮刷新，查看route信息")
+btn4.inputtitle = translate("route инфо")
+btn4.description = translate("Нажмите кнопку, чтобы обновить и просмотреть информацию о маршрутах.")
 btn4.inputstyle = "apply"
 btn4.write = function()
 if process_status ~= "" then
    luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli route >/tmp/easytier-cli_route")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_route")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier-cli_route")
 end
 end
 
@@ -360,14 +360,14 @@ btn4info.cfgvalue = function(self, section)
 end
 
 btn6 = s:taboption("infos", Button, "btn6")
-btn6.inputtitle = translate("peer-center信息")
-btn6.description = translate("点击按钮刷新，查看peer-center信息")
+btn6.inputtitle = translate("peer-center инфо")
+btn6.description = translate("Нажмите кнопку, чтобы обновить и просмотреть информацию о peer-center")
 btn6.inputstyle = "apply"
 btn6.write = function()
 if process_status ~= "" then
    luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli peer-center >/tmp/easytier-cli_peer-center")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_peer-center")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier-cli_peer-center")
 end
 end
 
@@ -379,14 +379,14 @@ btn6info.cfgvalue = function(self, section)
 end
 
 btn7 = s:taboption("infos", Button, "btn7")
-btn7.inputtitle = translate("vpn-portal信息")
-btn7.description = translate("点击按钮刷新，查看vpn-portal信息")
+btn7.inputtitle = translate("vpn-portal инфо")
+btn7.description = translate("Нажмите кнопку, чтобы обновить и просмотреть информацию о vpn-portal")
 btn7.inputstyle = "apply"
 btn7.write = function()
 if process_status ~= "" then
    luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli vpn-portal >/tmp/easytier-cli_vpn-portal")
 else
-    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_vpn-portal")
+    luci.sys.call("echo 'Ошибка: Программа не запущена!  Пожалуйста, запустите программу и снова нажмите «Обновить».' >/tmp/easytier-cli_vpn-portal")
 end
 end
 
@@ -417,8 +417,8 @@ btn5cmd.cfgvalue = function(self, section)
 end
 
 btnrm = s:taboption("infos", Button, "btnrm")
-btnrm.inputtitle = translate("检测更新")
-btnrm.description = translate("点击按钮开始检测更新，上方状态栏显示")
+btnrm.inputtitle = translate("Проверьте наличие обновлений")
+btnrm.description = translate("Нажмите кнопку, чтобы начать проверку обновлений")
 btnrm.inputstyle = "apply"
 btnrm.write = function()
   os.execute("rm -rf /tmp/easytier*.tag /tmp/easytier*.newtag /tmp/easytier-core_*")
@@ -426,14 +426,14 @@ end
 
 
 easytierbin = s:taboption("upload", Value, "easytierbin", translate("easytier-core程序路径"),
-	translate("自定义easytier-core的存放路径，确保填写完整的路径及名称,若指定的路径可用空间不足将会自动移至/tmp/easytier-core"))
+	translate("Настройте путь к easytier-core，Обязательно укажите полный путь и имя. Если по указанному пути недостаточно свободного места, он будет автоматически перемещен в /tmp/easytier-core"))
 easytierbin.placeholder = "/tmp/vnt-cli"
 
 local upload = s:taboption("upload", FileUpload, "upload_file")
 upload.optional = true
 upload.default = ""
 upload.template = "easytier/other_upload"
-upload.description = translate("可直接上传二进制程序easytier-core和easytier-cli或者以.zip结尾的压缩包,上传新版本会自动覆盖旧版本，下载地址：<a href='https://github.com/EasyTier/EasyTier/releases' target='_blank'>github.com/EasyTier/EasyTier</a><br>上传的文件将会保存在/tmp文件夹里，如果自定义了程序路径那么启动程序时将会自动移至自定义的路径<br>")
+upload.description = translate("Вы можете напрямую загружать двоичные программы easytier-core и easytier-cli или сжатые пакеты, заканчивающиеся на .zip. При загрузке новой версии адрес загрузки старой версии: <a href='https://github.com/EasyTier/. EasyTier/релизы'  target='_blank'>github.com/EasyTier/EasyTier</a> <br>Загруженный файл будет сохранен в папке /tmp. Если путь к программе настроен, он будет автоматически перемещен по этому пути при запуске. путь<br>.")
 local um = s:taboption("upload",DummyValue, "", nil)
 um.template = "easytier/other_dvalue"
 
@@ -448,7 +448,7 @@ http.setfilehandler(
             if meta and chunk then fd = nixio.open(dir .. meta.file, "w") end
 
             if not fd then
-                um.value = translate("错误：上传失败！")
+                um.value = translate("Ошибка: не удалось загрузить！")
                 return
             end
         end
@@ -458,7 +458,7 @@ http.setfilehandler(
         if eof and fd then
             fd:close()
             fd = nil
-            um.value = translate("文件已上传至") .. ' "/tmp/' .. meta.file .. '"'
+            um.value = translate("Файл был загружен в") .. ' "/tmp/' .. meta.file .. '"'
 
             if string.sub(meta.file, -4) == ".zip" then
                 local file_path = dir .. meta.file
@@ -467,10 +467,10 @@ http.setfilehandler(
                 os.execute("mv " .. extracted_dir .. "easytier-cli /tmp/easytier-cli")
                 os.execute("mv " .. extracted_dir .. "easytier-core /tmp/easytier-core")
                if nixio.fs.access("/tmp/easytier-cli") then
-                    um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-cli上传成功，重启一次插件才生效")
+                    um.value = um.value .. "\n" .. translate("Программа /tmp/easytier-cli успешно загружена, и плагин вступит в силу после перезапуска.")
                 end
                if nixio.fs.access("/tmp/easytier-core") then
-                    um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-core上传成功，重启一次插件才生效")
+                    um.value = um.value .. "\n" .. translate("Программа/tmp/easytier-core успешно загружена, и плагин вступит в силу после перезапуска.")
                 end
                end
 	    if string.sub(meta.file, -7) == ".tar.gz" then
@@ -480,10 +480,10 @@ http.setfilehandler(
                 os.execute("mv " .. extracted_dir .. "easytier-cli /tmp/easytier-cli")
                 os.execute("mv " .. extracted_dir .. "easytier-core /tmp/easytier-core")
                if nixio.fs.access("/tmp/easytier-cli") then
-                    um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-cli上传成功，重启一次插件才生效")
+                    um.value = um.value .. "\n" .. translate("Программа/tmp/easytier-cli успешно загружена, перезапустите")
                 end
                if nixio.fs.access("/tmp/easytier-core") then
-                    um.value = um.value .. "\n" .. translate("-程序/tmp/easytier-core上传成功，重启一次插件才生效")
+                    um.value = um.value .. "\n" .. translate("Программа/tmp/easytier-core успешно загружена, перезапустите")
                 end
                end
                 os.execute("chmod +x /tmp/easytier-core")
