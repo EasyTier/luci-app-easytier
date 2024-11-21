@@ -13,15 +13,15 @@ s.addremove=false
 s.anonymous=true
 s:tab("general", translate("Общие"))
 s:tab("privacy", translate("Расширенные"))
-s:tab("infos", translate("ифнормация о соединении"))
-s:tab("upload", translate("Загрузить бинарник"))
+s:tab("infos", translate("Информация о соединении"))
+s:tab("upload", translate("Загрузить .bin файл"))
 
 switch = s:taboption("general",Flag, "enabled", translate("Enable"))
 switch.rmempty = false
 
 btncq = s:taboption("general", Button, "btncq", translate("Перезагрузка"))
 btncq.inputtitle = translate("Перезагрузка")
-btncq.description = translate("Перезагрузка без изменения параметров")
+btncq.description = translate("Быстрая перезагрузка без изменения параметров")
 btncq.inputstyle = "apply"
 btncq:depends("enabled", "1")
 btncq.write = function()
@@ -87,60 +87,60 @@ peeradd:value("tcp://hw.gz.9z1.me:58443", translate("ГуанчжоуV4-tcp://hw
 peeradd:value("tcp://c.oee.icu:60006", translate("ГонконгV4/V6-tcp://c.oee.icu:60006"))
 peeradd:value("udp://c.oee.icu:60006", translate("ГонконгV4/V6-udp://c.oee.icu:60006"))
 peeradd:value("wss://c.oee.icu:60007", translate("ГонконгV4/V6-wss://c.oee.icu:60007"))
-peeradd:value("tcp://etvm.oee.icu:31572", translate("日本V4-tcp://etvm.oee.icu:31572"))
-peeradd:value("wss://etvm.oee.icu:30845", translate("日本V4-wss://etvm.oee.icu:30845"))
-peeradd:value("tcp://et.pub.moe.gift:11010", translate("美国科罗拉多V4-tcp://et.pub.moe.gift:11010"))
-peeradd:value("wss://et.pub.moe.gift:11012", translate("美国科罗拉多V4-tcp://et.pub.moe.gift:11012"))
-peeradd:value("tcp://et.323888.xyz:11010", translate("湖北十堰V4-tcp://et.323888.xyz:11010"))
-peeradd:value("udp://et.323888.xyz:11010", translate("湖北十堰V4-udp://et.323888.xyz:11010"))
-peeradd:value("wss://et.323888.xyz:11012", translate("湖北十堰V4-wss://et.323888.xyz:11012"))
-peeradd:value("tcp://s1.ct8.pl:1101", translate("德国萨克森V4-tcp://s1.ct8.pl:1101"))
-peeradd:value("ws://s1.ct8.pl:11012", translate("德国萨克森V4-ws://s1.ct8.pl:11012"))
+peeradd:value("tcp://etvm.oee.icu:31572", translate("ЯпонияV4-tcp://etvm.oee.icu:31572"))
+peeradd:value("wss://etvm.oee.icu:30845", translate("ЯпонияV4-wss://etvm.oee.icu:30845"))
+peeradd:value("tcp://et.pub.moe.gift:11010", translate("Колорадо, СШАV4-tcp://et.pub.moe.gift:11010"))
+peeradd:value("wss://et.pub.moe.gift:11012", translate("Колорадо, СШАV4-tcp://et.pub.moe.gift:11012"))
+peeradd:value("tcp://et.323888.xyz:11010", translate("Хубэй ШиянV4-tcp://et.323888.xyz:11010"))
+peeradd:value("udp://et.323888.xyz:11010", translate("Хубэй ШиянV4-udp://et.323888.xyz:11010"))
+peeradd:value("wss://et.323888.xyz:11012", translate("Хубэй ШиянV4-wss://et.323888.xyz:11012"))
+peeradd:value("tcp://s1.ct8.pl:1101", translate("Саксония ГерманияV4-tcp://s1.ct8.pl:1101"))
+peeradd:value("ws://s1.ct8.pl:11012", translate("Саксония ГерманияV4-ws://s1.ct8.pl:11012"))
 
-external_node = s:taboption("general", Value, "external_node", translate("共享节点地址"),
-	translate("使用公共共享节点来发现对等节点，和上方参数作用一样 （-e 参数）"))
+external_node = s:taboption("general", Value, "external_node", translate("Общий адрес узла"),
+	translate("Используйте публичный общий узел для обнаружения узла-аналога, как описано выше. （парамерт -e）"))
 external_node.default = ""
 external_node.placeholder = "tcp://public.easytier.top:11010"
-external_node:value("tcp://public.easytier.top:11010", translate("官方公共服务器-广东河源-tcp://public.easytier.top:11010"))
+external_node:value("tcp://public.easytier.top:11010", translate("Официальный публичный сервер – Гуандун Хэюань-tcp://public.easytier.top:11010"))
 
-proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("子网代理"),
-	translate("将本地网络导出到 VPN 中的其他对等点，可访问当前局域网内其他设备 （-n 参数）"))
+proxy_network = s:taboption("general",DynamicList, "proxy_network", translate("прокси подсети"),
+	translate("Экспорт локальной сети другим участникам VPN для доступа к другим устройствам в текущей локальной сети. （параметр -n）"))
 
-rpc_portal = s:taboption("privacy", Value, "rpc_portal", translate("门户地址端口"),
-	translate("用于管理的 RPC 门户地址。0 表示随机端口，12345 表示监听本地主机的 12345 端口，0.0.0.0:12345 表示在所有接口上监听 12345 端口。默认值为 0，首选 15888 （-r 参数）"))
+rpc_portal = s:taboption("privacy", Value, "rpc_portal", translate("RPC"),
+	translate("Адрес портала RPC для управления. 0 означает случайный порт, 12345 - прослушивать порт 12345 на локальном хосте, 0.0.0.0:12345 - прослушивать порт 12345 на всех интерфейсах. Значение по умолчанию - 0. Предпочтительно использовать значение 15888. （-r 参数）"))
 rpc_portal.placeholder = "0"
 rpc_portal.datatype = "range(1,65535)"
 
-listenermode = s:taboption("general",ListValue, "listenermode", translate("监听端口"),
-	translate("OFF:不监听任何端口，只连接到对等节点 （--no-listener 参数）<br>单纯作为客户端使用（不作为服务器）可以不监听端口"))
-listenermode:value("ON",translate("监听"))
-listenermode:value("OFF",translate("不监听"))
+listenermode = s:taboption("general",ListValue, "listenermode", translate("порт прослушивания"),
+	translate("OFF: не прослушивает никакие порты, подключается только к узлам-аналогам (параметр --no-listener) <br>Используется исключительно как клиент (не как сервер), можно не прослушивать порты."))
+listenermode:value("ON",translate("Влючено"))
+listenermode:value("OFF",translate("Выключено"))
 listenermode.default = "OFF"
 
-listener6 = s:taboption("general",Flag, "listener6", translate("同时监听IPV6"),
-	translate("默认只监听IPV4，对等节点只能使用IPV4连接，启用后将同时监听IPV6，例如 -l tcp://[::]:11010"))
+listener6 = s:taboption("general",Flag, "listener6", translate("мониторить IPV6"),
+	translate("По умолчанию он слушает только IPV4, а одноранговый узел может использовать для подключения только IPV4. Если этот параметр включен, он также будет слушать, например, IPV6. -l tcp://[::]:11010"))
 listener6:depends("listenermode", "ON")
 
-tcp_port = s:taboption("general",Value, "tcp_port", translate("tcp/udp端口"),
-	translate("tcp/udp协议，端口号：11010，表示 tcp/udp 将在 11010 上监听"))
+tcp_port = s:taboption("general",Value, "tcp_port", translate("tcp/udp порт"),
+	translate("tcp/udp протокол， порт：11010. Означает что tcp/udp монитор включен на 11010 порту"))
 tcp_port.datatype = "range(1,65535)"
 tcp_port.default = "11010"
 tcp_port:depends("listenermode", "ON")
 
-ws_port = s:taboption("general",Value, "ws_port", translate("ws端口"),
-	translate("ws协议，端口号：11011，表示 ws 将在 11011 上监听"))
+ws_port = s:taboption("general",Value, "ws_port", translate("ws порт"),
+	translate("ws протокол， порт：11010. Означает что ws монитотор включен на 11011 порту"))
 ws_port.datatype = "range(1,65535)"
 ws_port.default = "11011"
 ws_port:depends("listenermode", "ON")
 
-wss_port = s:taboption("general",Value, "wss_port", translate("wss端口"),
-	translate("wss协议，端口号：11012，表示 wss 将在 11012 上监听"))
+wss_port = s:taboption("general",Value, "wss_port", translate("wss порт"),
+	translate("wss протокол，порт：11012. Означает что wss монитор включее на 11012 порту"))
 wss_port.datatype = "range(1,65535)"
 wss_port.default = "11012"
 wss_port:depends("listenermode", "ON")
 
-wg_port = s:taboption("general",Value, "wg_port", translate("wg端口"),
-	translate("wireguard协议，端口号：11011，表示 wg 将在 11011 上监听"))
+wg_port = s:taboption("general",Value, "wg_port", translate("wg порт"),
+	translate("wireguard протокол，порт：11011. Означает что wg монитор включен на 11011 порту"))
 wg_port.datatype = "range(1,65535)"
 wg_port.placeholder = "11011"
 wg_port:depends("listenermode", "ON")
@@ -151,16 +151,16 @@ model = model:gsub("\n", "")
 hostname = hostname:gsub("\n", "")
 local device_name = (model ~= "" and model) or (hostname ~= "" and hostname) or "OpenWrt"
 device_name = device_name:gsub(" ", "_")
-desvice_name = s:taboption("general", Value, "desvice_name", translate("主机名"),
-    translate("用于标识此设备的主机名 （--hostname 参数）"))
+desvice_name = s:taboption("general", Value, "desvice_name", translate("имя хоста"),
+    translate("Имя хоста, используемое для идентификации этого устройства. （--hostname парамер）"))
 desvice_name.placeholder = device_name
 desvice_name.default = device_name
 
-instance_name = s:taboption("privacy",Value, "instance_name", translate("实例名称"),
-	translate("用于在同一台机器中标识此 VPN 节点的实例名称 （--instance-name 参数）"))
+instance_name = s:taboption("privacy",Value, "instance_name", translate("Имя экземпляра"),
+	translate("Имя экземпляра, используемое для идентификации этого узла VPN на этой же машине （--instance-name параметр）"))
 instance_name.placeholder = "default"
 
-vpn_portal = s:taboption("privacy",Value, "vpn_portal", translate("VPN门户URL"),
+vpn_portal = s:taboption("privacy",Value, "vpn_portal", translate("VPN URL"),
 	translate("定义 VPN 门户的 URL，允许其他 VPN 客户端连接。<br> 示例：wg://0.0.0.0:11011/10.14.14.0/24，表示 VPN 门户是一个在 vpn.example.com:11010 上监听的 WireGuard 服务器，并且 VPN 客户端位于 10.14.14.0/24 网络中（--vpn-portal 参数）"))
 vpn_portal.placeholder = "wg://0.0.0.0:11011/10.14.14.0/24"
 
