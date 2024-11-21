@@ -8,34 +8,34 @@ m.description = translate('Простое, безопасное, децентр�
 -- easytier
 m:section(SimpleSection).template  = "easytier/easytier_status"
 
-s=m:section(TypedSection, "easytier", translate("EasyTier配置"))
+s=m:section(TypedSection, "easytier", translate("Конфигурация EasyTier"))
 s.addremove=false
 s.anonymous=true
-s:tab("general", translate("基本设置"))
-s:tab("privacy", translate("高级设置"))
-s:tab("infos", translate("连接信息"))
-s:tab("upload", translate("上传程序"))
+s:tab("general", translate("Общие"))
+s:tab("privacy", translate("Расширенные"))
+s:tab("infos", translate("ифнормация о соединении"))
+s:tab("upload", translate("Загрузить бинарник"))
 
 switch = s:taboption("general",Flag, "enabled", translate("Enable"))
 switch.rmempty = false
 
-btncq = s:taboption("general", Button, "btncq", translate("重启"))
-btncq.inputtitle = translate("重启")
-btncq.description = translate("在没有修改参数的情况下快速重新启动一次")
+btncq = s:taboption("general", Button, "btncq", translate("Перезагрузка"))
+btncq.inputtitle = translate("Перезагрузка")
+btncq.description = translate("Перезагрузка без изменения параметров")
 btncq.inputstyle = "apply"
 btncq:depends("enabled", "1")
 btncq.write = function()
   os.execute("/etc/init.d/easytier restart &")
 end
 
-etcmd = s:taboption("privacy",ListValue, "etcmd", translate("启动方式"),
-	translate("默认使用命令行方式启动，也可以使用配置文件启动<br>切换启动方式后将以指定的方式启动，请谨慎选择"))
+etcmd = s:taboption("privacy",ListValue, "etcmd", translate("Режим запуска"),
+	translate("Запуск из командной строки по умолчанию, также можно использовать запуск из файла конфигурации<br>При переключении метода запуска запуск будет происходить указанным способом, пожалуйста, выбирайте внимательно!"))
 etcmd.default = "etcmd"
-etcmd:value("etcmd",translate("命令行"))
-etcmd:value("config",translate("配置文件"))
+etcmd:value("etcmd",translate("командная строка"))
+etcmd:value("config",translate("файл конфигурации"))
 
-et_config = s:taboption("privacy",TextValue, "et_config", translate("配置文件"),
-	translate("配置文件在/etc/easytier/config.toml<br>命令行的启动参数和此配置文件的参数并不同步，请自行修改<br>配置文件介绍：<a href='https://easytier.rs/guide/network/config-file.html'>点此查看</a>"))
+et_config = s:taboption("privacy",TextValue, "et_config", translate("файл конфигурации"),
+	translate("Файл конфигурации находится в /etc/easytier/config.toml <br>Параметры запуска в командной строке не синхронизированы с параметрами в этом файле конфигурации, поэтому измените их самостоятельно<br>Ознакомление с файлом конфигурации:<a href='https://easytier.rs/guide/network/config-file.html '> Нажмите здесь для просмотра</a>"))
 et_config.rows = 18
 et_config.wrap = "off"
 et_config:depends("etcmd", "config")
@@ -46,33 +46,33 @@ end
 et_config.write = function(self, section, value)
     local dir = "/etc/easytier/"
     local file = dir .. "config.toml"
-    -- 检查目录是否存在，如果不存在则创建
+    -- Проверьте сушествует ли каталог, если нет, создайте.
     if not nixio.fs.access(dir) then
         nixio.fs.mkdir(dir)
     end
     fs.writefile(file, value:gsub("\r\n", "\n"))
 end
 
-network_name = s:taboption("general", Value, "network_name", translate("网络名称"),
-	translate("用于识别此 VPN 网络的网络名称（--network-name 参数）"))
+network_name = s:taboption("general", Value, "network_name", translate("имя сети"),
+	translate("Имя сети VPN （--network-name параметр）"))
 network_name.password = true
 network_name.placeholder = "test"
 
-network_secret = s:taboption("general", Value, "network_secret", translate("网络密钥"),
-	translate("用于验证此节点是否属于 VPN 网络的网络密钥（--network-secret 参数）"))
+network_secret = s:taboption("general", Value, "network_secret", translate("сетевой ключ"),
+	translate("Испльзуется для проверки надёжности этого узла VPN сетевой ключ（--network-secret параметр）"))
 network_secret.password = true
 network_secret.placeholder = "test"
 
-ip_dhcp = s:taboption("general",Flag, "ip_dhcp", translate("启用dhcp"),
-	translate("由Easytier自动确定并设置IP地址，默认从10.0.0.1开始。警告：在使用DHCP时，如果网络中出现IP冲突，IP将自动更改。（-d 参数）"))
+ip_dhcp = s:taboption("general",Flag, "ip_dhcp", translate("dhcp"),
+	translate("IP-адрес автоматически определяется и устанавливается Easytier, начиная с 10.0.0.1 по умолчанию. ВНИМАНИЕ: При использовании DHCP, если в сети возникнет конфликт IP-адресов, IP-адрес будет изменен автоматически. (параметр -d)"))
 
-ipaddr = s:taboption("general",Value, "ipaddr", translate("接口IP地址"),
-	translate("此VPN节点的IPv4地址，如果为空，则此节点将仅转发数据包，不会创建TUN设备（-i 参数）"))
+ipaddr = s:taboption("general",Value, "ipaddr", translate("IP интерфейса"),
+	translate("IPv4-адрес этого VPN-узла, если пустой, то этот узел будет только пересылать пакеты и не будет создавать TUN-устройства (параметр -i)"))
 ipaddr.datatype = "ip4addr"
 ipaddr.placeholder = "10.0.0.1"
 
-peeradd = s:taboption("general",DynamicList, "peeradd", translate("对等节点"),
-	translate("初始连接的对等节点，和下方参数作用一样 （-p 参数）<br>公共服务器可用状态查询：<a href='https://easytier.gd.nkbpal.cn/status/easytier' target='_blank'>点此查询</a>"))
+peeradd = s:taboption("general",DynamicList, "peeradd", translate("Одноранговый узел"),
+	translate("Начальное соединение с пиром, то же самое, что и ниже (параметр -p) <br>Запрос статуса доступности публичного сервера：<a href='https://easytier.gd.nkbpal.cn/status/easytier' target='_blank'>узнать</a>"))
 peeradd.placeholder = "tcp://public.easytier.top:11010"
 peeradd:value("tcp://public.easytier.top:11010", translate("官方公共服务器-广东河源-tcp://public.easytier.top:11010"))
 peeradd:value("tcp://43.136.45.249:11010", translate("广州V4-tcp://43.136.45.249:11010"))
