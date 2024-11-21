@@ -46,7 +46,7 @@ end
 et_config.write = function(self, section, value)
     local dir = "/etc/easytier/"
     local file = dir .. "config.toml"
-    -- Проверьте сушествует ли каталог, если нет, создайте.
+    -- Проверьте сушествует ли каталог /etc/easytier/config.toml, если нет, создайте.
     if not nixio.fs.access(dir) then
         nixio.fs.mkdir(dir)
     end
