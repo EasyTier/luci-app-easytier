@@ -54,25 +54,25 @@ start_et() {
 		[ "$enabled" = "1" ] || return 1
                 config_get easytierbin "$cfg" 'easytierbin' '/tmp/easytier-core'
                 config_get etcmd "$cfg" 'etcmd' 'etcmd'
-                echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : easytier-core_${cpucore}开始启动" >>/tmp/easytier.log
-                test -z "`opkg list-installed|grep kmod-tun`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 缺少kmod-tun插件" >>/tmp/easytier.log
+                echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : easytier-core_${cpucore}Начать загрузку" >>/tmp/easytier.log
+                test -z "`opkg list-installed|grep kmod-tun`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Отсутствует kmod-tun" >>/tmp/easytier.log
                 path=$(dirname "$easytierbin")
                 if [ -f /tmp/easytier-core ] || [ -f /tmp/easytier-cli ] && [ "${path:0:4}" != "/tmp" ] ;then
                    chmod +x /tmp/easytier-core 2>/dev/null
                    chmod +x /tmp/easytier-cli 2>/dev/null
-                   echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 找到上传的程序/tmp/easytier-core，替换为$easytierbin " >>/tmp/easytier.log
+                   echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Найдите загруженную программу/tmp/easytier-core，Заменить на $easytierbin " >>/tmp/easytier.log
                    upsize="$(du -k /tmp/easytier-core | cut -f1)"
                    result=$(expr $size - $upsize)
-                   [ -z "$size"] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 获取可用空间失败，请使用ssh手动上传至 ${easytierbin} ${path}/easytier-cli" >>/tmp/easytier.log
+                   [ -z "$size"] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Не удалось получить доступное пространство. Используйте SSH для загрузки вручную в ${easytierbin} ${path}/easytier-cli" >>/tmp/easytier.log
                    if [ $(($(/tmp/easytier-core -h | wc -l))) -gt 3 ] && [ "$result" -gt 1000 ] ; then
                      mv -f /tmp/easytier-core "$easytierbin" 2>/dev/null
                      mv -f /tmp/easytier-cli "${path}/easytier-cli" 2>/dev/null
                      else
-                     echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 无法替换，上传的程序不完整或自定义路径的可用空间不足，当前空间剩余${size}kb" >>/tmp/easytier.log
+                     echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Невозможно заменить, загруженная программа неполная или в пользовательском пути недостаточно свободного места, а текущее место осталось${size}kb" >>/tmp/easytier.log
                    fi
                 fi
                 if [ ! -f "$easytierbin" ] && [ "$size" -lt 5000 ] ; then
-                    echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 自定义程序路径的可用空间不足，当前可用空间剩余${size}kb,自动切换为内存/tmp/easytier-core" >>/tmp/easytier.log
+                    echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Недостаточно свободного места для пользовательского пути к программе, осталось свободное место.${size}kb,自动切换为内存/tmp/easytier-core" >>/tmp/easytier.log
                     sed -i "/easytierbin/c option easytierbin '/tmp/easytier-core' " /etc/config/easytier 
                     easytierbin=/tmp/easytier-core
                 fi
@@ -100,7 +100,7 @@ start_et() {
                 chmod +x "$easytierbin" 
                 chmod +x ${path}/easytier-cli
                 ver="$($easytierbin -h | grep version | awk -F ':' {'print $2'})"
-                [ ! -z "$ver" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : ${easytierbin}当前版本号-${ver} " >>/tmp/easytier.log
+                [ ! -z "$ver" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : ${easytierbin}Текущий номер версии-${ver} " >>/tmp/easytier.log
                 pgrep -f easytier_check | xargs kill -9 >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1
@@ -474,9 +474,9 @@ start_service() {
            [ "$mipstype" = "0" ] && cpucore="mips" || cpucore="mipsel" 
         fi
         
-        #test -z "`opkg list-installed|grep curl`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 缺少curl插件" >>/tmp/easytier.log
-        #test -z "`opkg list-installed|grep luci-lib-fs`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 缺少luci-lib-fs插件" >>/tmp/easytier.log
-        #test -z "`opkg list-installed|grep unzip`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 缺少unzip插件" >>/tmp/easytier.log
+        #test -z "`opkg list-installed|grep curl`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Отсутствует curl" >>/tmp/easytier.log
+        #test -z "`opkg list-installed|grep luci-lib-fs`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Отсутствует luci-lib-fs" >>/tmp/easytier.log
+        #test -z "`opkg list-installed|grep unzip`" && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Отсутствует unzip" >>/tmp/easytier.log
 	config_foreach start_et 'easytier'
 }
 
@@ -508,7 +508,7 @@ stop_service() {
                 rm -rf /tmp/easytier-cli_peer-center /tmp/easytier-cli_vpn-portal /tmp/easytier_cmd /tmp/easytier-cli_node >/dev/null 2>&1
                 rm -rf /tmp/easytier-*.* /tmp/easytier.log >/dev/null 2>&1
                 rm -rf /tmp/easytiernew.tag /tmp/easytier.tag >/dev/null 2>&1
-                echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 停止运行" >>/tmp/easytier.log
+                echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Хватит бежать" >>/tmp/easytier.log
 }
 
 reload_service() {
