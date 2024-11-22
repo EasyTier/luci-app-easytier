@@ -18,13 +18,13 @@ PKG_NAME:=luci-app-easytier
 define Package/$(PKG_NAME)/prerm
 #!/bin/sh
 if [ -f /etc/config/easytier ] ; then
-  echo "备份easytier配置文件/etc/config/easytier到/tmp/easytier_backup"
-  echo "不重启设备之前再次安装luci-app-easytier 配置不丢失,不用重新配置"
+  echo "Резервное копирование файла конфигурации easytier/etc/config/easytier в/tmp/easytier_backup"
+  echo "Установите luci-app-easytier не перезагружая устройство, конфигурация сохранится, нет необходимрсти перенастраивать"
   mv -f /etc/config/easytier /tmp/easytier_backup
 fi
 if [ -f /etc/easytier/config.toml ] ; then
-  echo "备份easytier配置文件/etc/easytier/config.toml到/tmp/config_backup.toml"
-  echo "不重启设备之前再次安装luci-app-easytier 配置不丢失,不用重新配置"
+  echo "Резервное копирование файла конфигурации easytier/etc/easytier/config.toml в/tmp/config_backup.toml"
+  echo "Устоновить заново luci-app-easytier без перезагрузки не потеряв файл конфигурациии, нет необходимости перенастраивать"
   mv -f /etc/easytier/config.toml /tmp/config_backup.toml 
 fi
 endef
@@ -33,14 +33,14 @@ define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 chmod +x /etc/init.d/easytier
 if [ -f /tmp/easytier_backup ] ; then
-  echo "发现easytier备份配置文件/tmp/easytier_backup，开始恢复到/etc/config/easytier"
+  echo "Найден файл конфигурации резервного копирования easytier/tmp/easytier_backup，начать востановление в/etc/config/easytier"
   mv -f /tmp/easytier_backup /etc/config/easytier
-  echo "请前往 VPN - EasyTier 界面进行重启插件"
+  echo "Зайдите в веб интерфейс Luci VPN - EasyTier"
 fi
 if [ -f /tmp/config_backup.toml ] ; then
-  echo "发现easytier备份配置文件/tmp/config_backup.toml，开始恢复到/etc/easytier/config.toml"
+  echo "Найден файл резервного копирования easytier/tmp/config_backup.toml，начать востановление в/etc/easytier/config.toml"
   mv -f /tmp/config_backup.toml /etc/easytier/config.toml
-  echo "请前往 VPN - EasyTier 界面进行重启插件"
+  echo "Зайдите в веб интерфейс Luci VPN - EasyTier"
 fi
 endef
 
