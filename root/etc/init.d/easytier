@@ -25,16 +25,16 @@ while true; do
            online=""
            for ip in $(uci -q get easytier.@easytier[0].checkip); do
            ms=`echo $(ping -4 $ip  -c 2 -w 4 -q) | awk -F '/' '{print $4}'`
-           [ ! -z "$ms" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 通断检测：${ip} 延迟：${ms}ms " >>/tmp/easytier.log && online=1
-           [ -z "$ms" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 通断检测：${ip} 网络中断 " >>/tmp/easytier.log
+           [ ! -z "$ms" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Обнаружение неисправности：${ip} Задерживать：${ms}ms " >>/tmp/easytier.log && online=1
+           [ -z "$ms" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier :  Обнаружение неисправности：${ip} Сбой сети " >>/tmp/easytier.log
            done     
-           [ "$online" != "1" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 通断检测：$(uci -q get easytier.@easytier[0].checkip) 所有指定IP皆无法ping通,重新启动程序！ " >>/tmp/easytier.log && /etc/init.d/easytier restart
+           [ "$online" != "1" ] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Обнаружение неисправности：$(uci -q get easytier.@easytier[0].checkip) Все указанные IP не пингуются, перезагрузите программую！ " >>/tmp/easytier.log && /etc/init.d/easytier restart
         fi
      else
-        echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 通断检测：检测到互联网未能成功访问，跳过检测 " >>/tmp/easytier.log
+        echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Обнаружение несправности:Не удалось получить доступ к интенету " >>/tmp/easytier.log
     fi
  else
- echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 通断检测：程序已关闭，退出检测 " >>/tmp/easytier.log
+ echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : Обнаружение неисправности: Программа была закрыта. " >>/tmp/easytier.log
  /etc/init.d/easytier restart
  break
  fi
