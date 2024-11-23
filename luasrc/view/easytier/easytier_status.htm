@@ -5,9 +5,9 @@ XHR.poll(3, '<%=url([[admin]], [[vpn]], [[easytier]], [[status]])%>', null,
         var st = document.getElementById('easytier_status');
         if (data && st) {
             var clientStatus = data.crunning ? "<span style='color:green;'> Работает</span><img src='https://www.right.com.cn/forum/data/attachment/album/202401/30/081238k459q2d5klacs8rk.gif' width='30px' alt=''>" : "<span style='color:red;'> Не работает</span>";
-            var etstaContent = data.crunning ? "已运行：" + "<span style='color:#DA70D6;'>" + data.etsta + "</span>" : "";    
-            var etcpuContent = data.crunning ? "<br>" + "CPU占用：" + "<span style='color:#6A5ACD;'>" + data.etcpu + "</span>" : "";  
-            var etramContent = data.crunning ? "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + "&nbsp;&nbsp;&nbsp;&nbsp;内存占用：" + "<span style='color:#0000CD;'>" + data.etram + "</span>" : "";
+            var etstaContent = data.crunning ? "Запущен：" + "<span style='color:#DA70D6;'>" + data.etsta + "</span>" : "";    
+            var etcpuContent = data.crunning ? "<br>" + "CPU：" + "<span style='color:#6A5ACD;'>" + data.etcpu + "</span>" : "";  
+            var etramContent = data.crunning ? "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + "&nbsp;&nbsp;&nbsp;&nbsp;Память：" + "<span style='color:#0000CD;'>" + data.etram + "</span>" : "";
             var ettagContent = data.crunning ? "<br>" + "Текущая версия：" + "<span style='color:#CD853F;'>" + data.ettag + "</span>" : ""; 
             var etnewtagContent = data.crunning ? "&nbsp;&nbsp;&nbsp;&nbsp;" + "&nbsp;&nbsp;&nbsp;последняя версия：" + "<span style='color:#FFA500;'>" + data.etnewtag + "</span>" : ""; 
             st.innerHTML = "<em><b>easytier-core " + clientStatus + etstaContent + etcpuContent + etramContent + ettagContent + etnewtagContent + "</b></em>";          
