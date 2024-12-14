@@ -77,7 +77,7 @@ start_et() {
                      echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 无法替换，上传的程序不完整或自定义路径的可用空间不足，当前空间剩余${size}kb" >>/tmp/easytier.log
                    fi
                 fi
-                if [ ! -f "$easytierbin" ] && [ "$size" -lt 5000 ] && [ -z "$size" ] ; then
+                if [ ! -f "$easytierbin" ] && [ "$size" -lt 5000 ] && [ ! -z "$size" ] ; then
                     echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 自定义程序路径的可用空间不足，当前可用空间剩余${size}kb,自动切换为内存/tmp/easytier-core" >>/tmp/easytier.log
                     sed -i "/easytierbin/c option easytierbin '/tmp/easytier-core' " /etc/config/easytier 
                     easytierbin=/tmp/easytier-core
@@ -96,15 +96,15 @@ start_et() {
        			tag="$( curl --connect-timeout 3 --user-agent "$user_agent"  https://api.github.com/repos/EasyTier/EasyTier/releases/latest  2>&1 | grep 'tag_name' | cut -d\" -f4 )"
        			[ -z "$tag" ] && tag="$( curl -Lk --connect-timeout 3 --user-agent "$user_agent" -s  https://api.github.com/repos/EasyTier/EasyTier/releases/latest  2>&1 | grep 'tag_name' | cut -d\" -f4 )"
    		 fi
-		 [ -z "$newtag"] && newtag=v2.0.3
-		 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 未找到程序 $easytierbin 开始在线下载${newtag}，下载较慢耐心等候" >>/tmp/easytier.log
+		 [ -z "$tag"] && tag=v2.0.3
+		 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 未找到程序 $easytierbin 开始在线下载${tag}，下载较慢耐心等候" >>/tmp/easytier.log
                  mkdir -p "$path"
 		for proxy in $proxys ; do
-	           curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://ghp.ci/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://ghproxy.net/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || wget --no-check-certificate --quiet --timeout=10 --tries=3 -O /tmp/easytier.zip "https://gh-proxy.com/https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip" || curl -L -k -s -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip"
+	           curl -L -k -o /tmp/easytier.zip --connect-timeout 10 --retry 3 "${proxy}https://github.com/EasyTier/EasyTier/releases/download/${tag}/easytier-linux-${cpucore}-${tag}.zip" || wget --no-check-certificate --timeout=10 --tries=3 -O /tmp/easytier.zip "${proxy}https://github.com/EasyTier/EasyTier/releases/download/${tag}/easytier-linux-${cpucore}-${tag}.zip"
 	           if [ "$?" = 0 ] ; then
 			unzip -q -o /tmp/easytier.zip -d /tmp
-	         	chmod +x /tmp/easytier-linux-${cpucore}-${newtag}/*
-	         	mv -f /tmp/easytier-linux-${cpucore}-${newtag}/* ${path}/*
+	         	chmod +x /tmp/easytier-linux-${cpucore}-${tag}/*
+	         	mv -f /tmp/easytier-linux-${cpucore}-${tag}/* ${path}/*
                  	chmod +x "$easytierbin"
                 	 rm -rf /tmp/easytier.zip
                  	if [ "$($easytierbin -h 2>&1 | wc -l)" -gt 3 ]; then
@@ -112,11 +112,11 @@ start_et() {
                  	else
                    	 	uci -q set easytier.@easytier[0].enabled=0
                     		uci commit easytier
-                    		echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip 下载失败，请手动下载上传程序,程序退出" >>/tmp/easytier.log
+                    		echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : https://github.com/EasyTier/EasyTier/releases/download/${tag}/easytier-linux-${cpucore}-${tag}.zip 下载失败，请手动下载上传程序,程序退出" >>/tmp/easytier.log
                     		return 1
                  	fi
  		     else
-			echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : https://github.com/EasyTier/EasyTier/releases/download/${newtag}/easytier-linux-${cpucore}-${newtag}.zip 下载失败，请手动下载上传程序,程序退出" >>/tmp/easytier.log
+			echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : https://github.com/EasyTier/EasyTier/releases/download/${tag}/easytier-linux-${cpucore}-${tag}.zip 下载失败，请手动下载上传程序,程序退出" >>/tmp/easytier.log
 		     fi
 		done
                 fi
