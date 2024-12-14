@@ -32,7 +32,6 @@ endef
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 chmod +x /etc/init.d/easytier
-[ ! -s /usr/lib/opkg/info/luci-lib-fs.list ] && echo "缺少依赖 luci-lib-fs "
 if [ -f /tmp/easytier_backup ] ; then
   echo "发现easytier备份配置文件/tmp/easytier_backup，开始恢复到/etc/config/easytier"
   mv -f /tmp/easytier_backup /etc/config/easytier
