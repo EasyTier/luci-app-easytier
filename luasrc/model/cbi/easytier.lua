@@ -24,7 +24,7 @@ btncq.description = translate("在没有修改参数的情况下快速重新启�
 btncq.inputstyle = "apply"
 btncq:depends("enabled", "1")
 btncq.write = function()
-  os.execute("/etc/init.d/easytier restart &")
+  luci.sys.call("/etc/init.d/easytier restart >/dev/null 2>&1 &")  -- 执行重启命令
 end
 
 etcmd = s:taboption("privacy",ListValue, "etcmd", translate("启动方式"),
