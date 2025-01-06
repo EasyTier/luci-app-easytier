@@ -1,4 +1,4 @@
-name: 编译luci-app-easytier
+name: 编译luci-app-easytier_op-ipk
 
 on:
   workflow_dispatch:
@@ -24,10 +24,12 @@ jobs:
           make package/luci-app-easytier/compile V=s -j1
           cd /opt/openwrt-sdk*/bin/packages/aarch64_generic/base
           ls
-          mv *.ipk /opt/luci-app-easytier_all.ipk
+          mv luci-app-easytier*all.ipk luci-app-easytier_all.ipk
+          mkdir -p /opt/outipk
+          cp -rf *.ipk /opt/outipk/
       - name: 上传
         uses: actions/upload-artifact@v4
         with:
-          name: luci-app-easytier
-          path: /opt/luci-app-easytier_all.ipk
+          name: luci-app-easytier_ipk
+          path: /opt/outipk/
      
