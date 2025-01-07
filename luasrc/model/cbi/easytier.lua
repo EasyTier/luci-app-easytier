@@ -479,7 +479,7 @@ end
 
 easytierbin = s:taboption("upload", Value, "easytierbin", translate("easytier-core程序路径"),
 	translate("自定义easytier-core的存放路径，确保填写完整的路径及名称,若指定的路径可用空间不足将会自动移至/tmp/easytier-core"))
-easytierbin.placeholder = "/usr/bin/vnt-cli"
+easytierbin.placeholder = "/usr/bin/easytier-core"
 
 local upload = s:taboption("upload", FileUpload, "upload_file")
 upload.optional = true
