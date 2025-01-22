@@ -33,7 +33,11 @@ jobs:
       - name: 安装SDK
         run: |
           wget -qO ${{ matrix.SDK }} ${{ matrix.URL }}
-          tar -xJf ${{ matrix.SDK }} -C /opt
+          if [ "${{ matrix.APP }}" = "APK" ]; then
+              tar -I zstd -xf ${{ matrix.SDK }} -C /opt
+          else
+              tar -xJf ${{ matrix.SDK }} -C /opt
+          fi
           cp -R ${{ github.workspace }} /opt/luci-app-easytier
           cd /opt/openwrt-sdk*/package
           cp -R /opt/luci-app-easytier .
