@@ -1,0 +1,79 @@
+name: luci-app-easytier
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '请填写发布Releases的版本号（留空不发布）'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+jobs:
+ build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+
+          - APP : APK
+            TARGET: aarch64_generic
+            SDK : /opt/sdk.tar.zst
+            URL: https://downloads.openwrt.org/snapshots/targets/rockchip/armv8/openwrt-sdk-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst
+
+          - APP : IPK
+            TARGET: aarch64_generic
+            SDK : /opt/sdk.tar.xz
+            URL: https://downloads.openwrt.org/releases/22.03.5/targets/rockchip/armv8/openwrt-sdk-22.03.5-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安装SDK
+        run: |
+          wget -qO ${{ matrix.SDK }} ${{ matrix.URL }}
+          if [ "${{ matrix.APP }}" = "APK" ]; then
+              tar -I zstd -xf ${{ matrix.SDK }} -C /opt
+          else
+              tar -xJf ${{ matrix.SDK }} -C /opt
+          fi
+          cp -R ${{ github.workspace }} /opt/luci-app-easytier
+          cd /opt/openwrt-sdk*/package
+          cp -R /opt/luci-app-easytier .
+          cd /opt/openwrt-sdk*
+          ./scripts/feeds update -a
+          make defconfig
+      - name: 开始编译
+        run: |
+          sudo timedatectl set-timezone Asia/Shanghai
+          cd /opt/openwrt-sdk*
+          make package/luci-app-easytier/compile V=s -j1
+          cd /opt/openwrt-sdk*/bin/packages/${{ matrix.TARGET }}/base
+          if [ "${{ matrix.APP }}" = "APK" ]; then
+              mv luci-app-easytier*.apk luci-app-easytier_all.apk
+              echo "APK跳过签名验证安装命令： apk add --allow-untrusted luci-app-easytier_all.apk"
+          else
+              mv luci-app-easytier*.ipk luci-app-easytier_all.ipk
+          fi
+          mkdir -p /opt/out
+          cp -rf luci-app-easytier* /opt/out/
+
+      - name: 上传
+        uses: actions/upload-artifact@v4
+        with:
+          name: luci-app-easytier_${{ matrix.APP }}
+          path: /opt/out/
+
+      - name: 发布
+        if: ${{ github.event.inputs.tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            body: |
+
+             - **`luci-app-easytier_all.apk` 是OpenWrt新版的APK包** 对于apk包安装时跳过证书验证命令
+             `apk add --allow-untrusted luci-app-vnt.apk`
+           
+            tag_name: ${{ github.event.inputs.tag }}
+            files: /opt/out/*
