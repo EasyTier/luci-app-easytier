@@ -59,9 +59,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-core $(1)/usr/bin/easytier-core
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-cli $(1)/usr/bin/easytier-cli
-	ifneq ($(filter mips mipsel, $(APP_ARCH)), $(APP_ARCH))
-	        $(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-web $(1)/usr/bin/easytier-web
-	endif
+	[ "$(APP_ARCH)" != "mips" ] && [ "$(APP_ARCH)" != "mipsel" ] && $(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-web $(1)/usr/bin/easytier-web
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
