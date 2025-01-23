@@ -1,7 +1,5 @@
 # luci-app-easytier
 
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Flmq8267%2Fluci-app-easytier&count_bg=%2395C10D&title_bg=%23555555&icon=github.svg&icon_color=%238DC409&title=%E8%AE%BF%E9%97%AE%E6%95%B0&edge_flat=false)](https://hits.seeyoufarm.com)
-
 依赖`kmod-tun`需要先在系统软件包里安装好
 ### 快速开始
 ```bash
@@ -36,7 +34,8 @@ tar -xJf /opt/sdk.tar.xz -C /opt
 
 cd /opt/openwrt-sdk*/package
 #克隆luci-app-easytier到sdk的package目录里
-git clone https://github.com/EasyTier/luci-app-easytier.git
+git clone https://github.com/EasyTier/luci-app-easytier.git /opt/luci-app-easytier
+cp -R /opt/luci-app-easytier/luci-app-easytier .
 
 cd /opt/openwrt-sdk*
 #升级脚本创建模板
