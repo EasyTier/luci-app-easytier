@@ -38,7 +38,7 @@ jobs:
           else
               tar -xJf ${{ matrix.SDK }} -C /opt
           fi
-          cp -R ${{ github.workspace }} /opt/luci-app-easytier
+          cp -R ${{ github.workspace }}/luci-app-easytier /opt/luci-app-easytier
           cd /opt/openwrt-sdk*/package
           cp -R /opt/luci-app-easytier .
           cd /opt/openwrt-sdk*
