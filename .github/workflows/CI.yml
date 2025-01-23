@@ -64,7 +64,7 @@ jobs:
           FEEDNAME: packages_ci
           PACKAGES: easytier luci-app-easytier
           NO_REFRESH_CHECK: true
-          #V: s
+          V: s
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
