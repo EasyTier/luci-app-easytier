@@ -48,8 +48,8 @@ define Package/$(PKG_NAME)/description
 endef
 
 define Build/Prepare
-  [ ! -f $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION).tar.gz ] && wget https://github.com/EasyTier/EasyTier/releases/download/v$(PKG_VERSION)/$(PKG_NAME)-linux-$(APP_ARCH)-$(PKG_VERSION).tar.gz -O $(PKG_NAME)-$(PKG_VERSION).tar.gz
-	tar -xzvf $(PKG_NAME)-$(PKG_VERSION).tar.gz -C $(PKG_BUILD_DIR)
+  [ ! -f $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION).zip ] && wget https://github.com/EasyTier/EasyTier/releases/download/v$(PKG_VERSION)/$(PKG_NAME)-linux-$(APP_ARCH)-$(PKG_VERSION).zip -O $(PKG_NAME)-$(PKG_VERSION).zip
+	unzip -j $(PKG_NAME)-$(PKG_VERSION).zip -d $(PKG_BUILD_DIR)
 endef
 
 define Build/Compile
