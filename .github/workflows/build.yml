@@ -1,4 +1,4 @@
-name: luci-app-easytier
+name: Build-OpenWrt-EasyTier
 
 on:
   workflow_dispatch:
@@ -7,73 +7,90 @@ on:
         description: '请填写发布Releases的版本号（留空不发布）'
         required: false
         default: ''
-
+      text:
+        description: '请填写发布的说明'
+        required: false
+        default: ''
+env:
+  TAG: "${{ github.event.inputs.tag }}"
+  TZ: Asia/Shanghai
 permissions:
   contents: write
 jobs:
- build:
+  build:
+    name: Build ${{ matrix.arch }}-${{ matrix.sdk }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
+        arch:
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_generic
+          - arm_arm1176jzf-s_vfp
+          - arm_arm926ej-s
+          - arm_cortex-a15_neon-vfpv4
+          - arm_cortex-a5_vfpv4
+          - arm_cortex-a7
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a8_vfpv3
+          - arm_cortex-a9
+          - arm_cortex-a9_neon
+          - arm_cortex-a9_vfpv3-d16
+          - arm_fa526
+          - arm_mpcore
+          - arm_xscale
+          - mips_24kc
+          - mips_4kec
+          - mips_mips32
+          - mipsel_24kc
+          - mipsel_24kc_24kf
+          - mipsel_74kc
+          - mipsel_mips32
+          - x86_64
+        sdk:
+          - openwrt-22.03
+          - SNAPSHOT
 
-          - APP : APK
-            TARGET: aarch64_generic
-            SDK : /opt/sdk.tar.zst
-            URL: https://downloads.openwrt.org/snapshots/targets/rockchip/armv8/openwrt-sdk-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst
-
-          - APP : IPK
-            TARGET: aarch64_generic
-            SDK : /opt/sdk.tar.xz
-            URL: https://downloads.openwrt.org/releases/22.03.5/targets/rockchip/armv8/openwrt-sdk-22.03.5-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64.tar.xz
-
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 安装SDK
-        run: |
-          wget -qO ${{ matrix.SDK }} ${{ matrix.URL }}
-          if [ "${{ matrix.APP }}" = "APK" ]; then
-              tar -I zstd -xf ${{ matrix.SDK }} -C /opt
-          else
-              tar -xJf ${{ matrix.SDK }} -C /opt
-          fi
-          cp -R ${{ github.workspace }} /opt/luci-app-easytier
-          cd /opt/openwrt-sdk*/package
-          cp -R /opt/luci-app-easytier .
-          cd /opt/openwrt-sdk*
-          ./scripts/feeds update -a
-          make defconfig
-      - name: 开始编译
-        run: |
-          sudo timedatectl set-timezone Asia/Shanghai
-          cd /opt/openwrt-sdk*
-          make package/luci-app-easytier/compile V=s -j1
-          cd /opt/openwrt-sdk*/bin/packages/${{ matrix.TARGET }}/base
-          if [ "${{ matrix.APP }}" = "APK" ]; then
-              mv luci-app-easytier*.apk luci-app-easytier_all.apk
-              echo "APK跳过签名验证安装命令： apk add --allow-untrusted luci-app-easytier_all.apk"
-          else
-              mv luci-app-easytier*.ipk luci-app-easytier_all.ipk
-          fi
-          mkdir -p /opt/out
-          cp -rf luci-app-easytier* /opt/out/
+        with:
+          fetch-depth: 0
 
-      - name: 上传
+      - name: Building packages
+        uses: sbwml/openwrt-gh-action-sdk@main
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
+          FEEDNAME: packages_ci
+          PACKAGES: easytier luci-app-easytier
+          NO_REFRESH_CHECK: true
+          V: s
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: luci-app-easytier_${{ matrix.APP }}
-          path: /opt/out/
+          name: EasyTier-${{ matrix.arch }}-${{ matrix.sdk }}
+          path: bin/packages/${{ matrix.arch }}/packages_ci/
 
-      - name: 发布
+      - name: Create compress files
+        run: |
+          #tar -zcvf EasyTier-${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
+          zip -j EasyTier-${{ matrix.arch }}-${{ matrix.sdk }}.zip bin/packages/${{ matrix.arch }}/packages_ci/*
+
+      - name: Release
         if: ${{ github.event.inputs.tag != '' }}
         uses: softprops/action-gh-release@v2
         with:
             token: ${{ secrets.GITHUB_TOKEN }}
             body: |
 
-             - **`luci-app-easytier_all.apk` 是OpenWrt新版的APK包** 对于apk包安装时跳过证书验证命令
-             `apk add --allow-untrusted luci-app-vnt.apk`
+             - 其中 **`openwrt-22.03`** 里面是ipk安装包 **`SNAPSHOT`** 里面是apk安装包
+
+             - **`*.apk` 是OpenWrt新版的APK包** 对于apk包跳过证书命令
+             `apk add --allow-untrusted luci-app-easytier.apk`
+
+             ${{ github.event.inputs.text }}
            
-            tag_name: ${{ github.event.inputs.tag }}
-            files: /opt/out/*
+            tag_name: ${{ env.TAG }}
+            files: EasyTier-${{ matrix.arch }}-${{ matrix.sdk }}.zip
+ 
