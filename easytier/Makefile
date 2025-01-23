@@ -48,7 +48,7 @@ define Package/$(PKG_NAME)/description
 endef
 
 define Build/Prepare
-  [ ! -f $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION).zip ] && wget https://github.com/EasyTier/EasyTier/releases/download/v$(PKG_VERSION)/$(PKG_NAME)-linux-$(APP_ARCH)-$(PKG_VERSION).zip -O $(PKG_NAME)-$(PKG_VERSION).zip
+	[ ! -f $(PKG_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION).zip ] && wget https://github.com/EasyTier/EasyTier/releases/download/v$(PKG_VERSION)/$(PKG_NAME)-linux-$(APP_ARCH)-$(PKG_VERSION).zip -O $(PKG_NAME)-$(PKG_VERSION).zip
 	unzip -j $(PKG_NAME)-$(PKG_VERSION).zip -d $(PKG_BUILD_DIR)
 endef
 
@@ -58,10 +58,10 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-core $(1)/usr/bin/easytier-core
-  $(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-cli $(1)/usr/bin/easytier-cli
-  ifneq ($(filter mips mipsel, $(APP_ARCH)), $(APP_ARCH))
-        $(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-web $(1)/usr/bin/easytier-web
-  endif
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-cli $(1)/usr/bin/easytier-cli
+	ifneq ($(filter mips mipsel, $(APP_ARCH)), $(APP_ARCH))
+	        $(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-web $(1)/usr/bin/easytier-web
+	endif
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
