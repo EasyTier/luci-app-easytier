@@ -288,6 +288,7 @@ relay_all:depends("etcmd", "etcmd")
 bind_device = s:taboption("privacy",Flag, "bind_device", translate("仅使用物理网卡"),
 	translate("将连接器的套接字绑定到物理设备以避免路由问题。<br>比如子网代理网段与某节点的网段冲突，绑定物理设备后可以与该节点正常通信。（ --bind-device 参数）"))
 bind_device.rmempty = false
+bind_device.default = "1"
 bind_device:depends("etcmd", "etcmd")
 
 kcp_proxy = s:taboption("privacy",Flag, "kcp_proxy", translate("启用KCP代理"),
