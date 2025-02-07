@@ -264,7 +264,7 @@ get_etconfig() {
 		socks_port="$(uci -q get easytier.@easytier[0].socks_port)"
 		comp="$(uci -q get easytier.@easytier[0].comp || echo none)"
 		mapped_listeners="$(uci -q get easytier.@easytier[0].mapped_listeners)"
-		bind_device="$(uci -q get easytier.@easytier[0].bind_device || echo 0)"
+		bind_device="$(uci -q get easytier.@easytier[0].bind_device || echo 1)"
 		kcp_proxy="$(uci -q get easytier.@easytier[0].kcp_proxy || echo 0)"
 		kcp_input="$(uci -q get easytier.@easytier[0].kcp_input || echo 0)"
 }
