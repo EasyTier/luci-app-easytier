@@ -292,7 +292,7 @@ bind_device.default = "1"
 bind_device:depends("etcmd", "etcmd")
 
 kcp_proxy = s:taboption("privacy",Flag, "kcp_proxy", translate("启用KCP代理"),
-	translate("将连接器的套接字绑定到物理设备以避免路由问题。<br>比如子网代理网段与某节点的网段冲突，绑定物理设备后可以与该节点正常通信。（ --enable-kcp-proxy 参数）"))
+	translate("将TCP流量转为 KCP 流量，降低传输延迟，提升传输速度。<br>KCP 代理功能需要虚拟网内所有节点的 EasyTier 版本在 v2.2.0 以上。（ --enable-kcp-proxy 参数）"))
 kcp_proxy.rmempty = false
 kcp_proxy:depends("etcmd", "etcmd")
 
