@@ -473,6 +473,25 @@ btn7info.cfgvalue = function(self, section)
     return string.format("<pre>%s</pre>", luci.util.pcdata(content))
 end
 
+btn8 = s:taboption("infos", Button, "btn8")
+btn8.inputtitle = translate("vpn-portal信息")
+btn8.description = translate("点击按钮刷新，查看tcp/kcp代理信息")
+btn8.inputstyle = "apply"
+btn8.write = function()
+if process_status ~= "" then
+   luci.sys.call("$(dirname $(uci -q get easytier.@easytier[0].easytierbin))/easytier-cli proxy >/tmp/easytier-cli_proxy 2>&1")
+else
+    luci.sys.call("echo '错误：程序未运行！请启动程序后重新点击刷新' >/tmp/easytier-cli_proxy")
+end
+end
+
+btn8info = s:taboption("infos", DummyValue, "btn8info")
+btn8info.rawhtml = true
+btn8info.cfgvalue = function(self, section)
+    local content = nixio.fs.readfile("/tmp/easytier-cli_proxy") or ""
+    return string.format("<pre>%s</pre>", luci.util.pcdata(content))
+end
+
 btn5 = s:taboption("infos", Button, "btn5")
 btn5.inputtitle = translate("本机启动参数")
 btn5.description = translate("点击按钮刷新，查看本机完整启动参数")
