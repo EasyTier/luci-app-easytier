@@ -474,7 +474,7 @@ btn7info.cfgvalue = function(self, section)
 end
 
 btn8 = s:taboption("infos", Button, "btn8")
-btn8.inputtitle = translate("vpn-portal信息")
+btn8.inputtitle = translate("tcp/kcp代理信息")
 btn8.description = translate("点击按钮刷新，查看tcp/kcp代理信息")
 btn8.inputstyle = "apply"
 btn8.write = function()
