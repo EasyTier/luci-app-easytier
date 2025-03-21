@@ -508,6 +508,9 @@ start_et() {
 	     		fi
 			if [ "$etcmd" = "web" ] ; then
 				echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 运行 ${easytierbin} -w ${web_config}" >>/tmp/easytier.log
+				[ -f /etc/easytier/et_machine_id ] || touch /etc/easytier/et_machine_id
+				idpath=$(dirname "$easytierbin")
+				[ -f "${idpath}/et_machine_id" ] || ln -sf /etc/easytier/et_machine_id ${idpath}/et_machine_id
 				[ -z "$web_config" ] || procd_append_param command -w "$web_config"
 				[ "$log" = "off" ] || procd_append_param command --file-log-level "$log" 
 				[ "$log" = "off" ] || procd_append_param command --file-log-dir "/tmp"
