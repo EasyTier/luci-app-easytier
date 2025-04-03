@@ -7,13 +7,18 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=2.2.4
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 LUCI_TITLE:=LuCI support for EasyTier
 LUCI_DEPENDS:=+kmod-tun
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-easytier
+
+define Package/$(PKG_NAME)/conffiles
+# /etc/config/easytier
+/etc/easytier/config.toml
+endef
 
 define Package/$(PKG_NAME)/prerm
 #!/bin/sh
