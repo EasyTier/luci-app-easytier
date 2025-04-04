@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_VERSION:=2.2.4
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 LUCI_TITLE:=LuCI support for EasyTier
 LUCI_DEPENDS:=+kmod-tun
@@ -16,8 +16,7 @@ LUCI_PKGARCH:=all
 PKG_NAME:=luci-app-easytier
 
 define Package/$(PKG_NAME)/conffiles
-# /etc/config/easytier
-/etc/easytier/config.toml
+/etc/easytier/
 endef
 
 define Package/$(PKG_NAME)/prerm
@@ -34,10 +33,10 @@ if [ -f /etc/easytier/config.toml ] ; then
   mv -f /etc/easytier/config.toml /tmp/et_config_backup.toml
 fi
 
-DB_PATH=$$(uci -q get easytier.@easytierweb[0].db_path)
-if [ -n "$$DB_PATH" ] && [ -f "$$DB_PATH" ]; then
-    echo "数据库 $$DB_PATH 已备份到 /tmp/et_backup.db"
-    mv -f "$$DB_PATH" /tmp/et_backup.db
+DB_PATH=$(uci -q get easytier.@easytierweb[0].db_path)
+if [ -n "$DB_PATH" ] && [ -f "$DB_PATH" ]; then
+    echo "数据库 $DB_PATH 已备份到 /tmp/et_backup.db"
+    mv -f "$DB_PATH" /tmp/et_backup.db
 else
     echo "未找到数据库文件，跳过备份！"
 fi
@@ -74,6 +73,9 @@ if [ -f /tmp/et_machine_id_backup ] ; then
   echo "请前往 VPN - EasyTier 界面进行重启插件"
 fi
 endef
+
+$(eval $(call Build/Template,Package/$(PKG_NAME)/prerm))
+$(eval $(call Build/Template,Package/$(PKG_NAME)/postinst))
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
