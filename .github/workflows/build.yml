@@ -1,6 +1,7 @@
 name: Build-OpenWrt-EasyTier
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       tag:
@@ -11,6 +12,9 @@ on:
         description: '请填写发布的说明'
         required: false
         default: ''
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   TAG: "${{ github.event.inputs.tag }}"
   TZ: Asia/Shanghai
