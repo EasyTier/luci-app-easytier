@@ -19,7 +19,7 @@ opkg remove luci-app-easytier
 Для обновления необходимо удалить старую версию, затем установить новую.
 ```
 
-luci-app-easytier не содержит двоичных файлов easytier-core и easytier-cli, загрузите их самостоятельно и поместите по пути /usr/bin/
+luci-app-easytier не содержит двоичных файлов easytier-core и easytier-cli, загрузите их самостоятельно https://github.com/EasyTier/EasyTier/releases и поместите по пути /usr/bin/
 сделайте их исполняемыми
 chmod +x /usr/bin/easytier-c* 
 
