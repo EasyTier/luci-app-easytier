@@ -1,21 +1,17 @@
-#
-# Copyright (C) 2011-2020 OpenWrt.org
-#
-# This is free software, licensed under the GNU General Public License v2.
-# See /LICENSE for more information.
-#
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=upx
-PKG_VERSION:=4.2.4
+PKG_VERSION:=5.0.1
 PKG_RELEASE:=1
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/upx/upx.git
-PKG_SOURCE_VERSION:=3757579ffc6fa8710b4b7a1055529fea9dcaf149
-PKG_MIRROR_HASH:=3d529c371a863de2aa0bc2d23c5039fa3d2edb7462c66429312e2510ebeb8dec
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-src.tar.xz
+PKG_SOURCE_URL:=https://github.com/upx/upx/releases/download/$(PKG_VERSION)/$(PKG_SOURCE)
+PKG_HASH:=2b11323a9f6c7f0247a4936deee35afb486a2fdf808a5bc4abf10a085ec884d9
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)-src
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
+HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/$(PKG_SOURCE_SUBDIR)
 
-PKG_MAINTAINER:=Xingwang Liao <kuoruan@gmail.com>
+PKG_MAINTAINER:=dev <dev@nas.lan>
 PKG_LICENSE:=GPL-2.0-only
 PKG_LICENSE_FILES:=COPYING LICENSE
 
