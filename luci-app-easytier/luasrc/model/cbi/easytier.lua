@@ -625,10 +625,10 @@ btn10.write = function()
     end
 end
 
-btn11info = s:taboption("infos", DummyValue, "btn11info")
-btn11info.rawhtml = true
-btn11info.cfgvalue = function(self, section)
-    local content = nixio.fs.readfile("/tmp/easytier-cli_stats") or ""
+btn10info = s:taboption("infos", DummyValue, "btn10info")
+btn10info.rawhtml = true
+btn10info.cfgvalue = function(self, section)
+    local content = nixio.fs.readfile("/tmp/easytier-cli_mapped_listener") or ""
     return string.format("<pre>%s</pre>", luci.util.pcdata(content))
 end
 
