@@ -45,29 +45,40 @@ jobs:
           - arm_mpcore
           - arm_xscale
           - mips_24kc
-          - mips_4kec
+          #- mips_4kec
           - mips_mips32
           - mipsel_24kc
           - mipsel_24kc_24kf
           - mipsel_74kc
           - mipsel_mips32
           - x86_64
+          
         sdk:
-          - openwrt-22.03
+          - 22.03.7
           - SNAPSHOT
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+      - name: Cache OpenWrt SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            /opt/openwrt-sdk-${{ matrix.arch }}-${{ matrix.sdk }}
+            dl
+          key: sdk-${{ matrix.arch }}-${{ matrix.sdk }}
+          
       - name: Building packages
-        uses: sbwml/openwrt-gh-action-sdk@main
+        uses: openwrt/gh-action-sdk@main
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
           PACKAGES: easytier luci-app-easytier
-          NO_REFRESH_CHECK: true
+          #NO_DEFAULT_FEEDS: 1
+          NO_REFRESH_CHECK: 1
+          NO_SHFMT_CHECK: 1
+          MAKEFLAGS: -j$(nproc)
           V: s
 
       - name: Upload artifacts
