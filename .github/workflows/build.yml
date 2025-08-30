@@ -69,6 +69,13 @@ jobs:
             dl
           key: sdk-${{ matrix.arch }}-${{ matrix.sdk }}
           
+      - name: Overwrite i18n file
+        run: |
+          cat > luci-app-easytier/root/etc/uci-defaults/luci-i18n-easytier-zh-cn << 'EOF'
+          #!/bin/sh
+          exit 0
+          EOF
+          
       - name: Building packages
         uses: openwrt/gh-action-sdk@main
         env:
