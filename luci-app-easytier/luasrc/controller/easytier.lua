@@ -6,15 +6,15 @@ function index()
 		return
 	end
                   
-        entry({"admin", "vpn", "easytier"}, alias("admin", "vpn", "easytier", "easytier"),_("EasyTier"), 46).dependent = true
-	entry({"admin", "vpn", "easytier", "easytier"}, cbi("easytier"),_("EasyTier"), 47).leaf = true
-	entry({"admin", "vpn",  "easytier",  "easytier_log"}, form("easytier_log"),_("core log"), 48).leaf = true
-	entry({"admin", "vpn", "easytier", "get_log"}, call("get_log")).leaf = true
-	entry({"admin", "vpn", "easytier", "clear_log"}, call("clear_log")).leaf = true
-	entry({"admin", "vpn",  "easytier",  "easytierweb_log"}, form("easytierweb_log"),_("web log"), 49).leaf = true
-	entry({"admin", "vpn", "easytier", "get_wlog"}, call("get_wlog")).leaf = true
-	entry({"admin", "vpn", "easytier", "clear_wlog"}, call("clear_wlog")).leaf = true
-	entry({"admin", "vpn", "easytier", "status"}, call("act_status")).leaf = true
+        entry({"admin", "services", "easytier"}, alias("admin", "services", "easytier", "easytier"),_("EasyTier"), 46).dependent = true
+	entry({"admin", "services", "easytier", "easytier"}, cbi("easytier"),_("EasyTier"), 47).leaf = true
+	entry({"admin", "services",  "easytier",  "easytier_log"}, form("easytier_log"),_("core log"), 48).leaf = true
+	entry({"admin", "services", "easytier", "get_log"}, call("get_log")).leaf = true
+	entry({"admin", "services", "easytier", "clear_log"}, call("clear_log")).leaf = true
+	entry({"admin", "services",  "easytier",  "easytierweb_log"}, form("easytierweb_log"),_("web log"), 49).leaf = true
+	entry({"admin", "services", "easytier", "get_wlog"}, call("get_wlog")).leaf = true
+	entry({"admin", "services", "easytier", "clear_wlog"}, call("clear_wlog")).leaf = true
+	entry({"admin", "services", "easytier", "status"}, call("act_status")).leaf = true
 end
 
 function act_status()
