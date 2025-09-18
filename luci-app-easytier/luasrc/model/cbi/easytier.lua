@@ -193,6 +193,7 @@ model = model:gsub("\n", "")
 hostname = hostname:gsub("\n", "")
 local device_name = (model ~= "" and model) or (hostname ~= "" and hostname) or "OpenWrt"
 device_name = device_name:gsub(" ", "_")
+device_name = device_name:gsub("([%(%)])", "%%%1")
 desvice_name = s:taboption("general", Value, "desvice_name", translate("Hostname"),
         translate("The hostname used to identify this device (--hostname parameter)"))
 desvice_name.placeholder = device_name
