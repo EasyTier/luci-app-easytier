@@ -529,7 +529,7 @@ start_et() {
 				et_uuid="$(cat /etc/easytier/et_machine_id | tr -d ' \n')"
 				[ -z "$et_uuid" ] || core_cmd="${core_cmd} --machine-id $et_uuid"
 				[ -z "$web_config" ] || core_cmd="${core_cmd} -w $web_config"
-				[ -z "$desvice_name" ] || core_cmd="${core_cmd} --hostname $desvice_name"
+				[ -z "$desvice_name" ] || core_cmd="${core_cmd} --hostname $(echo "$desvice_name" | sed 's/[\\$`"()|><&;]/\\&/g')"
 			fi
 	     		procd_set_param command /bin/sh -c "
 			${easytierbin} ${core_cmd} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
