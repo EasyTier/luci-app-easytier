@@ -458,7 +458,12 @@ btn0info = s:taboption("infos", DummyValue, "btn0info")
 btn0info.rawhtml = true
 btn0info.cfgvalue = function(self, section)
     local content = nixio.fs.readfile("/tmp/easytier-cli_node") or ""
+    if content == "" then
+        return "<div style='color:red;'>（暂无输出）</div>"
+    end
+
     local html = {}
+    local parsed = false 
 
     table.insert(html, [[
         <div style="overflow:auto; max-width:100%;">
@@ -470,6 +475,7 @@ btn0info.cfgvalue = function(self, section)
         if not line:match("^|%s*%-") then
             local first_col, rest = line:match("^|%s*(.-)%s*|%s*(.-)%s*|?$")
             if first_col and rest then
+                parsed = true
                 local tr = {}
 
                 rest = rest:gsub("|%s*$", "")
@@ -493,7 +499,17 @@ btn0info.cfgvalue = function(self, section)
     end
 
     table.insert(html, "</table></div>")
-    return table.concat(html, "\n")
+
+    if parsed then
+        -- 正常表格输出
+        return table.concat(html, "\n")
+    else
+        -- 没有表格，原样显示文本
+        return string.format(
+            "<pre style='background:#f9f9f9;border:1px solid #ccc;padding:8px;white-space:pre-wrap;'>%s</pre>",
+            luci.util.pcdata(content)
+        )
+    end
 end
 
 btn1 = s:taboption("infos", Button, "btn1")
@@ -512,7 +528,12 @@ btn1info = s:taboption("infos", DummyValue, "btn1info")
 btn1info.rawhtml = true
 btn1info.cfgvalue = function(self, section)
     local content = nixio.fs.readfile("/tmp/easytier-cli_peer") or ""
+    if content == "" then
+        return "<div style='color:red;'>（暂无输出）</div>"
+    end
+
     local html = {}
+    local parsed = false 
 
     table.insert(html, [[
         <div style="overflow:auto; max-width:100%;">
@@ -544,6 +565,7 @@ btn1info.cfgvalue = function(self, section)
             end
 
             if #row > 0 then
+                parsed = true
                 local tr = {}
                 for i, c in ipairs(row) do
                     local tag = "td"
@@ -570,7 +592,17 @@ btn1info.cfgvalue = function(self, section)
     end
 
     table.insert(html, "</table></div>")
-    return table.concat(html, "\n")
+
+    if parsed then
+        -- 有表格就正常渲染
+        return table.concat(html, "\n")
+    else
+        -- 没有表格就原样输出
+        return string.format(
+            "<pre style='background:#f9f9f9;border:1px solid #ccc;padding:8px;white-space:pre-wrap;'>%s</pre>",
+            luci.xml.pcdata(content)
+        )
+    end
 end
 
 btn2 = s:taboption("infos", Button, "btn2")
@@ -628,7 +660,12 @@ btn4info = s:taboption("infos", DummyValue, "btn4info")
 btn4info.rawhtml = true
 btn4info.cfgvalue = function(self, section)
     local content = nixio.fs.readfile("/tmp/easytier-cli_route") or ""
+    if content == "" then
+        return "<div style='color:red;'>（暂无输出）</div>"
+    end
+
     local html = {}
+    local parsed = false 
 
     table.insert(html, [[
         <div style="overflow:auto; max-width:100%;">
@@ -648,6 +685,7 @@ btn4info.cfgvalue = function(self, section)
             end
 
             if #cells > 0 then
+                parsed = true
                 local tr = {}
                 for i, c in ipairs(cells) do
                     local tag = rowIndex == 1 and "th" or "td"
@@ -669,7 +707,17 @@ btn4info.cfgvalue = function(self, section)
     end
 
     table.insert(html, "</table></div>")
-    return table.concat(html, "\n")
+
+    if parsed then
+        -- 正常表格
+        return table.concat(html, "\n")
+    else
+        -- 没有表格就原样显示
+        return string.format(
+            "<pre style='background:#f9f9f9;border:1px solid #ccc;padding:8px;white-space:pre-wrap;'>%s</pre>",
+            luci.xml.pcdata(content)
+        )
+    end
 end
 
 btn6 = s:taboption("infos", Button, "btn6")
@@ -688,7 +736,12 @@ btn6info = s:taboption("infos", DummyValue, "btn6info")
 btn6info.rawhtml = true
 btn6info.cfgvalue = function(self, section)
     local content = nixio.fs.readfile("/tmp/easytier-cli_peer-center") or ""
+    if content == "" then
+        return "<div style='color:red;'>（暂无输出）</div>"
+    end
+
     local html = {}
+    local parsed = false 
 
     table.insert(html, [[
         <div style="overflow:auto; max-width:100%;">
@@ -708,6 +761,7 @@ btn6info.cfgvalue = function(self, section)
             end
 
             if #cells > 0 then
+                parsed = true
                 local tr = {}
                 for i, c in ipairs(cells) do
                     local tag = rowIndex == 1 and "th" or "td"
@@ -730,7 +784,17 @@ btn6info.cfgvalue = function(self, section)
     end
 
     table.insert(html, "</table></div>")
-    return table.concat(html, "\n")
+
+    if parsed then
+        -- 成功解析表格
+        return table.concat(html, "\n")
+    else
+        -- 没有表格 → 原样显示
+        return string.format(
+            "<pre style='background:#f9f9f9;border:1px solid #ccc;padding:8px;white-space:pre-wrap;'>%s</pre>",
+            luci.xml.pcdata(content)
+        )
+    end
 end
 
 btn7 = s:taboption("infos", Button, "btn7")
@@ -768,7 +832,12 @@ btn8info = s:taboption("infos", DummyValue, "btn8info")
 btn8info.rawhtml = true
 btn8info.cfgvalue = function(self, section)
     local content = nixio.fs.readfile("/tmp/easytier-cli_proxy") or ""
+    if content == "" then
+        return "<div style='color:red;'>（暂无输出）</div>"
+    end
+
     local html = {}
+    local parsed = false 
 
     table.insert(html, [[
         <div style="overflow:auto; max-width:100%;">
@@ -788,6 +857,7 @@ btn8info.cfgvalue = function(self, section)
             end
 
             if #cells > 0 then
+                parsed = true
                 local tr = {}
                 for i, c in ipairs(cells) do
                     local tag = rowIndex == 1 and "th" or "td"
@@ -801,7 +871,8 @@ btn8info.cfgvalue = function(self, section)
                         style = style .. "background:#ffffff;"
                     end
 
-                    table.insert(tr, string.format("<%s style='%s'>%s</%s>", tag, style, luci.util.pcdata(c), tag))
+                    table.insert(tr, string.format("<%s style='%s'>%s</%s>",
+                        tag, style, luci.util.pcdata(c), tag))
                 end
 
                 table.insert(html, "<tr>" .. table.concat(tr) .. "</tr>")
@@ -810,7 +881,16 @@ btn8info.cfgvalue = function(self, section)
     end
 
     table.insert(html, "</table></div>")
-    return table.concat(html, "\n")
+
+    if parsed then
+        return table.concat(html, "\n")
+    else
+        -- 没解析出表格，原样显示
+        return string.format(
+            "<pre style='background:#f9f9f9;border:1px solid #ccc;padding:8px;white-space:pre-wrap;'>%s</pre>",
+            luci.xml.pcdata(content)
+        )
+    end
 end
 
 btn9 = s:taboption("infos", Button, "btn9")
@@ -867,17 +947,21 @@ btn11info = s:taboption("infos", DummyValue, "btn11info")
 btn11info.rawhtml = true
 btn11info.cfgvalue = function(self, section)
     local content = nixio.fs.readfile("/tmp/easytier-cli_stats") or ""
-    local html = {}
+    content = luci.util.trim(content or "")
 
-    table.insert(html, [[
-        <div style="overflow:auto; max-width:100%;">
-        <table style="border-collapse:collapse;width:100%;font-family:monospace;">
-    ]])
+    if content == "" then
+        return "<div style='color:#888;font-style:italic;'>（暂无输出）</div>"
+    end
+
+    local html = {}
 
     local lines = {}
     for line in content:gmatch("[^\r\n]+") do
         table.insert(lines, line)
     end
+
+    local parsed = false
+    local tableRows = {}
 
     for rowIndex, line in ipairs(lines) do
         if not line:match("^|%s*-") then
@@ -887,6 +971,7 @@ btn11info.cfgvalue = function(self, section)
             end
 
             if #cells > 0 then
+                parsed = true
                 local tr = {}
                 for i, c in ipairs(cells) do
                     local tag = rowIndex == 1 and "th" or "td"
@@ -902,14 +987,24 @@ btn11info.cfgvalue = function(self, section)
 
                     table.insert(tr, string.format("<%s style='%s'>%s</%s>", tag, style, luci.util.pcdata(c), tag))
                 end
-
-                table.insert(html, "<tr>" .. table.concat(tr) .. "</tr>")
+                table.insert(tableRows, "<tr>" .. table.concat(tr) .. "</tr>")
             end
         end
     end
 
-    table.insert(html, "</table></div>")
-    return table.concat(html, "\n")
+    if parsed then
+        table.insert(html, [[
+            <div style="overflow:auto; max-width:100%;">
+            <table style="border-collapse:collapse;width:100%;font-family:monospace;">
+        ]])
+        for _, row in ipairs(tableRows) do
+            table.insert(html, row)
+        end
+        table.insert(html, "</table></div>")
+        return table.concat(html, "\n")
+    else
+        return string.format("<pre style='background:#f9f9f9;padding:8px;border:1px solid #ccc;white-space:pre-wrap;'>%s</pre>", luci.util.pcdata(content))
+    end
 end
 
 btn5 = s:taboption("infos", Button, "btn5")
