@@ -482,8 +482,8 @@ btn0info.cfgvalue = function(self, section)
                 key = key:gsub("^Peer ID$", "节点ID")
                 key = key:gsub("^Public IPv4$", "公网IPv4")
                 key = key:gsub("^UDP Stun Type$", "UDP穿透类型")
-                key = key:gsub("^Interface IPv4$", "接口IPv4地址")
-                key = key:gsub("^Interface IPv6$", "接口IPv6地址")
+                key = key:gsub("^Interface IPv4$", "IPv4地址")
+                key = key:gsub("^Interface IPv6$", "IPv6地址")
                 key = key:gsub("^Listener%s*(%d+)$", "监听器 %1") 
 
                 -- Value 中文化
@@ -581,7 +581,7 @@ btn1info.cfgvalue = function(self, section)
                 else
                     -- 内容值中文化
                     if cell == "Local" then
-                        cell = "本地"
+                        cell = "本机"
                     elseif cell == "PortRestricted" then
                         cell = "端口受限"
                     elseif cell == "NoPat" then
