@@ -42,7 +42,7 @@ jobs:
           - arm_cortex-a9_neon
           - arm_cortex-a9_vfpv3-d16
           - arm_fa526
-          - arm_mpcore
+          #- arm_mpcore
           - arm_xscale
           - mips_24kc
           #- mips_4kec
