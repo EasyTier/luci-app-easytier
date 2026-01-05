@@ -8,10 +8,10 @@ function index()
                   
         entry({"admin", "vpn", "easytier"}, alias("admin", "vpn", "easytier", "easytier"),_("EasyTier"), 46).dependent = true
 	entry({"admin", "vpn", "easytier", "easytier"}, cbi("easytier"),_("EasyTier"), 47).leaf = true
-	entry({"admin", "vpn",  "easytier",  "easytier_log"}, form("easytier_log"),_("core日志"), 48).leaf = true
+	entry({"admin", "vpn",  "easytier",  "easytier_log"}, form("easytier_log"),_("core log"), 48).leaf = true
 	entry({"admin", "vpn", "easytier", "get_log"}, call("get_log")).leaf = true
 	entry({"admin", "vpn", "easytier", "clear_log"}, call("clear_log")).leaf = true
-	entry({"admin", "vpn",  "easytier",  "easytierweb_log"}, form("easytierweb_log"),_("web日志"), 49).leaf = true
+	entry({"admin", "vpn",  "easytier",  "easytierweb_log"}, form("easytierweb_log"),_("web log"), 49).leaf = true
 	entry({"admin", "vpn", "easytier", "get_wlog"}, call("get_wlog")).leaf = true
 	entry({"admin", "vpn", "easytier", "clear_wlog"}, call("clear_wlog")).leaf = true
 	entry({"admin", "vpn", "easytier", "status"}, call("act_status")).leaf = true
@@ -20,8 +20,11 @@ end
 function act_status()
 	local e = {}
 	local sys  = require "luci.sys"
+	local uci  = require "luci.model.uci".cursor()
+	local port = tonumber(uci:get_first("easytier", "easytierweb", "html_port"))
 	e.crunning = luci.sys.call("pgrep easytier-core >/dev/null") == 0
 	e.wrunning = luci.sys.call("pgrep easytier-web >/dev/null") == 0
+	e.port = (port or 0)
 	
 	local tagfile = io.open("/tmp/easytier_time", "r")
         if tagfile then
@@ -84,7 +87,7 @@ function get_log()
     local files = {"/tmp/easytier.log"}
     for i, file in ipairs(files) do
         if luci.sys.call("[ -f '" .. file .. "' ]") == 0 then
-            log = log .. luci.sys.exec("cat " .. file)
+            log = log .. luci.sys.exec("sed 's/\\x1b\\[[0-9;]*m//g' " .. file)
         end
     end
     luci.http.write(log)
@@ -99,7 +102,7 @@ function get_wlog()
     local files = {"/tmp/easytierweb.log"}
     for i, file in ipairs(files) do
         if luci.sys.call("[ -f '" .. file .. "' ]") == 0 then
-            log = log .. luci.sys.exec("cat " .. file)
+            log = log .. luci.sys.exec("sed 's/\\x1b\\[[0-9;]*m//g' " .. file)
         end
     end
     luci.http.write(log)
