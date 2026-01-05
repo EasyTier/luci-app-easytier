@@ -58,7 +58,7 @@ jobs:
           - SNAPSHOT
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Cache OpenWrt SDK
@@ -91,18 +91,32 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: EasyTier-${{ matrix.arch }}-${{ matrix.sdk }}
-          path: bin/packages/${{ matrix.arch }}/packages_ci/
+          name: ${{ matrix.arch }}-${{ matrix.sdk }}
+          path: bin/packages/${{ matrix.arch }}/packages_ci/*
 
-      - name: Create compress files
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event.inputs.tag != '' }}
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release info
         run: |
           sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p release
+          for dir in artifacts/*; do
+            name=$(basename "$dir")
+            zip -j "release/EasyTier-${{ env.TAG }}-${name}.zip" "$dir"/*
+          done
           echo "build_time=$(TZ=UTC-8 date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
-          #tar -zcvf EasyTier-${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
-          zip -j EasyTier-${{ env.TAG }}-${{ matrix.arch }}-${{ matrix.sdk }}.zip bin/packages/${{ matrix.arch }}/packages_ci/*
 
       - name: Release
-        if: ${{ github.event.inputs.tag != '' }}
         uses: softprops/action-gh-release@v2
         with:
             token: ${{ secrets.GITHUB_TOKEN }}
@@ -118,5 +132,6 @@ jobs:
              ${{ github.event.inputs.text }}
            
             tag_name: ${{ env.TAG }}
-            files: EasyTier-${{ env.TAG }}-${{ matrix.arch }}-${{ matrix.sdk }}.zip
+            files: release/*.zip
  
+
