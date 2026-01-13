@@ -581,19 +581,21 @@ if luci.http.formvalue("upload") then
 end
 
 -- Self-hosted Web Console tab options (reads/writes to easytierweb section)
-local uci = require("luci.model.uci").cursor()
 
 web_enabled = s:taboption("webconsole", Flag, "_web_enabled", translate("Enable"))
 web_enabled.rmempty = false
 web_enabled.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "enabled") or "0"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "enabled") or "0"
 end
 web_enabled.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "enabled", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "enabled", value)
     uci:commit("easytier")
 end
 web_enabled.remove = function(self, section)
-    uci:set("easytier", "@easytierweb[0]", "enabled", "0")
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "enabled", "0")
     uci:commit("easytier")
 end
 
@@ -609,10 +611,12 @@ web_db_path = s:taboption("webconsole", Value, "_web_db_path", translate("Databa
         translate("Path to the sqlite3 database file used to store all data. (-d parameter)"))
 web_db_path.default = "/etc/easytier/et.db"
 web_db_path.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "db_path") or "/etc/easytier/et.db"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "db_path") or "/etc/easytier/et.db"
 end
 web_db_path.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "db_path", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "db_path", value)
     uci:commit("easytier")
 end
 
@@ -623,10 +627,12 @@ web_protocol:value("udp",translate("UDP"))
 web_protocol:value("tcp",translate("TCP"))
 web_protocol:value("ws",translate("WS"))
 web_protocol.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "web_protocol") or "udp"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "web_protocol") or "udp"
 end
 web_protocol.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "web_protocol", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "web_protocol", value)
     uci:commit("easytier")
 end
 
@@ -636,24 +642,29 @@ web_port.datatype = "range(1,65535)"
 web_port.placeholder = "22020"
 web_port.default = "22020"
 web_port.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "web_port") or "22020"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "web_port") or "22020"
 end
 web_port.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "web_port", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "web_port", value)
     uci:commit("easytier")
 end
 
 web_fw_web = s:taboption("webconsole", Flag, "_web_fw_web", translate("WAN access to WEB"),
         translate("Automatically add firewall rules to allow WAN access to this WEB console"))
 web_fw_web.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "fw_web") or "0"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "fw_web") or "0"
 end
 web_fw_web.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "fw_web", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_web", value)
     uci:commit("easytier")
 end
 web_fw_web.remove = function(self, section)
-    uci:set("easytier", "@easytierweb[0]", "fw_web", "0")
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_web", "0")
     uci:commit("easytier")
 end
 
@@ -663,10 +674,12 @@ web_api_port.datatype = "range(1,65535)"
 web_api_port.placeholder = "11211"
 web_api_port.default = "11211"
 web_api_port.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "api_port") or "11211"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "api_port") or "11211"
 end
 web_api_port.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "api_port", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "api_port", value)
     uci:commit("easytier")
 end
 
@@ -675,24 +688,29 @@ web_html_port = s:taboption("webconsole", Value, "_web_html_port", translate("We
 web_html_port.datatype = "range(1,65535)"
 web_html_port.default = "11211"
 web_html_port.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "html_port") or "11211"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "html_port") or "11211"
 end
 web_html_port.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "html_port", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "html_port", value)
     uci:commit("easytier")
 end
 
 web_fw_api = s:taboption("webconsole", Flag, "_web_fw_api", translate("WAN access to API"),
         translate("Automatically add firewall rules to allow WAN access to the API control page"))
 web_fw_api.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "fw_api") or "0"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "fw_api") or "0"
 end
 web_fw_api.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "fw_api", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_api", value)
     uci:commit("easytier")
 end
 web_fw_api.remove = function(self, section)
-    uci:set("easytier", "@easytierweb[0]", "fw_api", "0")
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_api", "0")
     uci:commit("easytier")
 end
 
@@ -700,10 +718,12 @@ web_api_host = s:taboption("webconsole", Value, "_web_api_host", translate("Defa
         translate("The URL of the API server, used for connecting the web frontend. (--api-host parameter)<br>"
                 .. "Example: http://[current device IP or resolved domain name]:[API port]"))
 web_api_host.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "api_host") or ""
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "api_host") or ""
 end
 web_api_host.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "api_host", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "api_host", value)
     uci:commit("easytier")
 end
 
@@ -712,10 +732,12 @@ web_geoip_db = s:taboption("webconsole", Value, "_web_geoip_db", translate("GEOI
 		.. "<br>Recommended: https://github.com/P3TERX/GeoLite.mmdb (--geoip-db parameter)"))
 web_geoip_db.placeholder = "/etc/easytier/GeoLite.mmdb"
 web_geoip_db.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "geoip_db") or ""
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "geoip_db") or ""
 end
 web_geoip_db.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "geoip_db", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "geoip_db", value)
     uci:commit("easytier")
 end
 
@@ -730,10 +752,12 @@ web_weblog:value("info", translate("Info"))
 web_weblog:value("debug", translate("Debug"))
 web_weblog:value("trace", translate("Trace"))
 web_weblog.cfgvalue = function(self, section)
-    return uci:get("easytier", "@easytierweb[0]", "weblog") or "off"
+    local uci = require("luci.model.uci").cursor()
+    return uci:get_first("easytier", "easytierweb", "weblog") or "off"
 end
 web_weblog.write = function(self, section, value)
-    uci:set("easytier", "@easytierweb[0]", "weblog", value)
+    local uci = require("luci.model.uci").cursor()
+    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "weblog", value)
     uci:commit("easytier")
 end
 
