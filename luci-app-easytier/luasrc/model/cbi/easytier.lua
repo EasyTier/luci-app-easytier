@@ -580,26 +580,12 @@ if luci.http.formvalue("upload") then
     local f = luci.http.formvalue("ulfile")
 end
 
--- Self-hosted Web Console tab options (reads/writes to easytierweb section)
+-- Self-hosted Web Console tab options
 
-web_enabled = s:taboption("webconsole", Flag, "_web_enabled", translate("Enable"))
+web_enabled = s:taboption("webconsole", Flag, "web_enabled", translate("Enable"))
 web_enabled.rmempty = false
-web_enabled.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "enabled") or "0"
-end
-web_enabled.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "enabled", value)
-    uci:commit("easytier")
-end
-web_enabled.remove = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "enabled", "0")
-    uci:commit("easytier")
-end
 
-web_btncq = s:taboption("webconsole", Button, "_web_btncq", translate("Restart"))
+web_btncq = s:taboption("webconsole", Button, "web_btncq", translate("Restart"))
 web_btncq.inputtitle = translate("Restart")
 web_btncq.description = translate("Quickly restart once without modifying any parameters")
 web_btncq.inputstyle = "apply"
@@ -607,141 +593,50 @@ web_btncq.write = function()
   luci.sys.call("/etc/init.d/easytier restart >/dev/null 2>&1 &")
 end
 
-web_db_path = s:taboption("webconsole", Value, "_web_db_path", translate("Database File Path"),
+web_db_path = s:taboption("webconsole", Value, "web_db_path", translate("Database File Path"),
         translate("Path to the sqlite3 database file used to store all data. (-d parameter)"))
 web_db_path.default = "/etc/easytier/et.db"
-web_db_path.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "db_path") or "/etc/easytier/et.db"
-end
-web_db_path.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "db_path", value)
-    uci:commit("easytier")
-end
 
-web_protocol = s:taboption("webconsole", ListValue, "_web_protocol", translate("Listening Protocol"),
+web_protocol = s:taboption("webconsole", ListValue, "web_protocol", translate("Listening Protocol"),
         translate("Configure the server's listening protocol for easytier-core to connect. (-p parameter)"))
 web_protocol.default = "udp"
 web_protocol:value("udp",translate("UDP"))
 web_protocol:value("tcp",translate("TCP"))
 web_protocol:value("ws",translate("WS"))
-web_protocol.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "web_protocol") or "udp"
-end
-web_protocol.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "web_protocol", value)
-    uci:commit("easytier")
-end
 
-web_port = s:taboption("webconsole", Value, "_web_port", translate("Server Port"),
+web_port = s:taboption("webconsole", Value, "web_port", translate("Server Port"),
         translate("Configure the server's listening port for easytier-core to connect. (-c parameter)"))
 web_port.datatype = "range(1,65535)"
 web_port.placeholder = "22020"
 web_port.default = "22020"
-web_port.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "web_port") or "22020"
-end
-web_port.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "web_port", value)
-    uci:commit("easytier")
-end
 
-web_fw_web = s:taboption("webconsole", Flag, "_web_fw_web", translate("WAN access to WEB"),
+web_fw_web = s:taboption("webconsole", Flag, "web_fw_web", translate("WAN access to WEB"),
         translate("Automatically add firewall rules to allow WAN access to this WEB console"))
-web_fw_web.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "fw_web") or "0"
-end
-web_fw_web.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_web", value)
-    uci:commit("easytier")
-end
-web_fw_web.remove = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_web", "0")
-    uci:commit("easytier")
-end
 
-web_api_port = s:taboption("webconsole", Value, "_web_api_port", translate("API Port"),
+web_api_port = s:taboption("webconsole", Value, "web_api_port", translate("API Port"),
         translate("Listening port of the RESTful server, used as ApiHost by the web frontend. (-a parameter)"))
 web_api_port.datatype = "range(1,65535)"
 web_api_port.placeholder = "11211"
 web_api_port.default = "11211"
-web_api_port.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "api_port") or "11211"
-end
-web_api_port.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "api_port", value)
-    uci:commit("easytier")
-end
 
-web_html_port = s:taboption("webconsole", Value, "_web_html_port", translate("Web Interface Port"),
+web_html_port = s:taboption("webconsole", Value, "web_html_port", translate("Web Interface Port"),
         translate("Frontend listening port for the web dashboard server. Leave empty to disable. (-l parameter)"))
 web_html_port.datatype = "range(1,65535)"
 web_html_port.default = "11211"
-web_html_port.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "html_port") or "11211"
-end
-web_html_port.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "html_port", value)
-    uci:commit("easytier")
-end
 
-web_fw_api = s:taboption("webconsole", Flag, "_web_fw_api", translate("WAN access to API"),
+web_fw_api = s:taboption("webconsole", Flag, "web_fw_api", translate("WAN access to API"),
         translate("Automatically add firewall rules to allow WAN access to the API control page"))
-web_fw_api.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "fw_api") or "0"
-end
-web_fw_api.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_api", value)
-    uci:commit("easytier")
-end
-web_fw_api.remove = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "fw_api", "0")
-    uci:commit("easytier")
-end
 
-web_api_host = s:taboption("webconsole", Value, "_web_api_host", translate("Default API Server URL"),
+web_api_host = s:taboption("webconsole", Value, "web_api_host", translate("Default API Server URL"),
         translate("The URL of the API server, used for connecting the web frontend. (--api-host parameter)<br>"
                 .. "Example: http://[current device IP or resolved domain name]:[API port]"))
-web_api_host.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "api_host") or ""
-end
-web_api_host.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "api_host", value)
-    uci:commit("easytier")
-end
 
-web_geoip_db = s:taboption("webconsole", Value, "_web_geoip_db", translate("GEOIP_DB Path"),
+web_geoip_db = s:taboption("webconsole", Value, "web_geoip_db", translate("GEOIP_DB Path"),
         translate("GeoIP2 database file path used to locate the client. Defaults to an embedded file (country-level information only)."
 		.. "<br>Recommended: https://github.com/P3TERX/GeoLite.mmdb (--geoip-db parameter)"))
 web_geoip_db.placeholder = "/etc/easytier/GeoLite.mmdb"
-web_geoip_db.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "geoip_db") or ""
-end
-web_geoip_db.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "geoip_db", value)
-    uci:commit("easytier")
-end
 
-web_weblog = s:taboption("webconsole", ListValue, "_web_weblog", translate("Program Log"),
+web_weblog = s:taboption("webconsole", ListValue, "web_weblog", translate("Program Log"),
         translate("Runtime log located at /tmp/easytierweb.log, viewable in the log section above.<br>"
                 .. "Levels: Error < Warning < Info < Debug < Trace"))
 web_weblog.default = "off"
@@ -751,14 +646,5 @@ web_weblog:value("warn", translate("Warning"))
 web_weblog:value("info", translate("Info"))
 web_weblog:value("debug", translate("Debug"))
 web_weblog:value("trace", translate("Trace"))
-web_weblog.cfgvalue = function(self, section)
-    local uci = require("luci.model.uci").cursor()
-    return uci:get_first("easytier", "easytierweb", "weblog") or "off"
-end
-web_weblog.write = function(self, section, value)
-    local uci = require("luci.model.uci").cursor()
-    uci:set("easytier", uci:get_first("easytier", "easytierweb") or "@easytierweb[0]", "weblog", value)
-    uci:commit("easytier")
-end
 
 return m

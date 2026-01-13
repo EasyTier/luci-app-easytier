@@ -22,7 +22,7 @@ function act_status()
 	local e = {}
 	local sys  = require "luci.sys"
 	local uci  = require "luci.model.uci".cursor()
-	local port = tonumber(uci:get_first("easytier", "easytierweb", "html_port"))
+	local port = tonumber(uci:get_first("easytier", "easytier", "web_html_port"))
 	e.crunning = luci.sys.call("pgrep easytier-core >/dev/null") == 0
 	e.wrunning = luci.sys.call("pgrep easytier-web >/dev/null") == 0
 	e.port = (port or 0)
