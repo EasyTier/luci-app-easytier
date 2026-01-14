@@ -78,7 +78,7 @@ check_bin() {
        		tag="$( curl -k --connect-timeout 3 --user-agent "$user_agent"  https://api.github.com/repos/EasyTier/EasyTier/releases/latest  2>&1 | grep 'tag_name' | cut -d\" -f4 )"
        		[ -z "$tag" ] && tag="$( curl -Lk --connect-timeout 3 --user-agent "$user_agent" -s  https://api.github.com/repos/EasyTier/EasyTier/releases/latest  2>&1 | grep 'tag_name' | cut -d\" -f4 )"
    	fi
-	[ -z "$tag"] && tag=v2.4.5
+	[ -z "$tag"] && tag=v2.5.0
 	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 开始在线下载${tag}版本，${proxy}https://github.com/EasyTier/EasyTier/releases/download/${tag}/easytier-linux-${cpucore}-${tag}.zip下载较慢耐心等候" >>/tmp/easytier.log
 	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 开始在线下载${tag}版本，${proxy}https://github.com/EasyTier/EasyTier/releases/download/${tag}/easytier-linux-${cpucore}-${tag}.zip下载较慢耐心等候" >>/tmp/easytierweb.log
         mkdir -p "$path"
@@ -97,7 +97,7 @@ check_bin() {
                     			echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : ${proxy}https://github.com/EasyTier/EasyTier/releases/download/${tag}/easytier-linux-${cpucore}-${tag}.zip 下载不完整，请手动下载上传程序" >>/tmp/easytier.log
                  		fi
 	         	fi
-	         	if [ "$(uci -q get easytier.@easytierweb[0].enabled)" = "1" ] ; then
+	         	if [ "$(uci -q get easytier.@easytier[0].web_enabled)" = "1" ] ; then
 	         		mv -f /tmp/easytier-web-embed ${webbin} || true
 	         		chmod +x "$webbin"
 	         		if [ "$($webbin -h 2>&1 | wc -l)" -gt 3 ] ; then
@@ -127,10 +127,14 @@ check_config() {
                    wss_port=$(grep -oE '"wss://(\[::\]|0\.0\.0\.0):[0-9]+"' "$config_file" | head -n1 | sed -E 's/.*:([0-9]+)"/\1/')
                    wg_port=$(grep -oE '"wg://(\[::\]|0\.0\.0\.0):[0-9]+"' "$config_file" | head -n1 | sed -E 's/.*:([0-9]+)"/\1/')
                    quic_port=$(grep -oE '"quic://(\[::\]|0\.0\.0\.0):[0-9]+"' "$config_file" | head -n1 | sed -E 's/.*:([0-9]+)"/\1/')
-                   tunname=$(cat $config_file | grep "dev_name =" | awk '{print $3}'| tr -d '", ')
+                   tunname=$(grep "dev_name =" "$config_file" | awk '{print $3}' | tr -d "'\", ")
                    proxy_network=$(grep -F '[[proxy_network]]' $config_file)
                    wireguard_port=$(cat $config_file | grep "wireguard_listen = " | awk -F ":" '{print $2}'| tr -d '/", ')
-                   log="$(uci -q get easytier.@easytier[0].log || echo off)"          
+                   log="$(uci -q get easytier.@easytier[0].log || echo off)"
+                   echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 检测配置文件可用性 ${easytierbin} --check-config ${config_file}" >>/tmp/easytier.log
+                   ${easytierbin} --check-config ${config_file} >> /tmp/easytier.log 2>&1 &
+                   
+		   echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 开始运行 ${easytierbin} -c ${config_file}" >>/tmp/easytier.log
                    procd_open_instance
                    get_tz
 		   [ -z "$SET_TZ" ] || procd_set_param env TZ="$SET_TZ"
@@ -151,7 +155,7 @@ check_config() {
 			trap \"kill -TERM \$ET_CORE_PID; kill -TERM \$LOG_MANAGEMENT_PID; exit\" SIGINT SIGTERM EXIT
 			wait \$ET_CORE_PID
 		   "
-		   echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 运行 ${easytierbin} -c ${config_file}" >>/tmp/easytier.log
+		   
 }
 
 get_etconfig() {
@@ -168,7 +172,7 @@ get_etconfig() {
 		listenermode="$(uci -q get easytier.@easytier[0].listenermode)"
 		tunname="$(uci -q get easytier.@easytier[0].tunname)"
 		relay_network="$(uci -q get easytier.@easytier[0].relay_network || echo 0)"
-		tcp_port="$(uci -q get easytier.@easytier[0].tcp_port)"
+		tcp_port="$(uci -q get easytier.@easytier[0].tcp_port | awk '{print $1}')"
 		ws_port="$(uci -q get easytier.@easytier[0].ws_port)"
 		wss_port="$(uci -q get easytier.@easytier[0].wss_port)"
 		wg_port="$(uci -q get easytier.@easytier[0].wg_port)"
@@ -212,6 +216,15 @@ get_etconfig() {
 		foreign_relay_bps_limit="$(uci -q get easytier.@easytier[0].foreign_relay_bps_limit)"
 		extra_args="$(uci -q get easytier.@easytier[0].extra_args)"
 		encryption_algorithm="$(uci -q get easytier.@easytier[0].encryption_algorithm)"
+		
+		p2p_only="$(uci -q get easytier.@easytier[0].p2p_only || echo 0)"
+		disable_tcp="$(uci -q get easytier.@easytier[0].disable_tcp || echo 0)"
+		disable_sym="$(uci -q get easytier.@easytier[0].disable_sym || echo 0)"
+		udp_white_port="$(uci -q get easytier.@easytier[0].udp_white_port)"
+		tcp_white_port="$(uci -q get easytier.@easytier[0].tcp_white_port)"
+		disable_relay_kcp="$(uci -q get easytier.@easytier[0].disable_relay_kcp || echo 0)"
+		relay_kcp="$(uci -q get easytier.@easytier[0].relay_kcp || echo 0)"
+		
 }
 
 set_firewall() {
@@ -499,7 +512,6 @@ start_et() {
 				[ "$latency_first" = "0" ] || core_cmd="${core_cmd} --latency-first"
 				[ "$exit_node" = "0" ] || core_cmd="${core_cmd} --enable-exit-node"
               	  		[ "$disable_p2p" = "0" ] || core_cmd="${core_cmd} --disable-p2p"
-                		[ "$disable_udp" = "0" ] || core_cmd="${core_cmd} --disable-udp-hole-punching"
                 		[ "$relay_all" = "0" ] || core_cmd="${core_cmd} --relay-all-peer-rpc"
                 		[ -z "$socks_port" ] || core_cmd="${core_cmd} --socks5 $socks_port"
 				[ "$comp" = "none" ] || core_cmd="${core_cmd} --compression $comp"
@@ -516,7 +528,19 @@ start_et() {
 				if [ -n "$encryption_algorithm" ] && [ "$encryption_algorithm" != "aes-gcm" ]; then
 					core_cmd="${core_cmd} --encryption-algorithm ${encryption_algorithm}"
 				fi
+				[ "$p2p_only" = "0" ] || core_cmd="${core_cmd} --p2p-only"
+				[ "$disable_tcp" = "0" ] || core_cmd="${core_cmd} --disable-tcp-hole-punching"
+				[ "$disable_udp" = "0" ] || core_cmd="${core_cmd} --disable-udp-hole-punching"
+				[ "$disable_sym" = "0" ] || core_cmd="${core_cmd} --disable-sym-hole-punching"
+				[ "$disable_relay_kcp" = "0" ] || core_cmd="${core_cmd} --disable-relay-kcp true"
+				[ "$relay_kcp" = "0" ] || core_cmd="${core_cmd} --enable-relay-foreign-network-kcp true"
+				[ -z "$udp_white_port" ] || core_cmd="${core_cmd} --udp-whitelist $udp_white_port"
+				[ -z "$tcp_white_port" ] || core_cmd="${core_cmd} --tcp-whitelist $tcp_white_port"
 				[ -z "$extra_args" ] || core_cmd="${core_cmd} $extra_args"
+				
+				echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 运行 ${easytierbin} ${core_cmd} --console-log-level ${log}" >>/tmp/easytier.log
+				
+		
 	     		fi
 			if [ "$etcmd" = "web" ] ; then
 				#WEB控制台启动
@@ -601,16 +625,16 @@ start_web() {
 		return 1
 	fi
 	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 开始启动${webbin} " >>/tmp/easytierweb.log
-	db_path="$(uci -q get easytier.@easytierweb[0].db_path)"
-	web_protocol="$(uci -q get easytier.@easytierweb[0].web_protocol)"
-	web_port="$(uci -q get easytier.@easytierweb[0].web_port)"
-	api_port="$(uci -q get easytier.@easytierweb[0].api_port)"
-	html_port="$(uci -q get easytier.@easytierweb[0].html_port)"
-	weblog="$(uci -q get easytier.@easytierweb[0].weblog)"
-	api_host="$(uci -q get easytier.@easytierweb[0].api_host)"
-	geoip_db="$(uci -q get easytier.@easytierweb[0].geoip_db)"
-	fw_web="$(uci -q get easytier.@easytierweb[0].fw_web || echo 0)"
-	fw_api="$(uci -q get easytier.@easytierweb[0].fw_api || echo 0)"
+	db_path="$(uci -q get easytier.@easytier[0].web_db_path)"
+	web_protocol="$(uci -q get easytier.@easytier[0].web_protocol)"
+	web_port="$(uci -q get easytier.@easytier[0].web_port)"
+	api_port="$(uci -q get easytier.@easytier[0].web_api_port)"
+	html_port="$(uci -q get easytier.@easytier[0].web_html_port)"
+	weblog="$(uci -q get easytier.@easytier[0].web_weblog)"
+	api_host="$(uci -q get easytier.@easytier[0].web_api_host)"
+	geoip_db="$(uci -q get easytier.@easytier[0].web_geoip_db)"
+	fw_web="$(uci -q get easytier.@easytier[0].web_fw_web || echo 0)"
+	fw_api="$(uci -q get easytier.@easytier[0].web_fw_api || echo 0)"
 	procd_open_instance "easytier_web"
 	get_tz
 	[ -z "$SET_TZ" ] || procd_set_param env TZ="$SET_TZ"
@@ -702,12 +726,14 @@ start_service() {
         echo "" >/tmp/easytier.log
 	echo "" >/tmp/easytierweb.log
         size="$(df -k | awk '/\/overlay$/ {sub(/K$/, "", $4); print $4}')"
-	[ -z "$size" ] && size="$(df -k /usr/bin | awk 'NR==2 {print $(NF-2) }')"
-	if [ -z "$(uci -q get easytier.@easytierweb[0].enabled)" ] ; then
-		echo "config easytierweb" >>/etc/config/easytier
-		echo "	option enabled '0'" >>/etc/config/easytier
+	[ -z "$size" ] && size="$(df -kP /usr/bin | awk 'NR==2 {print $(NF-2) }')"
+	if [ -z "$(uci -q get easytier.@easytier[0].web_enabled)" ] ; then
+		# Migrate old config if needed or just init
+		# For now just set default 0 if not present
+		uci -q set easytier.@easytier[0].web_enabled='0'
+		uci commit easytier
 	fi
-	[ "$(uci -q get easytier.@easytierweb[0].enabled)" = "1" ] && start_web 
+	[ "$(uci -q get easytier.@easytier[0].web_enabled)" = "1" ] && start_web 
 	[ "$(uci -q get easytier.@easytier[0].enabled)" = "1" ] && start_et easytier
 	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 重载防火墙和网络配置...会出现短暂断网现象... " >>/tmp/easytier.log
 	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 重载防火墙和网络配置...会出现短暂断网现象... " >>/tmp/easytierweb.log
@@ -744,7 +770,7 @@ stop_service() {
                 	rm -rf /tmp/easytier-*.* /tmp/easytier.log >/dev/null 2>&1
                 	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : easytier-core 停止运行" >>/tmp/easytier.log
 		fi
-		if [ "$(uci -q get easytier.@easytierweb[0].enabled)" = "0" ] ; then
+		if [ "$(uci -q get easytier.@easytier[0].web_enabled)" = "0" ] ; then
                 	ps | grep 'easytier-web' | grep -v grep | awk '{print $1}' | xargs kill >/dev/null 2>&1
                 	ps | grep 'easytier-web' | grep -v grep | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1
 			uci -q delete firewall.easytier_webserver
