@@ -253,15 +253,15 @@ disable_encryption = s:taboption("privacy", Flag, "disable_encryption", translat
 disable_encryption:depends("etcmd", "etcmd")
 
 encryption_algorithm = s:taboption("privacy", ListValue, "encryption_algorithm", translate("Encryption Algorithm"),
-        translate("encryption algorithm to use, supported: xor, chacha20, aes-gcm, aes-gcm-256, openssl-aes128-gcm, openssl-aes256-gcm, openssl-chacha20. default (aes-gcm) (--encryption-algorithm parameter)"))
+        translate("encryption algorithm to use, supported: xor, chacha20, aes-gcm, aes-256-gcm, openssl-aes-gcm, openssl-chacha20, openssl-aes-256-gcm. default (aes-gcm) (--encryption-algorithm parameter)"))
 encryption_algorithm.default = "aes-gcm"
 encryption_algorithm:value("xor",translate("xor"))
 encryption_algorithm:value("chacha20",translate("chacha20"))
 encryption_algorithm:value("aes-gcm",translate("aes-gcm"))
-encryption_algorithm:value("aes-gcm-256",translate("aes-gcm-256"))
-encryption_algorithm:value("openssl-aes128-gcm",translate("openssl-aes128-gcm"))
-encryption_algorithm:value("openssl-aes256-gcm",translate("openssl-aes256-gcm"))
+encryption_algorithm:value("aes-256-gcm",translate("aes-256-gcm"))
+encryption_algorithm:value("openssl-aes-gcm",translate("openssl-aes-gcm"))
 encryption_algorithm:value("openssl-chacha20",translate("openssl-chacha20"))
+encryption_algorithm:value("openssl-aes-256-gcm",translate("openssl-aes-256-gcm"))
 encryption_algorithm:depends("etcmd", "etcmd")
 
 multi_thread = s:taboption("privacy", Flag, "multi_thread", translate("Enable Multithreading"),
