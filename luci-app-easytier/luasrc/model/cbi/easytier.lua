@@ -441,6 +441,22 @@ log:value("info", translate("Info"))
 log:value("debug", translate("Debug"))
 log:value("trace", translate("Trace"))
 
+-- Network Configuration Options
+auto_config_interface = s:taboption("privacy", Flag, "auto_config_interface", translate("Auto Configure Interface"),
+        translate("Automatically create and configure the EasyTier network interface"))
+auto_config_interface.default = "1"
+
+interface_netmask = s:taboption("privacy", Value, "interface_netmask", translate("Interface Netmask"),
+        translate("Subnet mask for the EasyTier interface (default: 255.0.0.0)"))
+interface_netmask.placeholder = "255.0.0.0"
+interface_netmask.default = "255.0.0.0"
+interface_netmask.datatype = "ip4addr"
+interface_netmask:depends("auto_config_interface", "1")
+
+auto_config_firewall = s:taboption("privacy", Flag, "auto_config_firewall", translate("Auto Configure Firewall"),
+        translate("Automatically add and manage firewall rules"))
+auto_config_firewall.default = "1"
+
 et_forward = s:taboption("privacy", MultiValue, "et_forward", translate("Access Control"),
         translate("Set traffic permission rules between different network zones"))
 et_forward:value("etfwlan", translate("Allow traffic from EasyTier virtual network to LAN"))
