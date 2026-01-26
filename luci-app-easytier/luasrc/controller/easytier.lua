@@ -46,16 +46,19 @@ function index()
         return
     end
                   
-    entry({"admin", "services", "easytier"}, alias("admin", "services", "easytier", "easytier"),_("EasyTier"), 46).dependent = true
-    entry({"admin", "services", "easytier", "easytier"}, cbi("easytier"),_("EasyTier"), 47).leaf = true
-    entry({"admin", "services", "easytier", "easytier_log"}, form("easytier_log"),_("core log"), 48).leaf = true
+    local page = entry({"admin", "services", "easytier"}, firstchild(), _("EasyTier"), 60)
+    page.dependent = false
+    page.acl_depends = { "luci-app-easytier" }
+    
+    entry({"admin", "services", "easytier", "overview"}, cbi("easytier"), _("Overview"), 10).leaf = true
+    entry({"admin", "services", "easytier", "core_log"}, form("easytier_log"), _("Core Log"), 20).leaf = true
     entry({"admin", "services", "easytier", "get_log"}, call("get_log")).leaf = true
     entry({"admin", "services", "easytier", "clear_log"}, call("clear_log")).leaf = true
-    entry({"admin", "services", "easytier", "easytierweb_log"}, form("easytierweb_log"),_("web log"), 49).leaf = true
+    entry({"admin", "services", "easytier", "web_log"}, form("easytierweb_log"), _("Web Log"), 30).leaf = true
     entry({"admin", "services", "easytier", "get_wlog"}, call("get_wlog")).leaf = true
     entry({"admin", "services", "easytier", "clear_wlog"}, call("clear_wlog")).leaf = true
     entry({"admin", "services", "easytier", "status"}, call("act_status")).leaf = true
-    entry({"admin", "services", "easytier", "conninfo"}, call("act_conninfo")).leaf = true  -- 添加这行
+    entry({"admin", "services", "easytier", "connections"}, call("act_conninfo"), _("Connections"), 40).leaf = true
 end
 
 function act_status()
