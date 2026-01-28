@@ -437,11 +437,11 @@ start_et() {
 		
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill >/dev/null 2>&1
                 ps | grep 'easytier-core' | grep -v grep | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1
+			get_etconfig
           	if [ "$etcmd" = "config" ] ; then 
 			#配置文件启动方式
                 	check_config  
          	else
-			get_etconfig
 			procd_open_instance "easytier_core"
 			get_tz
 			[ -z "$SET_TZ" ] || procd_set_param env TZ="$SET_TZ"
