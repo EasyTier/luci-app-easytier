@@ -1847,3 +1847,7 @@ msgstr "来源实例ID"
 
 msgid "To Instance ID"
 msgstr "目标实例ID"
+
+msgid "Logs"
+msgstr "日志"
+
