@@ -1,60 +1,1143 @@
 <%
-	local uci = require 'luci.model.uci'.cursor()
-	protocol="http://"
-%>
+local uci = require 'luci.model.uci'.cursor()
+local util = require "luci.util"
+local i18n = require "luci.i18n"
+local translate = i18n.translate
+protocol = "http://"
+-%>
+
+<style>
+:root {
+	--card-bg: #ffffff;
+	--card-shadow: rgba(0,0,0,0.08);
+	--text-primary: #333333;
+	--text-secondary: #666666;
+	--border-color: #e0e0e0;
+	--success: #4CAF50;
+	--error: #F44336;
+	--info: #2196F3;
+	--warning: #FF9800;
+	--mem-1: #66BB6A;
+	--mem-2: #9CCC65;
+	--mem-3: #FFCA28;
+	--mem-4: #FF7043;
+	--mem-5: #EF5350;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--card-bg: #1e1e1e;
+		--card-shadow: rgba(0,0,0,0.3);
+		--text-primary: #e0e0e0;
+		--text-secondary: #b0b0b0;
+		--border-color: #3e3e3e;
+		--success: #66BB6A;
+		--error: #EF5350;
+		--info: #42A5F5;
+		--warning: #FFB74D;
+		--mem-1: #81C784;
+		--mem-2: #AED581;
+		--mem-3: #FFD54F;
+		--mem-4: #FF8A65;
+		--mem-5: #E57373;
+	}
+}
+
+.et-status-card {
+	background: var(--card-bg);
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 2px 8px var(--card-shadow);
+	border: 1px solid var(--border-color);
+	margin: 16px 0;
+}
+
+.et-service-section {
+	padding: 16px 0;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.et-service-section:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.et-service-section.service-stopped {
+	padding: 8px 0;
+}
+
+.et-service-section.service-stopped .et-service-header {
+	margin-bottom: 0;
+}
+
+.et-service-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.et-service-title {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.et-status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.et-status-running {
+	background: rgba(76, 175, 80, 0.1);
+	color: var(--success);
+}
+
+.et-status-stopped {
+	background: rgba(244, 67, 54, 0.1);
+	color: var(--error);
+}
+
+.et-status-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	animation: pulse 2s infinite;
+}
+
+.et-status-running .et-status-dot {
+	background: var(--success);
+}
+
+.et-status-stopped .et-status-dot {
+	background: var(--error);
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+.et-metrics-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.et-metric-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px;
+	background: var(--card-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+}
+
+.et-metric-icon {
+	flex-shrink: 0;
+}
+
+.et-metric-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.et-metric-label {
+	font-size: 11px;
+	color: var(--text-secondary);
+	margin-bottom: 2px;
+}
+
+.et-metric-value {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-primary);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.et-metric-value.mem-level-1 { color: var(--mem-1); }
+.et-metric-value.mem-level-2 { color: var(--mem-2); }
+.et-metric-value.mem-level-3 { color: var(--mem-3); }
+.et-metric-value.mem-level-4 { color: var(--mem-4); }
+.et-metric-value.mem-level-5 { color: var(--mem-5); }
+
+.et-version-badge {
+	display: inline-block;
+	padding: 6px 12px;
+	background: rgba(255, 152, 0, 0.15);
+	color: var(--warning);
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 500;
+	white-space: nowrap;
+	margin-left: 8px;
+	position: relative;
+}
+
+.et-version-badge::before {
+	content: "";
+	position: absolute;
+	left: -6px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border-top: 6px solid transparent;
+	border-bottom: 6px solid transparent;
+	border-right: 6px solid rgba(255, 152, 0, 0.15);
+}
+
+.et-btn {
+	display: inline-block;
+	padding: 6px 14px;
+	background: var(--info);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 500;
+	transition: all 0.2s;
+	text-decoration: none;
+}
+
+.et-btn:hover {
+	opacity: 0.9;
+}
+
+.et-empty {
+	text-align: center;
+	color: var(--text-secondary);
+	padding: 20px 12px;
+	font-size: 13px;
+	font-style: italic;
+	margin: -20px;
+}
+
+.version-modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0,0,0,0.5);
+	z-index: 10000;
+	align-items: center;
+	justify-content: center;
+}
+
+.version-modal.show {
+	display: flex;
+}
+
+.version-modal-content {
+	background: var(--card-bg);
+	border-radius: 12px;
+	padding: 24px;
+	max-width: 400px;
+	width: 90%;
+	box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.version-modal-title {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--text-primary);
+	margin-bottom: 16px;
+}
+
+.version-modal-message {
+	font-size: 14px;
+	color: var(--text-secondary);
+	margin-bottom: 24px;
+	line-height: 1.6;
+}
+
+.version-modal-buttons {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+}
+
+.version-modal-btn {
+	padding: 8px 20px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.version-modal-btn-cancel {
+	background: var(--border-color);
+	color: var(--text-primary);
+}
+
+.version-modal-btn-cancel:hover {
+	opacity: 0.8;
+}
+
+.version-modal-btn-confirm {
+	background: var(--info);
+	color: white;
+}
+
+.version-modal-btn-confirm:hover {
+	opacity: 0.9;
+}
+
+.et-toast {
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--info);
+	color: white;
+	padding: 14px 20px;
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+	z-index: 10001;
+	opacity: 0;
+	transition: opacity 0.3s ease-in-out;
+	font-size: 14px;
+	font-weight: 500;
+	min-width: 320px;
+	text-align: center;
+	pointer-events: none;
+}
+
+.et-toast.show {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+	.et-status-card {
+		padding: 16px;
+	}
+	
+	.et-metrics-grid {
+		grid-template-columns: 1fr;
+	}
+	
+	.et-service-section {
+		padding: 12px 0;
+	}
+}
+
+.et-quick-actions {
+	background: var(--card-bg);
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 2px 8px var(--card-shadow);
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+.et-quick-title {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--text-primary);
+	margin-bottom: 16px;
+}
+
+.et-action-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.et-action-row:last-child {
+	border-bottom: none;
+}
+
+.et-action-label {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-primary);
+}
+
+.et-action-controls {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 48px;
+	height: 26px;
+}
+
+.switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	transition: .3s;
+	border-radius: 26px;
+}
+
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 20px;
+	width: 20px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: .3s;
+	border-radius: 50%;
+}
+
+input:checked + .slider {
+	background-color: var(--success);
+}
+
+input:checked + .slider:before {
+	transform: translateX(22px);
+}
+
+.et-restart-btn {
+	padding: 6px 16px;
+	background: #FF5722;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 13px;
+	transition: all 0.3s;
+}
+
+.et-restart-btn:hover {
+	opacity: 0.9;
+	transform: translateY(-1px);
+}
+
+.et-restart-btn:active {
+	transform: translateY(0);
+}
+
+.et-restart-btn:disabled,
+.switch input:disabled + .slider {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+</style>
+
+<div class="et-quick-actions">
+	<div class="et-action-row">
+		<div class="et-quick-title"><%=translate("Quick Actions")%></div>
+		<button class="et-restart-btn" id="restartBtn" onclick="restartService(); return false;"><%=translate("Restart")%></button>
+	</div>
+	<div class="et-action-row">
+		<div class="et-action-label">EasyTier Core</div>
+		<div class="et-action-controls">
+			<label class="switch">
+				<input type="checkbox" id="coreSwitch" disabled>
+				<span class="slider"></span>
+			</label>
+		</div>
+	</div>
+	<div class="et-action-row">
+		<div class="et-action-label">EasyTier Web</div>
+		<div class="et-action-controls">
+			<label class="switch">
+				<input type="checkbox" id="webSwitch" disabled>
+				<span class="slider"></span>
+			</label>
+		</div>
+	</div>
+</div>
+
+<div class="et-status-card et-status-empty" id="easytier_status">
+	<div class="et-empty"><%=translate("Collecting data...")%></div>
+</div>
+
+<div class="et-status-card" id="tun_interface_card" style="display:none;">
+	<div class="et-service-header">
+		<div class="et-service-title"><%=translate("Virtual Network Interface")%></div>
+		<div class="et-status-badge et-status-running">
+			<span class="et-status-dot"></span>
+			<span id="tun_interface_name">tun0</span>
+		</div>
+	</div>
+	<div class="et-metrics-grid" id="tun_interface_info"></div>
+	<div style="margin-top:20px;padding:16px;background:var(--upload-hover);border-radius:8px;">
+		<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+			<div style="font-size:14px;font-weight:600;color:var(--text-primary);"><%=translate("Real-time Traffic")%></div>
+			<div style="display:flex;gap:16px;font-size:12px;">
+				<div style="display:flex;align-items:center;gap:6px;">
+					<div style="width:12px;height:12px;background:var(--success);border-radius:2px;"></div>
+					<span style="color:var(--text-secondary);"><%=translate("Download")%></span>
+					<span id="tun_rx_speed" style="color:var(--success);font-weight:600;">0 B/s</span>
+				</div>
+				<div style="display:flex;align-items:center;gap:6px;">
+					<div style="width:12px;height:12px;background:var(--info);border-radius:2px;"></div>
+					<span style="color:var(--text-secondary);"><%=translate("Upload")%></span>
+					<span id="tun_tx_speed" style="color:var(--info);font-weight:600;">0 B/s</span>
+				</div>
+			</div>
+		</div>
+		<div style="position:relative;">
+			<canvas id="tun_traffic_chart" style="width:100%;height:200px;"></canvas>
+		</div>
+		<div style="display:flex;justify-content:space-around;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color);">
+			<div style="text-align:center;">
+				<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;"><%=translate("Total Download")%></div>
+				<div id="tun_total_rx" style="font-size:14px;font-weight:600;color:var(--success);">0 B</div>
+			</div>
+			<div style="text-align:center;">
+				<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;"><%=translate("Total Upload")%></div>
+				<div id="tun_total_tx" style="font-size:14px;font-weight:600;color:var(--info);">0 B</div>
+			</div>
+		</div>
+	</div>
+</div>
+
 <script type="text/javascript">//<![CDATA[
-XHR.poll(3, '<%=url([[admin]], [[vpn]], [[easytier]], [[status]])%>', null,
-    function(x, data) {
-        var st = document.getElementById('easytier_status');
-        if (data && st) {
-            var html = '';
-            
-            // easytier-core 状态
-            var coreStatus = data.crunning 
-                ? "<span style='color:#4CAF50;font-weight:bold;'>● 运行中</span>" 
-                : "<span style='color:#F44336;font-weight:bold;'>○ 未运行</span>";
-            
-            html += "<div style='margin-bottom:16px;'>";
-            html += "<div style='font-size:15px;font-weight:bold;margin-bottom:8px;'>easytier-core " + coreStatus + "</div>";
-            
-            if (data.crunning) {
-                html += "<table style='border-collapse:collapse;'>";
-                html += "<tr><td style='padding:2px 16px 2px 0;'>运行时间</td><td>" + data.etsta + "</td></tr>";
-                html += "<tr><td style='padding:2px 16px 2px 0;'>CPU / 内存</td><td>" + data.etcpu + " / " + data.etram + "</td></tr>";
-                html += "<tr><td style='padding:2px 16px 2px 0;'>当前 / 最新版本</td><td>" + data.ettag + " / " + data.etnewtag + "</td></tr>";
-                html += "</table>";
-            }
-            html += "</div>";
-            
-            // easytier-web 状态
-            var webStatus = data.wrunning 
-                ? "<span style='color:#4CAF50;font-weight:bold;'>● 运行中</span>" 
-                : "<span style='color:#F44336;font-weight:bold;'>○ 未运行</span>";
-            
-            html += "<div>";
-            html += "<div style='font-size:15px;font-weight:bold;margin-bottom:8px;'>easytier-web " + webStatus + "</div>";
-            
-            if (data.wrunning) {
-                html += "<table style='border-collapse:collapse;'>";
-                html += "<tr><td style='padding:2px 16px 2px 0;'>运行时间</td><td>" + data.etwebsta + "</td></tr>";
-                html += "<tr><td style='padding:2px 16px 2px 0;'>CPU / 内存</td><td>" + data.etwebcpu + " / " + data.etwebram + "</td></tr>";
-                html += "<tr><td style='padding:2px 16px 2px 0;'>当前 / 最新版本</td><td>" + data.ettag + " / " + data.etnewtag + "</td></tr>";
-                html += "</table>";
-                
-                if (data.port !== 0) {
-                    html += "<div style='margin-top:8px;'><input class='cbi-button cbi-button-reload' type='button' value=' <%:Web Console%> ' onclick=\"window.open('<%=protocol%>" + window.location.hostname + ":" + data.port + "')\"/></div>";
-                }
-            }
-            html += "</div>";
-            
-            st.innerHTML = html;
-        }
-    }
-);
+function createSVGCircle(percent, color, size) {
+	size = size || 36;
+	var radius = (size - 8) / 2;
+	var circumference = 2 * Math.PI * radius;
+	var offset = circumference - (percent / 100) * circumference;
+	
+	return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" style="transform:rotate(-90deg)">' +
+		'<circle cx="' + size/2 + '" cy="' + size/2 + '" r="' + radius + '" fill="none" stroke="' + (document.documentElement.getAttribute('data-theme') === 'dark' ? '#3e3e3e' : '#e0e0e0') + '" stroke-width="3"/>' +
+		'<circle cx="' + size/2 + '" cy="' + size/2 + '" r="' + radius + '" fill="none" stroke="' + color + '" stroke-width="3" ' +
+		'stroke-dasharray="' + circumference + '" stroke-dashoffset="' + offset + '" ' +
+		'stroke-linecap="round" style="transition:stroke-dashoffset 0.5s ease"/>' +
+		'<text x="' + size/2 + '" y="' + size/2 + '" text-anchor="middle" dy="0.3em" fill="' + color + '" font-size="8" font-weight="bold" transform="rotate(90 ' + size/2 + ' ' + size/2 + ')">' + 
+		Math.round(percent) + '</text>' +
+		'</svg>';
+}
+
+function createSVGIcon(type, color) {
+	var icons = {
+		clock: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="' + color + '" stroke-width="2"/><path d="M12 7v5l3 3" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/></svg>',
+		version: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h10M7 16h6" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/><rect x="4" y="4" width="16" height="16" rx="2" stroke="' + color + '" stroke-width="2"/></svg>',
+		memory: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="' + color + '" stroke-width="2"/><path d="M7 6V4M12 6V4M17 6V4M7 18v2M12 18v2M17 18v2" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/><path d="M7 10h10M7 14h10" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
+	};
+	return icons[type] || '';
+}
+
+function getColorByPercent(percent, type) {
+	var colors = getComputedStyle(document.documentElement);
+	if (type === 'cpu') {
+		if (percent < 50) return colors.getPropertyValue('--success').trim();
+		if (percent < 80) return colors.getPropertyValue('--warning').trim();
+		return colors.getPropertyValue('--error').trim();
+	} else {
+		if (percent < 60) return colors.getPropertyValue('--info').trim();
+		if (percent < 85) return colors.getPropertyValue('--warning').trim();
+		return colors.getPropertyValue('--error').trim();
+	}
+}
+
+function parseCPU(cpuStr) {
+	var match = cpuStr.match(/(\d+\.?\d*)/);
+	return match ? parseFloat(match[1]) : 0;
+}
+
+function parseMem(memStr) {
+	var match = memStr.match(/(\d+\.?\d*)\s*MB/);
+	if (!match) return 0;
+	var usedMB = parseFloat(match[1]);
+	if (usedMB < 20) return 1;
+	if (usedMB < 40) return 2;
+	if (usedMB < 60) return 3;
+	if (usedMB < 80) return 4;
+	return 5;
+}
+
+function getMemColor(memStr) {
+	return getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+}
+
+function parseUptime(uptime) {
+	if (!uptime) return 0;
+	var days = uptime.match(/(\d+)d/);
+	var hours = uptime.match(/(\d+)h/);
+	var mins = uptime.match(/(\d+)m/);
+	var total = 0;
+	if (days) total += parseInt(days[1]) * 24;
+	if (hours) total += parseInt(hours[1]);
+	if (mins) total += parseInt(mins[1]) / 60;
+	return Math.min((total / 168) * 100, 100);
+}
+
+function compareVersion(current, latest) {
+	if (!current || !latest) return { match: true, latest: '' };
+	// 去除 v 前缀和 - 后面的内容
+	var c = current.replace(/^v/i, '').split('-')[0];
+	var l = latest.replace(/^v/i, '').split('-')[0];
+	return { match: c === l, latest: latest };
+}
+
+function renderService(name, data, isRunning) {
+	var html = '<div class="et-service-section' + (isRunning ? '' : ' service-stopped') + '">';
+	html += '<div class="et-service-header">';
+	html += '<div class="et-service-title">' + name + '</div>';
+	html += '<div class="et-status-badge ' + (isRunning ? 'et-status-running' : 'et-status-stopped') + '">';
+	html += '<span class="et-status-dot"></span>';
+	html += isRunning ? '<%=translate("Running")%>' : '<%=translate("Stopped")%>';
+	html += '</div></div>';
+	
+	if (isRunning) {
+		var cpuPercent = parseCPU(data.cpu || '0%');
+		var memLevel = parseMem(data.mem || '0 MB');
+		var uptimePercent = parseUptime(data.uptime || '0m');
+		var versionInfo = compareVersion(data.version, data.latest);
+		var colors = getComputedStyle(document.documentElement);
+		
+		html += '<div class="et-metrics-grid">';
+		
+		html += '<div class="et-metric-item">';
+		html += '<div class="et-metric-icon">' + createSVGCircle(cpuPercent, getColorByPercent(cpuPercent, 'cpu'), 36) + '</div>';
+		html += '<div class="et-metric-info">';
+		html += '<div class="et-metric-label">CPU</div>';
+		html += '<div class="et-metric-value">' + (data.cpu || '-') + '</div>';
+		html += '</div></div>';
+		
+		html += '<div class="et-metric-item">';
+		html += '<div class="et-metric-icon">' + createSVGIcon('memory', getMemColor(data.mem || '0 MB')) + '</div>';
+		html += '<div class="et-metric-info">';
+		html += '<div class="et-metric-label"><%=translate("Memory")%></div>';
+		html += '<div class="et-metric-value mem-level-' + memLevel + '">' + (data.mem || '-') + '</div>';
+		html += '</div></div>';
+		
+		html += '<div class="et-metric-item">';
+		html += '<div class="et-metric-icon">' + createSVGIcon('clock', colors.getPropertyValue('--info').trim()) + '</div>';
+		html += '<div class="et-metric-info">';
+		html += '<div class="et-metric-label"><%=translate("Uptime")%></div>';
+		html += '<div class="et-metric-value">' + (data.uptime || '-') + '</div>';
+		html += '</div></div>';
+		
+		var serviceType = name.indexOf('Core') !== -1 ? 'core' : 'web';
+		html += '<div class="et-metric-item" onclick="showVersionModal(\'' + serviceType + '\')" style="cursor:pointer;">';
+		html += '<div class="et-metric-icon">' + createSVGIcon('version', versionInfo.match ? colors.getPropertyValue('--success').trim() : colors.getPropertyValue('--warning').trim()) + '</div>';
+		html += '<div class="et-metric-info">';
+		html += '<div class="et-metric-label"><%=translate("Version")%></div>';
+		html += '<div class="et-metric-value">';
+		var displayVersion = data.version === 'unknown' ? '<%=translate("Unknown")%>' : data.version;
+		html += '<span>' + (displayVersion || '-') + '</span>';
+		if (!versionInfo.match && versionInfo.latest && data.version !== 'unknown') {
+			html += '<span class="et-version-badge"><%=translate("New")%>: ' + versionInfo.latest + '</span>';
+		}
+		html += '</div>';
+		html += '</div></div>';
+		
+		html += '</div>';
+		
+		if (data.port && data.port !== 0) {
+			html += '<button class="et-btn" onclick="window.open(\'<%=protocol%>' + window.location.hostname + ':' + data.port + '\')"><%=translate("Web Console")%></button>';
+		}
+	}
+	// 未运行时不显示额外内容，header的"Stopped"徽章已经足够
+	
+	html += '</div>';
+	return html;
+}
+
+function updateStatus(data) {
+	var container = document.getElementById('easytier_status');
+	if (!data || !container) return;
+	
+	var html = '';
+	html += renderService('EasyTier Core', {
+		cpu: data.etcpu,
+		mem: data.etram,
+		uptime: data.etsta,
+		version: data.ettag,
+		latest: data.etnewtag
+	}, data.crunning);
+	
+	html += renderService('EasyTier Web', {
+		cpu: data.etwebcpu,
+		mem: data.etwebram,
+		uptime: data.etwebsta,
+		version: data.etwebtag,
+		latest: data.etnewtag,
+		port: data.port
+	}, data.wrunning);
+	
+	container.innerHTML = html;
+}
+
+var actionCooldown = false;
+
+function showToast(message) {
+	var toast = document.getElementById('etToast');
+	if (!toast) {
+		toast = document.createElement('div');
+		toast.id = 'etToast';
+		toast.className = 'et-toast';
+		document.body.appendChild(toast);
+	}
+	toast.textContent = message;
+	toast.classList.add('show');
+	setTimeout(function() {
+		toast.classList.remove('show');
+	}, 3000);
+}
+
+function setControlsDisabled(disabled) {
+	document.getElementById('coreSwitch').disabled = disabled;
+	document.getElementById('webSwitch').disabled = disabled;
+	document.getElementById('restartBtn').disabled = disabled;
+}
+
+var firstLoad = true;
+
+function showRestartModal() {
+	if (firstLoad) return;
+	document.getElementById('restart_modal').classList.add('show');
+}
+
+function closeRestartModal() {
+	document.getElementById('restart_modal').classList.remove('show');
+}
+
+function confirmRestart() {
+	closeRestartModal();
+	
+	if (actionCooldown) {
+		showToast('<%=translate("Please wait, operation in progress...")%>');
+		return;
+	}
+	
+	actionCooldown = true;
+	setControlsDisabled(true);
+	showToast('<%=translate("Restarting service...")%>');
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "restart_service")%>', true);
+	xhr.onload = function() {
+		setTimeout(function() { 
+			actionCooldown = false;
+			setControlsDisabled(false);
+		}, 5000);
+	};
+	xhr.onerror = function() {
+		setTimeout(function() { 
+			actionCooldown = false;
+			setControlsDisabled(false);
+		}, 5000);
+	};
+	xhr.send();
+}
+
+function restartService() {
+	if (firstLoad) return false;
+	showRestartModal();
+	return false;
+}
+
+function toggleCore(enabled) {
+	if (firstLoad || actionCooldown) {
+		document.getElementById('coreSwitch').checked = !enabled;
+		return;
+	}
+	
+	actionCooldown = true;
+	setControlsDisabled(true);
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "toggle_core")%>?enabled=' + (enabled ? '1' : '0'), true);
+	xhr.onload = function() {
+		setTimeout(function() { 
+			actionCooldown = false;
+			setControlsDisabled(false);
+		}, 3000);
+	};
+	xhr.onerror = function() {
+		setTimeout(function() { 
+			actionCooldown = false;
+			setControlsDisabled(false);
+		}, 3000);
+	};
+	xhr.send();
+}
+
+function toggleWeb(enabled) {
+	if (firstLoad || actionCooldown) {
+		document.getElementById('webSwitch').checked = !enabled;
+		return;
+	}
+	
+	actionCooldown = true;
+	setControlsDisabled(true);
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "toggle_web")%>?enabled=' + (enabled ? '1' : '0'), true);
+	xhr.onload = function() {
+		setTimeout(function() { 
+			actionCooldown = false;
+			setControlsDisabled(false);
+		}, 3000);
+	};
+	xhr.onerror = function() {
+		setTimeout(function() { 
+			actionCooldown = false;
+			setControlsDisabled(false);
+		}, 3000);
+	};
+	xhr.send();
+}
+
+document.getElementById('coreSwitch').addEventListener('change', function() {
+	if (firstLoad) {
+		this.checked = !this.checked;
+		return;
+	}
+	toggleCore(this.checked);
+});
+
+document.getElementById('webSwitch').addEventListener('change', function() {
+	if (firstLoad) {
+		this.checked = !this.checked;
+		return;
+	}
+	toggleWeb(this.checked);
+});
+
+var tunTrafficData = {
+	labels: [],
+	rx: [],
+	tx: []
+};
+var tunTrafficChart = null;
+var lastTunRx = 0;
+var lastTunTx = 0;
+
+function initTunTrafficChart() {
+	var canvas = document.getElementById('tun_traffic_chart');
+	if (!canvas || tunTrafficChart) return;
+	
+	canvas.width = canvas.offsetWidth;
+	canvas.height = 200;
+	
+	tunTrafficChart = {
+		canvas: canvas,
+		ctx: canvas.getContext('2d'),
+		data: tunTrafficData
+	};
+}
+
+function updateTunTrafficChart() {
+	if (!tunTrafficChart) return;
+	
+	var ctx = tunTrafficChart.ctx;
+	var canvas = tunTrafficChart.canvas;
+	var data = tunTrafficChart.data;
+	
+	canvas.width = canvas.offsetWidth;
+	
+	var colors = getComputedStyle(document.documentElement);
+	var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+	
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	
+	if (data.labels.length === 0) return;
+	
+	var paddingLeft = 70;
+	var paddingRight = 20;
+	var paddingTop = 30;
+	var paddingBottom = 30;
+	var width = canvas.width - paddingLeft - paddingRight;
+	var height = canvas.height - paddingTop - paddingBottom;
+	
+	var maxValue = Math.max.apply(null, data.rx.concat(data.tx));
+	if (maxValue === 0) maxValue = 100;
+	maxValue = maxValue * 1.2;
+	
+	ctx.strokeStyle = isDark ? '#3e3e3e' : '#e8e8e8';
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	for (var i = 0; i <= 5; i++) {
+		var y = paddingTop + (height / 5) * i;
+		ctx.moveTo(paddingLeft, y);
+		ctx.lineTo(paddingLeft + width, y);
+	}
+	ctx.stroke();
+	
+	ctx.fillStyle = colors.getPropertyValue('--text-secondary').trim();
+	ctx.font = '11px sans-serif';
+	ctx.textAlign = 'right';
+	ctx.textBaseline = 'middle';
+	for (var i = 0; i <= 5; i++) {
+		var y = paddingTop + (height / 5) * i;
+		var value = maxValue * (1 - i / 5);
+		ctx.fillText(formatBytes(value) + '/s', paddingLeft - 10, y);
+	}
+	
+	function drawLine(dataArray, color) {
+		if (dataArray.length < 2) return;
+		
+		var gradient = ctx.createLinearGradient(0, paddingTop, 0, paddingTop + height);
+		gradient.addColorStop(0, color + '40');
+		gradient.addColorStop(1, color + '00');
+		
+		ctx.beginPath();
+		ctx.moveTo(paddingLeft, paddingTop + height);
+		
+		for (var i = 0; i < dataArray.length; i++) {
+			var x = paddingLeft + (width / (dataArray.length - 1)) * i;
+			var y = paddingTop + height - (dataArray[i] / maxValue) * height;
+			ctx.lineTo(x, y);
+		}
+		
+		ctx.lineTo(paddingLeft + width, paddingTop + height);
+		ctx.closePath();
+		ctx.fillStyle = gradient;
+		ctx.fill();
+		
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 2.5;
+		ctx.beginPath();
+		
+		for (var i = 0; i < dataArray.length; i++) {
+			var x = paddingLeft + (width / (dataArray.length - 1)) * i;
+			var y = paddingTop + height - (dataArray[i] / maxValue) * height;
+			
+			if (i === 0) {
+				ctx.moveTo(x, y);
+			} else {
+				ctx.lineTo(x, y);
+			}
+		}
+		ctx.stroke();
+		
+		if (dataArray.length > 0) {
+			var lastX = paddingLeft + width;
+			var lastY = paddingTop + height - (dataArray[dataArray.length - 1] / maxValue) * height;
+			
+			ctx.beginPath();
+			ctx.arc(lastX, lastY, 4, 0, 2 * Math.PI);
+			ctx.fillStyle = color;
+			ctx.fill();
+		}
+	}
+	
+	drawLine(data.rx, colors.getPropertyValue('--success').trim());
+	drawLine(data.tx, colors.getPropertyValue('--info').trim());
+	
+	ctx.fillStyle = colors.getPropertyValue('--text-secondary').trim();
+	ctx.font = '10px sans-serif';
+	ctx.textAlign = 'center';
+	
+	var isMobile = canvas.width < 600;
+	var maxLabels = isMobile ? 4 : 6;
+	var step = Math.max(1, Math.floor(data.labels.length / maxLabels));
+	
+	for (var i = 0; i < data.labels.length; i += step) {
+		var x = paddingLeft + (width / (data.labels.length - 1)) * i;
+		ctx.fillText(data.labels[i], x, paddingTop + height + 20);
+	}
+}
+
+function formatBytes(bytes) {
+	if (bytes === 0) return '0 B';
+	var k = 1024;
+	var sizes = ['B', 'KB', 'MB', 'GB'];
+	var i = Math.floor(Math.log(bytes) / Math.log(k));
+	return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+}
+
+function updateTunInterface(coreRunning, noTun, devName) {
+	var card = document.getElementById('tun_interface_card');
+	
+	if (!coreRunning || noTun) {
+		card.style.display = 'none';
+		return;
+	}
+	
+	var ifname = devName || 'tun0';
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "get_tun_info")%>?ifname=' + encodeURIComponent(ifname), true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			try {
+				var response = JSON.parse(xhr.responseText);
+				if (response.success && response.exists) {
+					card.style.display = 'block';
+					document.getElementById('tun_interface_name').textContent = ifname;
+					
+					var html = '';
+					html += '<div class="et-metric-item">';
+					html += '<div class="et-metric-info">';
+					html += '<div class="et-metric-label">IPv4 <%=translate("Address")%></div>';
+					html += '<div class="et-metric-value">' + (response.ip || '-') + '</div>';
+					html += '</div></div>';
+					
+					html += '<div class="et-metric-item">';
+					html += '<div class="et-metric-info">';
+					html += '<div class="et-metric-label"><%=translate("Interface Netmask")%></div>';
+					html += '<div class="et-metric-value">' + (response.netmask || '-') + '</div>';
+					html += '</div></div>';
+					
+					if (response.ipv6) {
+						html += '<div class="et-metric-item">';
+						html += '<div class="et-metric-info">';
+						html += '<div class="et-metric-label">IPv6 <%=translate("Address")%></div>';
+						html += '<div class="et-metric-value">' + response.ipv6 + '</div>';
+						html += '</div></div>';
+					}
+					
+					html += '<div class="et-metric-item">';
+					html += '<div class="et-metric-info">';
+					html += '<div class="et-metric-label">MTU</div>';
+					html += '<div class="et-metric-value">' + (response.mtu || '-') + '</div>';
+					html += '</div></div>';
+					
+					html += '<div class="et-metric-item">';
+					html += '<div class="et-metric-info">';
+					html += '<div class="et-metric-label"><%=translate("State")%></div>';
+					html += '<div class="et-metric-value">' + (response.state || '-') + '</div>';
+					html += '</div></div>';
+					
+					document.getElementById('tun_interface_info').innerHTML = html;
+					
+					if (!tunTrafficChart) {
+						initTunTrafficChart();
+					}
+					
+					var now = new Date();
+					var timeStr = now.getHours() + ':' + ('0' + now.getMinutes()).slice(-2) + ':' + ('0' + now.getSeconds()).slice(-2);
+					
+					var rxSpeed = 0;
+					var txSpeed = 0;
+					
+					if (lastTunRx > 0 && response.rx_bytes > lastTunRx) {
+						rxSpeed = (response.rx_bytes - lastTunRx) / 3;
+					}
+					if (lastTunTx > 0 && response.tx_bytes > lastTunTx) {
+						txSpeed = (response.tx_bytes - lastTunTx) / 3;
+					}
+					
+					lastTunRx = response.rx_bytes;
+					lastTunTx = response.tx_bytes;
+					
+					document.getElementById('tun_rx_speed').textContent = formatBytes(rxSpeed) + '/s';
+					document.getElementById('tun_tx_speed').textContent = formatBytes(txSpeed) + '/s';
+					document.getElementById('tun_total_rx').textContent = formatBytes(response.rx_bytes);
+					document.getElementById('tun_total_tx').textContent = formatBytes(response.tx_bytes);
+					
+					tunTrafficData.labels.push(timeStr);
+					tunTrafficData.rx.push(rxSpeed);
+					tunTrafficData.tx.push(txSpeed);
+					
+					if (tunTrafficData.labels.length > 20) {
+						tunTrafficData.labels.shift();
+						tunTrafficData.rx.shift();
+						tunTrafficData.tx.shift();
+					}
+					
+					updateTunTrafficChart();
+				} else {
+					card.style.display = 'none';
+				}
+			} catch (e) {
+				card.style.display = 'none';
+			}
+		}
+	};
+	xhr.send();
+}
+
+var firstLoad = true;
+XHR.poll(3, '<%=url("admin", "vpn", "easytier", "api_status")%>', null, function(x, data) {
+	updateStatus(data);
+	
+	updateTunInterface(data.crunning, data.no_tun, data.dev_name);
+	
+	// 使用配置值初始化开关状态
+	var coreSwitch = document.getElementById('coreSwitch');
+	var webSwitch = document.getElementById('webSwitch');
+	
+	coreSwitch.checked = data.cenabled;
+	webSwitch.checked = data.wenabled;
+	
+	// 首次加载完成后启用控件
+	if (firstLoad && !actionCooldown) {
+		setControlsDisabled(false);
+		firstLoad = false;
+	}
+});
 //]]>
 </script>
-<fieldset class="cbi-section">
-    <p id="easytier_status">
-        <em><%:Collecting data...%></em>
-    </p>
-</fieldset>
+
+<div class="version-modal" id="version_modal">
+	<div class="version-modal-content">
+		<div class="version-modal-title"><%=translate("Refresh Version")%></div>
+		<div class="version-modal-message"><%=translate("Clear cached version and fetch latest version from GitHub?")%></div>
+		<div class="version-modal-buttons">
+			<button class="version-modal-btn version-modal-btn-cancel" onclick="closeVersionModal(); return false;"><%=translate("Cancel")%></button>
+			<button class="version-modal-btn version-modal-btn-confirm" onclick="confirmRefreshVersion(); return false;"><%=translate("Confirm")%></button>
+		</div>
+	</div>
+</div>
+
+<div class="version-modal" id="restart_modal">
+	<div class="version-modal-content">
+		<div class="version-modal-title"><%=translate("Restart Service")%></div>
+		<div class="version-modal-message"><%=translate("Restart EasyTier service?")%></div>
+		<div class="version-modal-buttons">
+			<button class="version-modal-btn version-modal-btn-cancel" onclick="closeRestartModal(); return false;"><%=translate("Cancel")%></button>
+			<button class="version-modal-btn version-modal-btn-confirm" onclick="confirmRestart(); return false;"><%=translate("Confirm")%></button>
+		</div>
+	</div>
+</div>
+
+<script>
+var currentVersionType = '';
+
+function showVersionModal(type) {
+	currentVersionType = type;
+	document.getElementById('version_modal').classList.add('show');
+}
+
+function closeVersionModal() {
+	document.getElementById('version_modal').classList.remove('show');
+}
+
+function confirmRefreshVersion() {
+	closeVersionModal();
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "clear_version_cache")%>?type=' + currentVersionType, true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			XHR.poll(0);
+		}
+	};
+	xhr.send();
+}
+</script>

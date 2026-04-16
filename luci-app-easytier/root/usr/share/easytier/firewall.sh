@@ -187,8 +187,18 @@ setup_web_firewall() {
 	fi
 }
 
-# 应用防火墙和网络配置更改
+# 应用防火墙和网络配置更改（延迟后台执行）
 apply_network_changes() {
-	[ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
-	[ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1
+	if [ -n "$(uci changes network)" ] || [ -n "$(uci changes firewall)" ]; then
+		(
+			sleep 5
+			LOCK_FILE="/var/lock/easytier_reload.lock"
+			if [ ! -f "$LOCK_FILE" ]; then
+				touch "$LOCK_FILE"
+				[ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
+				[ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1
+				rm -f "$LOCK_FILE"
+			fi
+		) &
+	fi
 }

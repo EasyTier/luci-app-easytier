@@ -72,6 +72,14 @@ msgstr ""
 msgid "Allow traffic from WAN to EasyTier virtual network"
 msgstr ""
 
+#: applications/luci-app-easytier/luasrc/view/easytier/easytier_unified_log.htm:210
+msgid "Stop Auto Refresh"
+msgstr ""
+
+#: applications/luci-app-easytier/luasrc/view/easytier/easytier_unified_log.htm:210
+msgid "Start Auto Refresh"
+msgstr ""
+
 #: applications/luci-app-easytier/luasrc/view/easytier/easytier_log.htm:30
 #: applications/luci-app-easytier/luasrc/view/easytier/easytierweb_log.htm:30
 msgid "Auto Refresh"
@@ -1090,3 +1098,308 @@ msgstr ""
 msgid "If true, allow relay kcp packets from foreign network. default is false (not forward foreign network kcp packets). (--enable-relay-foreign-network-kcp parameter)"
 msgstr ""
 
+msgid "Auto Configure Interface"
+msgstr ""
+
+msgid "Automatically create and configure the EasyTier network interface"
+msgstr ""
+
+msgid "Interface Netmask"
+msgstr ""
+
+msgid "Subnet mask for the EasyTier interface (default: 255.0.0.0)"
+msgstr ""
+
+msgid "Auto Configure Firewall"
+msgstr ""
+
+msgid "Automatically add and manage firewall rules"
+msgstr ""
+
+msgid "GitHub Proxy URLs"
+msgstr ""
+
+msgid "Used to accelerate GitHub downloads when fetching binaries online"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "No proxy configured"
+msgstr ""
+
+msgid "No proxy configured, using default proxy"
+msgstr ""
+
+msgid "Please enter proxy URL"
+msgstr ""
+
+msgid "Invalid URL format"
+msgstr ""
+
+msgid "Proxy already exists"
+msgstr ""
+
+msgid "Proxy added successfully"
+msgstr ""
+
+msgid "Space-separated list of GitHub proxy URLs for downloading binaries. Leave empty to use default proxies."
+msgstr ""
+
+msgid "Fallback Version"
+msgstr ""
+
+msgid "Fallback version to use when unable to fetch the latest version from GitHub."
+msgstr ""
+
+msgid "Logs"
+msgstr ""
+
+msgid "EasyTier Core"
+msgstr ""
+
+msgid "EasyTier Web"
+msgstr ""
+
+msgid "All Levels"
+msgstr ""
+
+msgid "Auto Refresh"
+msgstr ""
+
+msgid "Stop Auto Refresh"
+msgstr ""
+
+msgid "Start Auto Refresh"
+msgstr ""
+
+msgid "Clear Logs"
+msgstr ""
+
+msgid "Download Log"
+msgstr ""
+
+msgid "Loading logs..."
+msgstr ""
+
+msgid "No logs available"
+msgstr ""
+
+msgid "Logs cleared"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Running"
+msgstr ""
+
+msgid "Stopped"
+msgstr ""
+
+msgid "Memory"
+msgstr ""
+
+msgid "Uptime"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Refresh Version"
+msgstr ""
+
+msgid "Clear cached version and fetch latest version from GitHub?"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Confirm"
+msgstr ""
+
+msgid "Web Console"
+msgstr ""
+
+msgid "Service not running"
+msgstr ""
+
+msgid "Collecting data..."
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Quick Actions"
+msgstr ""
+
+msgid "Restart Service"
+msgstr ""
+
+msgid "Restart EasyTier service?"
+msgstr ""
+
+msgid "Please wait, operation in progress..."
+msgstr ""
+
+msgid "Restarting service..."
+msgstr ""
+
+msgid "Upload Program"
+msgstr ""
+
+msgid "Upload EasyTier Binary"
+msgstr ""
+
+msgid "Drag and drop file here or click to browse"
+msgstr ""
+
+msgid "Select File"
+msgstr ""
+
+msgid "Uploading..."
+msgstr ""
+
+msgid "Supported Files"
+msgstr ""
+
+msgid "Core service binary"
+msgstr ""
+
+msgid "Command line tool"
+msgstr ""
+
+msgid "Web console binary"
+msgstr ""
+
+msgid "Embedded web console"
+msgstr ""
+
+msgid "Download from"
+msgstr ""
+
+msgid "Upload Successful"
+msgstr ""
+
+msgid "Binary uploaded successfully. Restart the service to apply changes?"
+msgstr ""
+
+msgid "Restart the service to apply changes?"
+msgstr ""
+
+msgid "Later"
+msgstr ""
+
+msgid "Restart Now"
+msgstr ""
+
+msgid "Invalid file name"
+msgstr ""
+
+msgid "Only easytier binaries or compressed archives (.zip, .tar.gz, .tar) are allowed"
+msgstr ""
+
+msgid "Upload failed"
+msgstr ""
+
+msgid "Network error"
+msgstr ""
+
+msgid "Service restarted successfully"
+msgstr ""
+
+msgid "Restart failed"
+msgstr ""
+
+msgid "No changes to save"
+msgstr ""
+
+msgid "Configuration"
+msgstr ""
+
+msgid "Save Configuration"
+msgstr ""
+
+msgid "Configuration saved successfully"
+msgstr ""
+
+msgid "Save failed"
+msgstr ""
+
+msgid "Recommended"
+msgstr ""
+
+msgid "Will be ignored, use embed version instead"
+msgstr ""
+
+msgid "Note"
+msgstr ""
+
+msgid "Files will be uploaded to the paths specified above"
+msgstr ""
+
+msgid "EasyTier console uses easytier-web-embed. The easytier-web binary will be rejected during upload validation."
+msgstr ""
+
+msgid "Compressed archive containing binaries"
+msgstr ""
+
+msgid "Drag *.tar.gz / *.zip / easytier binaries here or click to select file"
+msgstr ""
+
+msgid "Used when unable to fetch the latest version during online download"
+msgstr ""
+
+msgid "Error: Program not running! Please start the program and refresh"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Failed to connect to RPC server. Please check if the RPC port is set to 15888 in the configuration."
+msgstr ""
+
+msgid "Self-hosted Web Console"
+msgstr ""
+
+msgid "Enable Self-hosted Web Console"
+msgstr ""
+
+msgid "Log Level"
+msgstr ""
+
+msgid "Runtime log located at"
+msgstr ""
+
+msgid "viewable in the log section"
+msgstr ""
+
+msgid "Log levels"
+msgstr ""
+
+msgid "parameter"
+msgstr ""
+
+msgid "Example"
+msgstr ""
+
+msgid "current device IP or domain"
+msgstr ""
+
+msgid "API port"
+msgstr ""
+
+msgid "GeoIP2 database file path used to locate the client"
+msgstr ""
+
+msgid "Defaults to an embedded file (country-level information only)"
+msgstr ""
+
+msgid "GEOIP Database Path"
+msgstr ""

@@ -58,23 +58,30 @@ jobs:
           - SNAPSHOT
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Cache OpenWrt SDK
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             /opt/openwrt-sdk-${{ matrix.arch }}-${{ matrix.sdk }}
             dl
           key: sdk-${{ matrix.arch }}-${{ matrix.sdk }}
           
-      - name: Overwrite i18n file
+      - name: Create i18n uci-defaults file
         run: |
+          mkdir -p luci-app-easytier/root/etc/uci-defaults
           cat > luci-app-easytier/root/etc/uci-defaults/luci-i18n-easytier-zh-cn << 'EOF'
           #!/bin/sh
+          uci -q batch << EOI
+          set luci.languages.zh_cn='简体中文 (Simplified Chinese)'
+          commit luci
+          EOI
+          rm -f /tmp/luci-indexcache /tmp/luci-modulecache/*
           exit 0
           EOF
+          chmod +x luci-app-easytier/root/etc/uci-defaults/luci-i18n-easytier-zh-cn
           
       - name: Building packages
         uses: openwrt/gh-action-sdk@main
@@ -89,7 +96,7 @@ jobs:
           V: s
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.arch }}-${{ matrix.sdk }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*

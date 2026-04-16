@@ -2,35 +2,16 @@ local http = luci.http
 local nixio = require "nixio"
 
 m = Map("easytier")
-m.description = translate("A simple, secure, decentralized VPN solution for intranet penetration, implemented in Rust using the Tokio framework. "
-        .. "Project URL: <a href=\"https://github.com/EasyTier/EasyTier\" target=\"_blank\">github.com/EasyTier/EasyTier</a>&nbsp;&nbsp;"
-        .. "<a href=\"http://easytier.cn\" target=\"_blank\">Official Documentation</a>&nbsp;&nbsp;"
-        .. "<a href=\"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jhP2Z4UsEZ8wvfGPLrs0VwLKn_uz0Q_p&authKey=OGKSQLfg61YPCpVQuvx%2BxE7hUKBVBEVi9PljrDKbHlle6xqOXx8sOwPPTncMambK&noverify=0&group_code=949700262\" target=\"_blank\">QQ Group</a>&nbsp;&nbsp;")
-  
-m:section(SimpleSection).template  = "easytier/easytier_status"
 
 -- easytier-core
-s=m:section(TypedSection, "easytier", translate("EasyTier Configuration"))
+s=m:section(TypedSection, "easytier")
 s.addremove=false
 s.anonymous=true
 s:tab("general", translate("General Settings"))
 s:tab("privacy", translate("Advanced Settings"))
-s:tab("webconsole", translate("Self-hosted Web Server"))
-s:tab("infos", translate("Connection Info"))
-s:tab("upload", translate("Upload Program"))
 
 switch = s:taboption("general",Flag, "enabled", translate("Enable"))
 switch.rmempty = false
-
-btncq = s:taboption("general", Button, "btncq", translate("Restart"))
-btncq.inputtitle = translate("Restart")
-btncq.description = translate("Quickly restart once without modifying any parameters")
-btncq.inputstyle = "apply"
-btncq:depends("enabled", "1")
-btncq.write = function()
-  luci.sys.call("rm -rf /tmp/easytier*.tag /tmp/easytier*.newtag >/dev/null 2>&1 &") -- 执行删除版本号信息
-  luci.sys.call("/etc/init.d/easytier restart >/dev/null 2>&1 &")  -- 执行重启命令
-end
 
 etcmd = s:taboption("general", ListValue, "etcmd", translate("Startup Method"),
         translate("Official Web Console: <a href=\"https://easytier.cn/web\" target=\"_blank\">https://easytier.cn/web</a><br>"
@@ -113,8 +94,6 @@ peeradd = s:taboption("general", DynamicList, "peeradd", translate("Peer Nodes")
         translate("Initial connected peer nodes (-p parameter)<br>"
                 .. "Public server status check: <a href='https://uptime.easytier.cn' target='_blank'>"
                 .. "Click here to check</a>"))
-peeradd.placeholder = "tcp://public.easytier.top:11010"
-peeradd:value("tcp://public.easytier.top:11010", translate("Official Server - tcp://public.easytier.top:11010"))
 peeradd:depends("etcmd", "etcmd")
 
 --[=[
@@ -471,8 +450,9 @@ et_forward:value("etfwlan", translate("Allow traffic from EasyTier virtual netwo
 et_forward:value("etfwwan", translate("Allow traffic from EasyTier virtual network to WAN"))
 et_forward:value("lanfwet", translate("Allow traffic from LAN to EasyTier virtual network"))
 et_forward:value("wanfwet", translate("Allow traffic from WAN to EasyTier virtual network"))
-et_forward.default = "etfwlan etfwwan lanfwet"
 et_forward.rmempty = true
+et_forward.optional = true
+et_forward:depends("auto_config_firewall", "1")
 
 check = s:taboption("privacy", Flag, "check", translate("Connectivity Check"),
         translate("Enable connectivity check to specify remote device IPs; if all specified IPs fail to ping, "
@@ -491,194 +471,5 @@ for s = 1, 60 do
     checktime:value(s)
 end
 checktime:depends("check", "1")
-
-local process_status = luci.sys.exec("ps | grep easytier-core| grep -v grep")
-
--- 连接信息 tab - 使用 HTM 模板展示
-conninfo = s:taboption("infos", DummyValue, "_conninfo")
-conninfo.template = "easytier/easytier_conninfo"
-conninfo.rawhtml = true
-
-btnrm = s:taboption("infos", Button, "btnrm")
-btnrm.inputtitle = translate("Check for Updates")
-btnrm.description = translate("Click the button to start checking for updates and refresh the version display in the status bar above")
-btnrm.inputstyle = "apply"
-btnrm.write = function()
-  os.execute("rm -rf /tmp/easytier*.tag /tmp/easytier*.newtag /tmp/easytier-core_*")
-end
-
-
-easytierbin = s:taboption("upload", Value, "easytierbin", translate("easytier-core Binary Path"),
-        translate("Customize the storage path for easytier-core. Make sure to provide the full path and filename. "
-                .. "If the specified path has insufficient space, it will automatically move to /tmp/easytier-core"))
-easytierbin.placeholder = "/usr/bin/easytier-core"
-easytierbin.default = "/usr/bin/easytier-core"
-
-webbin = s:taboption("upload", Value, "webbin", translate("easytier-web Binary Path"),
-        translate("Customize the storage path for easytier-web. Make sure to provide the full path and filename, "
-                .. "then upload the installer"))
-webbin.placeholder = "/usr/bin/easytier-web"
-webbin.default = "/usr/bin/easytier-web"
-
-github_proxys = s:taboption("upload", Value, "github_proxys", translate("GitHub Proxy URLs"),
-        translate("Space-separated list of GitHub proxy URLs for downloading binaries. "
-                .. "Leave empty to use default proxies."))
-github_proxys.placeholder = "https://ghproxy.net/ https://gh-proxy.com/"
-
-fallback_version = s:taboption("upload", Value, "fallback_version", translate("Fallback Version"),
-        translate("Fallback version to use when unable to fetch the latest version from GitHub."))
-fallback_version.placeholder = "v2.5.0"
-fallback_version.default = "v2.5.0"
-
-local upload = s:taboption("upload", FileUpload, "upload_file")
-upload.optional = true
-upload.default = ""
-upload.template = "easytier/other_upload"
-upload.description = translate("You can directly upload the binary programs easytier-core and easytier-cli, or a compressed .zip archive. "
-        .. "Uploading a new version will automatically overwrite the old one. Download link: "
-        .. "<a href='https://github.com/EasyTier/EasyTier/releases' target='_blank'>github.com/EasyTier/EasyTier</a><br>"
-        .. "The uploaded files will be saved in the /tmp folder. If a custom program path is specified, "
-        .. "the program will be automatically moved to that path when started.<br>")
-local um = s:taboption("upload",DummyValue, "", nil)
-um.template = "easytier/other_dvalue"
-
-local dir, fd, chunk
-dir = "/tmp/"
-nixio.fs.mkdir(dir)
-http.setfilehandler(
-    function(meta, chunk, eof)
-        if not fd then
-            if not meta then return end
-
-            if meta and chunk then fd = nixio.open(dir .. meta.file, "w") end
-
-            if not fd then
-                um.value = translate("Error: Upload failed!")
-                return
-            end
-        end
-
-        if chunk and fd then
-            fd:write(chunk)
-        end
-
-        if eof and fd then
-            fd:close()
-            fd = nil
-            um.value = translate("File has been uploaded to") .. ' "/tmp/' .. meta.file .. '"'
-
-            if string.sub(meta.file, -4) == ".zip" then
-                local file_path = dir .. meta.file
-                os.execute("unzip -q " .. file_path .. " -d " .. dir)
-                local extracted_dir = "/tmp/easytier-linux-*/"
-                os.execute("mv " .. extracted_dir .. "easytier-cli /tmp/easytier-cli")
-                os.execute("mv " .. extracted_dir .. "easytier-core /tmp/easytier-core")
-                os.execute("mv " .. extracted_dir .. "easytier-web-embed /tmp/easytier-web-embed")
-                if nixio.fs.access("/tmp/easytier-cli") then
-                    um.value = um.value .. "\n" .. translate("- Program /tmp/easytier-cli uploaded successfully, restart the plugin to take effect")
-                end
-                if nixio.fs.access("/tmp/easytier-core") then
-                    um.value = um.value .. "\n" .. translate("- Program /tmp/easytier-core uploaded successfully, restart the plugin to take effect")
-                end
-                if nixio.fs.access("/tmp/easytier-web-embed") then
-                    um.value = um.value .. "\n" .. translate("- Program /tmp/easytier-web uploaded successfully, restart the plugin to take effect")
-                end
-            end
-
-	        if string.sub(meta.file, -7) == ".tar.gz" then
-                local file_path = dir .. meta.file
-                os.execute("tar -xzf " .. file_path .. " -C " .. dir)
-		        local extracted_dir = "/tmp/easytier-linux-*/"
-                os.execute("mv " .. extracted_dir .. "easytier-cli /tmp/easytier-cli")
-                os.execute("mv " .. extracted_dir .. "easytier-core /tmp/easytier-core")
-		        os.execute("mv " .. extracted_dir .. "easytier-web-embed /tmp/easytier-web-embed")
-                if nixio.fs.access("/tmp/easytier-cli") then
-                    um.value = um.value .. "\n" .. translate("- Program /tmp/easytier-cli uploaded successfully, restart the plugin to take effect")
-                end
-                if nixio.fs.access("/tmp/easytier-core") then
-                    um.value = um.value .. "\n" .. translate("- Program /tmp/easytier-core uploaded successfully, restart the plugin to take effect")
-                end
-                if nixio.fs.access("/tmp/easytier-web-embed") then
-                    um.value = um.value .. "\n" .. translate("- Program /tmp/easytier-web uploaded successfully, restart the plugin to take effect")
-                end
-            end
-
-            os.execute("chmod +x /tmp/easytier-core")
-            os.execute("chmod +x /tmp/easytier-cli")
-            os.execute("chmod +x /tmp/easytier-web-embed")
-		   
-        end
-    end
-)
-if luci.http.formvalue("upload") then
-    local f = luci.http.formvalue("ulfile")
-end
-
--- Self-hosted Web Console tab options
-
-web_enabled = s:taboption("webconsole", Flag, "web_enabled", translate("Enable"))
-web_enabled.rmempty = false
-
-web_btncq = s:taboption("webconsole", Button, "web_btncq", translate("Restart"))
-web_btncq.inputtitle = translate("Restart")
-web_btncq.description = translate("Quickly restart once without modifying any parameters")
-web_btncq.inputstyle = "apply"
-web_btncq.write = function()
-  luci.sys.call("/etc/init.d/easytier restart >/dev/null 2>&1 &")
-end
-
-web_db_path = s:taboption("webconsole", Value, "web_db_path", translate("Database File Path"),
-        translate("Path to the sqlite3 database file used to store all data. (-d parameter)"))
-web_db_path.default = "/etc/easytier/et.db"
-
-web_protocol = s:taboption("webconsole", ListValue, "web_protocol", translate("Listening Protocol"),
-        translate("Configure the server's listening protocol for easytier-core to connect. (-p parameter)"))
-web_protocol.default = "udp"
-web_protocol:value("udp",translate("UDP"))
-web_protocol:value("tcp",translate("TCP"))
-web_protocol:value("ws",translate("WS"))
-
-web_port = s:taboption("webconsole", Value, "web_port", translate("Server Port"),
-        translate("Configure the server's listening port for easytier-core to connect. (-c parameter)"))
-web_port.datatype = "range(1,65535)"
-web_port.placeholder = "22020"
-web_port.default = "22020"
-
-web_fw_web = s:taboption("webconsole", Flag, "web_fw_web", translate("WAN access to WEB"),
-        translate("Automatically add firewall rules to allow WAN access to this WEB console"))
-
-web_api_port = s:taboption("webconsole", Value, "web_api_port", translate("API Port"),
-        translate("Listening port of the RESTful server, used as ApiHost by the web frontend. (-a parameter)"))
-web_api_port.datatype = "range(1,65535)"
-web_api_port.placeholder = "11211"
-web_api_port.default = "11211"
-
-web_html_port = s:taboption("webconsole", Value, "web_html_port", translate("Web Interface Port"),
-        translate("Frontend listening port for the web dashboard server. Leave empty to disable. (-l parameter)"))
-web_html_port.datatype = "range(1,65535)"
-web_html_port.default = "11211"
-
-web_fw_api = s:taboption("webconsole", Flag, "web_fw_api", translate("WAN access to API"),
-        translate("Automatically add firewall rules to allow WAN access to the API control page"))
-
-web_api_host = s:taboption("webconsole", Value, "web_api_host", translate("Default API Server URL"),
-        translate("The URL of the API server, used for connecting the web frontend. (--api-host parameter)<br>"
-                .. "Example: http://[current device IP or resolved domain name]:[API port]"))
-
-web_geoip_db = s:taboption("webconsole", Value, "web_geoip_db", translate("GEOIP_DB Path"),
-        translate("GeoIP2 database file path used to locate the client. Defaults to an embedded file (country-level information only)."
-		.. "<br>Recommended: https://github.com/P3TERX/GeoLite.mmdb (--geoip-db parameter)"))
-web_geoip_db.placeholder = "/etc/easytier/GeoLite.mmdb"
-
-web_weblog = s:taboption("webconsole", ListValue, "web_weblog", translate("Program Log"),
-        translate("Runtime log located at /tmp/easytierweb.log, viewable in the log section above.<br>"
-                .. "Levels: Error < Warning < Info < Debug < Trace"))
-web_weblog.default = "off"
-web_weblog:value("off", translate("Off"))
-web_weblog:value("error", translate("Error"))
-web_weblog:value("warn", translate("Warning"))
-web_weblog:value("info", translate("Info"))
-web_weblog:value("debug", translate("Debug"))
-web_weblog:value("trace", translate("Trace"))
 
 return m

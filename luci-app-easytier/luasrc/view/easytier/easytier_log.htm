@@ -1,49 +1,542 @@
 <%
-local dsp = require "luci.dispatcher"
+local util = require "luci.util"
+local i18n = require "luci.i18n"
+local translate = i18n.translate
 -%>
+<%+header%>
+
+<style>
+:root {
+	--log-bg: #ffffff;
+	--log-text: #333333;
+	--log-border: #e0e0e0;
+	--log-header-bg: #f5f5f5;
+	--log-info: #2196F3;
+	--log-warn: #FF9800;
+	--log-error: #F44336;
+	--log-hover: #f0f0f0;
+	--tab-active: #2196F3;
+	--shadow: rgba(0,0,0,0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--log-bg: #1e1e1e;
+		--log-text: #d4d4d4;
+		--log-border: #3e3e3e;
+		--log-header-bg: #252525;
+		--log-info: #4FC3F7;
+		--log-warn: #FFB74D;
+		--log-error: #EF5350;
+		--log-hover: #2a2a2a;
+		--tab-active: #42A5F5;
+		--shadow: rgba(0,0,0,0.3);
+	}
+}
+
+.log-container {
+	background: var(--log-bg);
+	border-radius: 12px;
+	overflow: hidden;
+	margin: 16px 0;
+	box-shadow: 0 4px 12px var(--shadow);
+	border: 1px solid var(--log-border);
+	transition: box-shadow 0.3s ease;
+}
+
+.log-container:hover {
+	box-shadow: 0 6px 16px var(--shadow);
+}
+
+.log-header {
+	background: var(--log-header-bg);
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--log-border);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.log-tabs {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.log-tab {
+	padding: 10px 20px;
+	border: none;
+	background: transparent;
+	color: #757575;
+	cursor: pointer;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+}
+
+.log-tab:hover {
+	background: var(--log-hover);
+	transform: translateY(-2px);
+}
+
+.log-tab.active {
+	color: var(--tab-active);
+	background: var(--log-hover);
+}
+
+.log-tab.active::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 10%;
+	right: 10%;
+	height: 3px;
+	background: var(--tab-active);
+	border-radius: 3px 3px 0 0;
+	animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+	from {
+		transform: scaleX(0);
+		opacity: 0;
+	}
+	to {
+		transform: scaleX(1);
+		opacity: 1;
+	}
+}
+
+.log-controls {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.log-select {
+	padding: 8px 14px;
+	border: 1px solid var(--log-border);
+	background: var(--log-bg);
+	color: var(--log-text);
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 13px;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.log-select:hover, .log-select:focus {
+	outline: none;
+	border-color: var(--tab-active);
+	box-shadow: 0 2px 8px rgba(33,150,243,0.2);
+	transform: translateY(-1px);
+}
+
+.log-btn {
+	padding: 8px 16px;
+	border: 1px solid var(--log-border);
+	background: var(--log-bg);
+	color: var(--log-text);
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.log-btn:hover {
+	background: var(--log-hover);
+	border-color: var(--tab-active);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.log-btn:active {
+	transform: translateY(0);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.log-btn-primary {
+	background: var(--tab-active);
+	color: white;
+	border-color: var(--tab-active);
+}
+
+.log-btn-primary:hover {
+	opacity: 0.9;
+	box-shadow: 0 4px 12px rgba(33,150,243,0.3);
+}
+
+.log-content {
+	background: var(--log-bg);
+	color: var(--log-text);
+	padding: 20px;
+	height: 500px;
+	overflow-y: auto;
+	font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.8;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+}
+
+.log-line {
+	margin: 2px 0;
+	padding: 4px 10px;
+	border-radius: 0;
+	transition: background 0.15s ease;
+}
+
+.log-line:hover {
+	background: var(--log-hover);
+}
+
+.log-level-INFO { color: var(--log-info); }
+.log-level-WARN { color: var(--log-warn); }
+.log-level-ERROR { color: var(--log-error); }
+.log-level-DEBUG { color: #9E9E9E; }
+.log-level-TRACE { color: #BDBDBD; }
+
+.log-timestamp {
+	color: #9E9E9E;
+	margin-right: 12px;
+	font-weight: 600;
+}
+
+.log-empty {
+	text-align: center;
+	color: #9E9E9E;
+	padding: 60px 20px;
+	font-style: italic;
+	font-size: 14px;
+}
+
+.log-footer {
+	background: var(--log-header-bg);
+	padding: 8px 20px;
+	border-top: 1px solid var(--log-border);
+	font-size: 12px;
+	color: #757575;
+	text-align: right;
+}
+
+.log-size-1 { color: #4CAF50; }
+.log-size-2 { color: #FF9800; }
+.log-size-3 { color: #FF5722; }
+.log-size-4 { color: #F44336; }
+.log-size-5 { color: #D32F2F; font-weight: bold; }
+
+.log-content::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+.log-content::-webkit-scrollbar-track {
+	background: var(--log-header-bg);
+	border-radius: 5px;
+}
+
+.log-content::-webkit-scrollbar-thumb {
+	background: var(--log-border);
+	border-radius: 5px;
+	transition: background 0.3s ease;
+}
+
+.log-content::-webkit-scrollbar-thumb:hover {
+	background: #757575;
+}
+
+@media (max-width: 768px) {
+	.log-header {
+		flex-direction: column;
+		align-items: stretch;
+		padding: 12px 16px;
+	}
+	
+	.log-tabs {
+		width: 100%;
+		justify-content: space-around;
+	}
+	
+	.log-controls {
+		width: 100%;
+		justify-content: space-between;
+	}
+	
+	.log-content {
+		height: 400px;
+		font-size: 12px;
+		padding: 16px;
+	}
+	
+	.log-btn {
+		flex: 1;
+		text-align: center;
+	}
+}
+</style>
+
+<div class="log-container">
+	<div class="log-header">
+		<div class="log-tabs">
+			<button class="log-tab active" data-log="core" onclick="switchLog('core')">
+				<%=translate("core log")%>
+			</button>
+			<button class="log-tab" data-log="web" onclick="switchLog('web')">
+				<%=translate("web log")%>
+			</button>
+		</div>
+		<div class="log-controls">
+			<select id="log_level_filter" class="log-select" onchange="filterLogLevel()">
+				<option value="all"><%=translate("All Levels")%></option>
+				<option value="INFO">INFO</option>
+				<option value="WARN">WARN</option>
+				<option value="ERROR">ERROR</option>
+				<option value="DEBUG">DEBUG</option>
+				<option value="TRACE">TRACE</option>
+			</select>
+			<button class="log-btn log-btn-primary" id="auto_refresh_btn" onclick="toggleAutoRefresh()">
+				<%=translate("Stop Auto Refresh")%>
+			</button>
+			<button class="log-btn" onclick="clearCurrentLog()"><%=translate("Clear Logs")%></button>
+			<button class="log-btn" onclick="downloadCurrentLog()"><%=translate("Download Log")%></button>
+		</div>
+	</div>
+	<div class="log-content" id="log_content">
+		<div class="log-empty"><%=translate("Loading logs...")%></div>
+	</div>
+	<div class="log-footer" id="log_footer">
+		<span id="log_size_info"></span>
+	</div>
+</div>
 
 <script type="text/javascript">
-	//<![CDATA[
-	function clearlog(btn) {
-		XHR.get('<%=dsp.build_url("admin/vpn/easytier/clear_log")%>', null,
-			function(x, data) {
-				if(x && x.status == 200) {
-					var log_textarea = document.getElementById('log_textarea');
-					log_textarea.innerHTML = "";
-					log_textarea.scrollTop = log_textarea.scrollHeight;
+//<![CDATA[
+var currentLog = 'core';
+var pollTimer = null;
+var allLogLines = [];
+var autoRefreshEnabled = true;
+
+function filterLogLevel() {
+	var filter = document.getElementById('log_level_filter').value;
+	var content = document.getElementById('log_content');
+	var lines = content.querySelectorAll('.log-line');
+	
+	for (var i = 0; i < lines.length; i++) {
+		var line = lines[i];
+		if (filter === 'all') {
+			line.style.display = '';
+		} else {
+			var hasLevel = false;
+			for (var j = 0; j < line.classList.length; j++) {
+				if (line.classList[j] === 'log-level-' + filter) {
+					hasLevel = true;
+					break;
 				}
 			}
-		);
+			line.style.display = hasLevel ? '' : 'none';
+		}
 	}
-	function downloadLog() {
-		var log_textarea = document.getElementById('log_textarea');
-		var logContent = log_textarea.value || log_textarea.innerText || log_textarea.innerHTML;
-		var blob = new Blob([logContent], {type: 'text/plain;charset=utf-8'});
-		var url = window.URL.createObjectURL(blob);
-		var a = document.createElement('a');
-		a.href = url;
-		a.download = 'easytier-core_log.txt';  
-		document.body.appendChild(a);
-		a.click();
-		setTimeout(function() {
-			document.body.removeChild(a);
-			window.URL.revokeObjectURL(url);
-		}, 0);
+}
+
+function switchLog(type) {
+	currentLog = type;
+	var tabs = document.querySelectorAll('.log-tab');
+	for (var i = 0; i < tabs.length; i++) {
+		if (tabs[i].getAttribute('data-log') === type) {
+			tabs[i].classList.add('active');
+		} else {
+			tabs[i].classList.remove('active');
+		}
 	}
-	XHR.poll(2, '<%=dsp.build_url("admin/vpn/easytier/get_log")%>', null,
-		function(x, data) {
-			if(x && x.status == 200 && document.getElementById("checkbox1").checked == true) {
-				var log_textarea = document.getElementById('log_textarea');
-				log_textarea.innerHTML = x.responseText;
-				log_textarea.scrollTop = log_textarea.scrollHeight;
+	document.getElementById('log_size_info').innerHTML = '';
+	refreshLog();
+}
+
+function formatLogLine(line) {
+	if (!line || line.trim() === '') return '';
+	
+	var timestamp = '';
+	var content = line.trim();
+	var level = 'INFO';
+	
+	// 匹配 ISO 8601 格式: 2026-04-14T20:30:54.744803154+08:00
+	var isoTimeMatch = content.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})\.\d+[+-]\d{2}:\d{2}\s*/);
+	if (isoTimeMatch) {
+		timestamp = isoTimeMatch[1] + ' ' + isoTimeMatch[2];
+		content = content.substring(isoTimeMatch[0].length);
+	} else {
+		// 匹配简单格式: 2026-04-14 20:19:33
+		var simpleTimeMatch = content.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})[:\s]*/);
+		if (simpleTimeMatch) {
+			timestamp = simpleTimeMatch[1];
+			content = content.substring(simpleTimeMatch[0].length);
+		}
+	}
+	
+	// 匹配日志级别
+	var levelMatch = content.match(/^\s*(INFO|WARN|ERROR|DEBUG|TRACE)\s+/i);
+	if (levelMatch) {
+		level = levelMatch[1].toUpperCase();
+		content = content.substring(levelMatch[0].length);
+	}
+	
+	var html = '<div class="log-line log-level-' + level + '">';
+	if (timestamp) {
+		html += '<span class="log-timestamp">' + escapeHtml(timestamp) + '</span>';
+	}
+	html += '<span class="log-level-' + level + '">' + escapeHtml(content) + '</span>';
+	html += '</div>';
+	
+	return html;
+}
+
+function escapeHtml(text) {
+	var div = document.createElement('div');
+	div.appendChild(document.createTextNode(text));
+	return div.innerHTML;
+}
+
+function refreshLog() {
+	var url = currentLog === 'core' 
+		? '<%=url("admin/vpn/easytier/get_log")%>'
+		: '<%=url("admin/vpn/easytier/get_wlog")%>';
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === 4 && xhr.status === 200) {
+			var content = document.getElementById('log_content');
+			var rawLog = xhr.responseText || '';
+			
+			if (rawLog.trim() === '') {
+				content.innerHTML = '<div class="log-empty"><%=translate("No logs available")%></div>';
+				return;
+			}
+			
+			var lines = rawLog.split('\n');
+			var html = '';
+			
+			for (var i = 0; i < lines.length; i++) {
+				var line = lines[i];
+				if (!line.trim()) continue;
+				html += formatLogLine(line);
+			}
+			
+			content.innerHTML = html;
+			filterLogLevel();
+			
+			if (autoRefreshEnabled) {
+				content.scrollTop = content.scrollHeight;
+				updateLogSize();
 			}
 		}
-	);
-	//]]>
+	};
+	xhr.send();
+}
+
+function updateLogSize() {
+	var url = currentLog === 'core' 
+		? '<%=url("admin/vpn/easytier/get_log_size")%>'
+		: '<%=url("admin/vpn/easytier/get_wlog_size")%>';
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === 4 && xhr.status === 200) {
+			var data = JSON.parse(xhr.responseText);
+			var sizeMB = (data.size / 1024 / 1024).toFixed(2);
+			var logPath = currentLog === 'core' ? '/tmp/easytier.log' : '/tmp/easytierweb.log';
+			var sizeClass = '';
+			
+			if (sizeMB < 1) sizeClass = 'log-size-1';
+			else if (sizeMB < 2) sizeClass = 'log-size-2';
+			else if (sizeMB < 3) sizeClass = 'log-size-3';
+			else if (sizeMB < 4) sizeClass = 'log-size-4';
+			else sizeClass = 'log-size-5';
+			
+			document.getElementById('log_size_info').innerHTML = 
+				logPath + ': <span class="' + sizeClass + '">' + sizeMB + ' MB</span>';
+		}
+	};
+	xhr.send();
+}
+
+function clearCurrentLog() {
+	var url = currentLog === 'core'
+		? '<%=url("admin/vpn/easytier/clear_log")%>'
+		: '<%=url("admin/vpn/easytier/clear_wlog")%>';
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === 4 && xhr.status === 200) {
+			document.getElementById('log_content').innerHTML = '<div class="log-empty"><%=translate("Logs cleared")%></div>';
+		}
+	};
+	xhr.send();
+}
+
+function downloadCurrentLog() {
+	var content = document.getElementById('log_content');
+	var logText = '';
+	var lines = content.querySelectorAll('.log-line');
+	
+	for (var i = 0; i < lines.length; i++) {
+		logText += lines[i].innerText + '\n';
+	}
+	
+	if (logText.trim() === '') {
+		logText = content.innerText;
+	}
+	
+	var blob = new Blob([logText], {type: 'text/plain;charset=utf-8'});
+	var url = window.URL.createObjectURL(blob);
+	var a = document.createElement('a');
+	a.href = url;
+	a.download = 'easytier-' + currentLog + '-log.txt';
+	document.body.appendChild(a);
+	a.click();
+	setTimeout(function() {
+		document.body.removeChild(a);
+		window.URL.revokeObjectURL(url);
+	}, 0);
+}
+
+function startPolling() {
+	if (pollTimer) clearInterval(pollTimer);
+	pollTimer = setInterval(function() {
+		if (autoRefreshEnabled) {
+			refreshLog();
+		}
+	}, 2000);
+}
+
+function toggleAutoRefresh() {
+	autoRefreshEnabled = !autoRefreshEnabled;
+	var btn = document.getElementById('auto_refresh_btn');
+	if (autoRefreshEnabled) {
+		btn.textContent = '<%=translate("Stop Auto Refresh")%>';
+		btn.classList.add('log-btn-primary');
+	} else {
+		btn.textContent = '<%=translate("Start Auto Refresh")%>';
+		btn.classList.remove('log-btn-primary');
+	}
+}
+
+refreshLog();
+startPolling();
+
+window.addEventListener('beforeunload', function() {
+	if (pollTimer) clearInterval(pollTimer);
+});
+//]]>
 </script>
-<fieldset class="cbi-section" id="_log_fieldset">
-	<input type="checkbox" id="checkbox1" style="vertical-align:middle;height: auto;"checked><%:Auto Refresh%></input>
-	<input class="cbi-button cbi-input-remove" type="button" onclick="clearlog()" value="<%:Clear Logs%>" />
-	<input class="cbi-button cbi-input-apply" type="button" onclick="downloadLog()" value="<%:Download Log%>" />
-	<textarea id="log_textarea" class="cbi-input-textarea" style="width: 100%;margin-top: 10px;" data-update="change" rows="30" wrap="off" readonly="readonly"></textarea>
-</fieldset>
+
+<%+footer%>

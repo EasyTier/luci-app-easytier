@@ -1,0 +1,645 @@
+<%
+local util = require "luci.util"
+local uci = require "luci.model.uci".cursor()
+-%>
+<%+header%>
+
+<style>
+:root {
+	--card-bg: #ffffff;
+	--border-color: #e0e0e0;
+	--text-primary: #333333;
+	--text-secondary: #666666;
+	--success: #4CAF50;
+	--error: #F44336;
+	--info: #2196F3;
+	--warning: #FF9800;
+	--hover-bg: #f5f5f5;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--card-bg: #1e1e1e;
+		--border-color: #3e3e3e;
+		--text-primary: #e0e0e0;
+		--text-secondary: #b0b0b0;
+		--success: #66BB6A;
+		--error: #EF5350;
+		--info: #42A5F5;
+		--warning: #FFA726;
+		--hover-bg: #2a2a2a;
+	}
+}
+
+.web-console-container {
+	max-width: 1200px;
+	margin: 20px auto;
+	padding: 0 20px;
+}
+
+.web-card {
+	background: var(--card-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 16px;
+	padding: 28px;
+	margin-bottom: 24px;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+	transition: box-shadow 0.3s ease;
+}
+
+.web-card:hover {
+	box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.web-card h3 {
+	margin: 0 0 24px 0;
+	color: var(--text-primary);
+	font-size: 20px;
+	font-weight: 600;
+	border-bottom: 3px solid var(--info);
+	padding-bottom: 14px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.web-card h3::before {
+	content: "⚙️";
+	font-size: 24px;
+}
+
+.form-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.form-group {
+	margin-bottom: 24px;
+}
+
+.form-group label {
+	display: block;
+	margin-bottom: 10px;
+	color: var(--text-primary);
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.form-group .description {
+	display: block;
+	margin-top: 6px;
+	color: var(--text-secondary);
+	font-size: 12px;
+	line-height: 1.6;
+	padding-left: 0;
+	opacity: 0.8;
+}
+
+.form-group .description a {
+	color: var(--info);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.form-group .description a:hover {
+	text-decoration: underline;
+}
+
+.form-control {
+	width: 100%;
+	padding: 12px 16px;
+	border: 2px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--card-bg);
+	color: var(--text-primary);
+	font-size: 14px;
+	transition: all 0.2s ease;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.form-control:focus {
+	outline: none;
+	border-color: var(--info);
+	box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-control:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background: var(--hover-bg);
+}
+
+.checkbox-wrapper {
+	display: block;
+	padding: 12px 16px;
+	background: var(--hover-bg);
+	border-radius: 8px;
+	transition: background 0.2s;
+	position: relative;
+	min-height: 26px;
+}
+
+.checkbox-wrapper:hover {
+	background: var(--border-color);
+}
+
+.checkbox-wrapper label {
+	margin: 0 !important;
+	cursor: pointer;
+	user-select: none;
+	display: block;
+	line-height: 26px;
+	padding-right: 60px;
+}
+
+.checkbox-wrapper label::before {
+	display: none;
+}
+
+/* iOS风格开关 */
+.switch {
+	position: absolute;
+	width: 48px;
+	height: 26px;
+	right: 16px;
+	top: 12px;
+}
+
+.switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+	position: absolute;
+}
+
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	width: 48px;
+	height: 26px;
+	background-color: #ccc;
+	-webkit-transition: 0.3s;
+	transition: 0.3s;
+	border-radius: 26px;
+}
+
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 20px;
+	width: 20px;
+	left: 3px;
+	top: 3px;
+	background-color: white;
+	-webkit-transition: 0.3s;
+	transition: 0.3s;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+	background-color: var(--info);
+}
+
+input:checked + .slider:before {
+	-webkit-transform: translateX(22px);
+	-ms-transform: translateX(22px);
+	transform: translateX(22px);
+}
+
+input:disabled + .slider {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.btn {
+	padding: 12px 28px;
+	border: none;
+	border-radius: 8px;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+	transform: translateY(0);
+}
+
+.btn-primary {
+	background: var(--info);
+	color: white;
+}
+
+.btn-primary::before {
+	content: "💾";
+}
+
+.btn-success {
+	background: var(--success);
+	color: white;
+}
+
+.btn-success::before {
+	content: "🔄";
+}
+
+.btn-group {
+	display: flex;
+	gap: 16px;
+	margin-top: 32px;
+	padding-top: 24px;
+	border-top: 2px dashed var(--border-color);
+}
+
+.iframe-container {
+	width: 100%;
+	height: 800px;
+	border: 2px solid var(--border-color);
+	border-radius: 12px;
+	overflow: hidden;
+	background: var(--card-bg);
+	box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.iframe-container iframe {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 16px;
+	border-radius: 20px;
+	font-size: 13px;
+	font-weight: 600;
+	margin-left: auto;
+}
+
+.status-badge::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	animation: pulse 2s infinite;
+}
+
+.status-running {
+	background: rgba(76, 175, 80, 0.15);
+	color: var(--success);
+}
+
+.status-running::before {
+	background: var(--success);
+}
+
+.status-stopped {
+	background: rgba(244, 67, 54, 0.15);
+	color: var(--error);
+}
+
+.status-stopped::before {
+	background: var(--error);
+	animation: none;
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+.loading-spinner {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	border: 2px solid rgba(255,255,255,0.3);
+	border-top-color: white;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+.btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none !important;
+}
+
+.alert {
+	padding: 14px 20px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
+	z-index: 10000;
+	min-width: 320px;
+	max-width: 500px;
+	text-align: center;
+	box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+	opacity: 0;
+	-webkit-transition: opacity 0.3s ease-in-out;
+	transition: opacity 0.3s ease-in-out;
+	pointer-events: none;
+}
+
+.alert.show {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.alert-success {
+	background: var(--success);
+	color: white;
+	border: none;
+}
+
+.alert-error {
+	background: var(--error);
+	color: white;
+	border: none;
+}
+
+.alert-info {
+	background: var(--info);
+	color: white;
+	border: none;
+}
+</style>
+
+<div class="web-console-container">
+	<div class="web-card">
+		<h3><%:Self-hosted Web Console%></h3>
+
+		<form id="webConsoleForm">
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_enabled"><%:Enable Self-hosted Web Console%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_enabled" name="web_enabled">
+						<span class="slider"></span>
+					</label>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="web_db_path"><%:Database File Path%></label>
+				<input type="text" class="form-control" id="web_db_path" name="web_db_path" placeholder="/etc/easytier/et.db">
+				<span class="description"><%:Path to the sqlite3 database file used to store all data. (-d parameter)%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_protocol"><%:Listening Protocol%></label>
+				<select class="form-control" id="web_protocol" name="web_protocol">
+					<option value="udp">UDP</option>
+					<option value="tcp">TCP</option>
+					<option value="ws">WS</option>
+					<option value="wss">WSS</option>
+				</select>
+				<span class="description"><%:Configure the server's listening protocol for easytier-core to connect. (-p parameter)%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_port"><%:Server Port%></label>
+				<input type="number" class="form-control" id="web_port" name="web_port" placeholder="22020" min="1" max="65535">
+				<span class="description"><%:Configure the server's listening port for easytier-core to connect. (-c parameter)%></span>
+			</div>
+
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_fw_web"><%:WAN access to WEB%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_fw_web" name="web_fw_web">
+						<span class="slider"></span>
+					</label>
+				</div>
+				<span class="description"><%:Automatically add firewall rules to allow WAN access to this WEB console%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_api_port"><%:API Port%></label>
+				<input type="number" class="form-control" id="web_api_port" name="web_api_port" placeholder="11211" min="1" max="65535">
+				<span class="description"><%:Listening port of the RESTful server, used as ApiHost by the web frontend. (-a parameter)%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_html_port"><%:Web Interface Port%></label>
+				<input type="number" class="form-control" id="web_html_port" name="web_html_port" placeholder="11211" min="1" max="65535">
+				<span class="description"><%:Frontend listening port for the web dashboard server. Leave empty to disable. (-l parameter)%></span>
+			</div>
+
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_fw_api"><%:WAN access to API%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_fw_api" name="web_fw_api">
+						<span class="slider"></span>
+					</label>
+				</div>
+				<span class="description"><%:Automatically add firewall rules to allow WAN access to the API control page%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_api_host"><%:Default API Server URL%></label>
+				<input type="text" class="form-control" id="web_api_host" name="web_api_host" placeholder="http://192.168.1.1:11211">
+				<span class="description"><%:The URL of the API server, used for connecting the web frontend%>. (--api-host <%:parameter%>)<br>
+				<%:Example%>: http://[<%:current device IP or domain%>]:[<%:API port%>]</span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_geoip_db"><%:GEOIP Database Path%></label>
+				<input type="text" class="form-control" id="web_geoip_db" name="web_geoip_db" placeholder="/etc/easytier/GeoLite.mmdb">
+				<span class="description"><%:GeoIP2 database file path used to locate the client%>. <%:Defaults to an embedded file (country-level information only)%>.<br>
+				<%:Recommended%>: <a href="https://github.com/P3TERX/GeoLite.mmdb" target="_blank">https://github.com/P3TERX/GeoLite.mmdb</a> (--geoip-db <%:parameter%>)</span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_weblog"><%:Log Level%></label>
+				<select class="form-control" id="web_weblog" name="web_weblog">
+					<option value="off"><%:Off%></option>
+					<option value="error"><%:Error%></option>
+					<option value="warn"><%:Warning%></option>
+					<option value="info"><%:Info%></option>
+					<option value="debug"><%:Debug%></option>
+					<option value="trace"><%:Trace%></option>
+				</select>
+				<span class="description"><%:Runtime log located at%> /tmp/easytierweb.log, <%:viewable in the log section%>.<br>
+				<%:Log levels%>: Error < Warning < Info < Debug < Trace</span>
+			</div>
+
+			<div class="btn-group">
+				<button type="button" class="btn btn-primary" onclick="saveConfig()"><%:Save Configuration%></button>
+			</div>
+		</form>
+	</div>
+
+	<div class="web-card" id="consoleCard" style="display:none;">
+		<div class="iframe-container">
+			<iframe id="webConsoleFrame"></iframe>
+		</div>
+	</div>
+</div>
+
+<!-- 提示框 -->
+<div id="alert_box" class="alert"></div>
+
+<script type="text/javascript">//<![CDATA[
+var originalConfig = {};
+
+function showAlert(type, message) {
+	var alertBox = document.getElementById('alert_box');
+	if (!alertBox) return;
+	
+	alertBox.className = 'alert alert-' + type + ' show';
+	alertBox.textContent = message;
+	
+	setTimeout(function() {
+		hideAlert();
+	}, 3000);
+}
+
+function hideAlert() {
+	var alertBox = document.getElementById('alert_box');
+	if (!alertBox) return;
+	alertBox.className = 'alert';
+}
+
+function loadConfig() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "get_web_config")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			var data = JSON.parse(xhr.responseText);
+			document.getElementById('web_enabled').checked = data.web_enabled === '1';
+			document.getElementById('web_db_path').value = data.web_db_path || '/etc/easytier/et.db';
+			document.getElementById('web_protocol').value = data.web_protocol || 'udp';
+			document.getElementById('web_port').value = data.web_port || '22020';
+			document.getElementById('web_fw_web').checked = data.web_fw_web === '1';
+			document.getElementById('web_api_port').value = data.web_api_port || '11211';
+			document.getElementById('web_html_port').value = data.web_html_port || '11211';
+			document.getElementById('web_fw_api').checked = data.web_fw_api === '1';
+			document.getElementById('web_api_host').value = data.web_api_host || '';
+			document.getElementById('web_geoip_db').value = data.web_geoip_db || '';
+			document.getElementById('web_weblog').value = data.web_weblog || 'off';
+			
+			// 保存原始配置
+			originalConfig = JSON.parse(JSON.stringify(data));
+			
+			checkWebStatus();
+		}
+	};
+	xhr.send();
+}
+
+function getCurrentConfig() {
+	return {
+		web_enabled: document.getElementById('web_enabled').checked ? '1' : '0',
+		web_db_path: document.getElementById('web_db_path').value,
+		web_protocol: document.getElementById('web_protocol').value,
+		web_port: document.getElementById('web_port').value,
+		web_fw_web: document.getElementById('web_fw_web').checked ? '1' : '0',
+		web_api_port: document.getElementById('web_api_port').value,
+		web_html_port: document.getElementById('web_html_port').value,
+		web_fw_api: document.getElementById('web_fw_api').checked ? '1' : '0',
+		web_api_host: document.getElementById('web_api_host').value,
+		web_geoip_db: document.getElementById('web_geoip_db').value,
+		web_weblog: document.getElementById('web_weblog').value
+	};
+}
+
+function isConfigChanged() {
+	var current = getCurrentConfig();
+	for (var key in originalConfig) {
+		if (originalConfig[key] !== current[key]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function saveConfig() {
+	if (!isConfigChanged()) {
+		showAlert('info', '<%:No changes to save%>');
+		return;
+	}
+	
+	var formData = new FormData();
+	var config = getCurrentConfig();
+	for (var key in config) {
+		formData.append(key, config[key]);
+	}
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "save_web_config")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			showAlert('success', '<%:Configuration saved successfully%>');
+			originalConfig = getCurrentConfig();
+		} else {
+			showAlert('error', '<%:Save failed%>');
+		}
+	};
+	xhr.onerror = function() {
+		showAlert('error', '<%:Save failed%>');
+	};
+	xhr.send(formData);
+}
+
+function checkWebStatus() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "check_web_status")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			var data = JSON.parse(xhr.responseText);
+			var consoleCard = document.getElementById('consoleCard');
+			var iframe = document.getElementById('webConsoleFrame');
+			
+			if (data.running && data.port) {
+				var newSrc = 'http://' + window.location.hostname + ':' + data.port;
+				// 只在URL变化或iframe未加载时才更新，避免闪烁
+				if (!iframe.src || iframe.src.indexOf(':' + data.port) === -1) {
+					iframe.src = newSrc;
+				}
+				consoleCard.style.display = 'block';
+			} else {
+				consoleCard.style.display = 'none';
+				if (iframe.src) {
+					iframe.src = '';
+				}
+			}
+		}
+	};
+	xhr.send();
+}
+
+window.addEventListener('load', function() {
+	loadConfig();
+	checkWebStatus();
+	setInterval(checkWebStatus, 10000);
+});
+//]]></script>
+
+<%+footer%>

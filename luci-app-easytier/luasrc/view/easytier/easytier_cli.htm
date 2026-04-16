@@ -1,0 +1,1154 @@
+<%
+local uci = require 'luci.model.uci'.cursor()
+-%>
+
+<style>
+:root {
+	--card-bg: #ffffff;
+	--card-shadow: rgba(0,0,0,0.1);
+	--text-primary: #2c3e50;
+	--text-secondary: #7f8c8d;
+	--border-color: #ecf0f1;
+	--tab-active: #3498db;
+	--tab-hover: #f8f9fa;
+	--success: #27ae60;
+	--warning: #f39c12;
+	--error: #e74c3c;
+	--gradient-bg: var(--card-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--card-bg: #2c3e50;
+		--card-shadow: rgba(0,0,0,0.3);
+		--text-primary: #ecf0f1;
+		--text-secondary: #bdc3c7;
+		--border-color: #34495e;
+		--tab-active: #3498db;
+		--tab-hover: #34495e;
+		--gradient-bg: var(--card-bg);
+	}
+}
+
+.et-conninfo-container {
+	background: var(--card-bg);
+	border-radius: 16px;
+	box-shadow: 0 8px 32px var(--card-shadow);
+	border: 1px solid var(--border-color);
+	margin: 20px 0;
+	overflow: hidden;
+	backdrop-filter: blur(10px);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.et-conninfo-container:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 40px var(--card-shadow);
+}
+
+.et-conninfo-header {
+	background: var(--card-bg);
+	padding: 12px 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.et-conninfo-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.et-refresh-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	background: var(--tab-active);
+	color: white;
+	border: 1px solid var(--tab-active);
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.et-refresh-btn:hover {
+	opacity: 0.9;
+}
+
+.et-refresh-btn:active {
+	transform: scale(0.95);
+}
+
+.et-refresh-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.et-refresh-icon {
+	transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.et-refresh-btn.loading .et-refresh-icon {
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+.et-tabs-container {
+	background: var(--card-bg);
+	border-bottom: 1px solid var(--border-color);
+	overflow-x: auto;
+}
+
+.et-tabs-container::-webkit-scrollbar {
+	height: 6px;
+}
+
+.et-tabs-container::-webkit-scrollbar-track {
+	background: var(--border-color);
+	border-radius: 3px;
+}
+
+.et-tabs-container::-webkit-scrollbar-thumb {
+	background: var(--text-secondary);
+	border-radius: 3px;
+}
+
+.et-tabs-container::-webkit-scrollbar-thumb:hover {
+	background: var(--text-primary);
+}
+
+.et-tabs {
+	display: flex;
+	min-width: max-content;
+}
+
+.et-tab {
+	padding: 16px 24px;
+	cursor: pointer;
+	border: none;
+	background: none;
+	color: var(--text-secondary);
+	font-size: 14px;
+	font-weight: 600;
+	white-space: nowrap;
+	border-bottom: 3px solid transparent;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.et-tab::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--tab-active);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.et-tab:hover::before {
+	opacity: 0.05;
+}
+
+.et-tab:hover {
+	color: var(--tab-active);
+	background: var(--tab-hover);
+}
+
+.et-tab.active {
+	color: var(--tab-active);
+	border-bottom-color: var(--tab-active);
+	background: var(--tab-hover);
+}
+
+.et-tab.active::before {
+	opacity: 0.1;
+}
+
+.et-tab-content {
+	display: none;
+	padding: 24px;
+	min-height: 200px;
+	animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.et-tab-content.active {
+	display: block;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(10px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.et-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 40px;
+	color: var(--text-secondary);
+}
+
+.et-loading-spinner {
+	width: 24px;
+	height: 24px;
+	border: 3px solid var(--border-color);
+	border-top: 3px solid var(--tab-active);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin-right: 12px;
+}
+
+.et-table-container {
+	overflow-x: auto;
+	border-radius: 12px;
+	border: 1px solid var(--border-color);
+	background: var(--card-bg);
+}
+
+.et-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+	border: 2px solid var(--border-color);
+}
+
+.et-table th {
+	background: #f0f0f0;
+	color: var(--text-primary);
+	padding: 10px 12px;
+	text-align: center;
+	font-weight: 600;
+	border: 2px solid #ccc;
+	white-space: nowrap;
+}
+
+.et-table td {
+	padding: 8px 12px;
+	text-align: center;
+	border: 2px solid #ddd;
+	color: var(--text-primary);
+	white-space: nowrap;
+	background: #ffffff;
+}
+
+/* 斑马色 - 数据行（对调奇偶） */
+.et-table tr:nth-child(2n) td {
+	background: #ffffff;
+}
+
+.et-table tr:nth-child(2n+1) td {
+	background: #f5f5f5;
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+	.et-table th {
+		background: #2a2a2a;
+		border: 2px solid #444;
+	}
+	
+	.et-table td {
+		background: transparent;
+		border: 2px solid #333;
+	}
+	
+	.et-table tr:nth-child(2n) td {
+		background: transparent;
+	}
+	
+	.et-table tr:nth-child(2n+1) td {
+		background: rgba(255,255,255,0.05);
+	}
+}
+
+.et-table tr:hover td {
+	background: rgba(52, 152, 219, 0.1);
+}
+
+/* Node信息表格特殊样式 - 左侧表头 */
+.et-table.node-table th:first-child,
+.et-table.node-table td:first-child {
+	background: #f0f0f0 !important;
+	font-weight: 600;
+	text-align: left;
+	border-right: 3px solid #999;
+}
+
+.et-table.node-table td:not(:first-child) {
+	text-align: left;
+}
+
+/* 两列表格 - 左侧作为表头 */
+.et-table.two-column td:first-child {
+	background: #e8e8e8 !important;
+	font-weight: 600;
+	text-align: left;
+	border-right: 3px solid #999 !important;
+}
+
+.et-table.two-column tr:nth-child(2n) td:last-child {
+	background: #ffffff !important;
+}
+
+.et-table.two-column tr:nth-child(2n+1) td:last-child {
+	background: #f5f5f5 !important;
+}
+	text-align: left;
+	border-right: 3px solid #ccc !important;
+}
+
+.et-table.two-column tr:nth-child(2n) td:last-child {
+	background: #f5f5f5 !important;
+}
+
+.et-table.two-column tr:nth-child(2n+1) td:last-child {
+	background: #ffffff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+	.et-table.node-table th:first-child,
+	.et-table.node-table td:first-child,
+	.et-table.two-column td:first-child {
+		background: #2a2a2a !important;
+		border-right: 3px solid #444 !important;
+	}
+	
+	.et-table.two-column tr:nth-child(2n) td:last-child {
+		background: rgba(255,255,255,0.05) !important;
+	}
+	
+	.et-table.two-column tr:nth-child(2n+1) td:last-child {
+		background: transparent !important;
+	}
+}
+	background: var(--tab-hover);
+	font-weight: 600;
+	text-align: left;
+	border-right: 2px solid var(--border-color);
+}
+
+.et-table.node-table td:not(:first-child) {
+	text-align: left;
+}
+
+.et-empty {
+	text-align: center;
+	color: var(--text-secondary);
+	padding: 60px 20px;
+	font-size: 16px;
+	font-style: italic;
+}
+
+.et-error {
+	color: var(--error);
+	padding: 20px;
+	text-align: center;
+	background: rgba(231, 76, 60, 0.1);
+	border-radius: 12px;
+	margin: 16px;
+	border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.et-pre {
+	background: var(--tab-hover);
+	border: 1px solid var(--border-color);
+	padding: 16px;
+	border-radius: 12px;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+	font-size: 13px;
+	color: var(--text-primary);
+	overflow-x: auto;
+	line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+	.et-conninfo-header {
+		flex-direction: column;
+		gap: 16px;
+		align-items: center;
+		text-align: center;
+	}
+	
+	.et-tab {
+		padding: 12px 16px;
+		font-size: 13px;
+	}
+	
+	.et-tab-content {
+		padding: 16px;
+	}
+	
+	.et-table th,
+	.et-table td {
+		padding: 8px 12px;
+		font-size: 12px;
+	}
+}
+
+/* Contributors Section */
+.et-contributors-section {
+	margin-top: 24px;
+	padding: 20px;
+	background: var(--card-bg);
+	border-top: 1px solid var(--border-color);
+}
+
+.et-contributors-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-primary);
+	margin-bottom: 16px;
+}
+
+.et-contributors-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.et-contributors-container a {
+	display: inline-block;
+	transition: transform 0.2s ease;
+}
+
+.et-contributors-container a:hover {
+	transform: scale(1.1);
+}
+
+.et-contributors-container img {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: 2px solid var(--border-color);
+	transition: border-color 0.2s ease;
+}
+
+.et-contributors-container img:hover {
+	border-color: var(--info);
+}
+
+@media (max-width: 768px) {
+	.et-contributors-section {
+		padding: 16px;
+	}
+	
+	.et-contributors-container img {
+		width: 36px;
+		height: 36px;
+	}
+}
+</style>
+
+<div class="et-conninfo-container">
+	<div class="et-conninfo-header">
+		<div class="et-conninfo-title"><%:Connection Information%></div>
+		<button class="et-refresh-btn" id="et_conninfo_refresh" onclick="refreshConnInfo(); return false;">
+			<svg class="et-refresh-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+			</svg>
+			<span><%:Refresh%></span>
+		</button>
+	</div>
+	
+	<div class="et-tabs-container">
+		<div class="et-tabs">
+			<button class="et-tab active" data-tab="node"><%:Node Info%></button>
+			<button class="et-tab" data-tab="peer"><%:Peer List%></button>
+			<button class="et-tab" data-tab="route"><%:Route Info%></button>
+			<button class="et-tab" data-tab="connector"><%:Connector%></button>
+			<button class="et-tab" data-tab="stun"><%:STUN%></button>
+			<button class="et-tab" data-tab="peercenter"><%:Peer Center%></button>
+			<button class="et-tab" data-tab="vpnportal"><%:VPN Portal%></button>
+			<button class="et-tab" data-tab="proxy"><%:Proxy%></button>
+			<button class="et-tab" data-tab="acl"><%:ACL%></button>
+			<button class="et-tab" data-tab="mappedlistener"><%:Mapped Listener%></button>
+			<button class="et-tab" data-tab="stats"><%:Statistics%></button>
+			<button class="et-tab" data-tab="cmdline"><%:Command Line%></button>
+		</div>
+	</div>
+	
+	<div class="et-tab-content active" id="tab_node">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_peer">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_route">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_connector">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_stun">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_peercenter">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_vpnportal">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_proxy">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_acl">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_mappedlistener">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_stats">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	<div class="et-tab-content" id="tab_cmdline">
+		<div class="et-loading">
+			<div class="et-loading-spinner"></div>
+			<%:Collecting data...%>
+		</div>
+	</div>
+	
+	<!-- Contributors Section -->
+	<div id="contributors-section" class="et-contributors-section" style="display: none;">
+		<div class="et-contributors-title"><%:Contributors%></div>
+		<div id="contributors" class="et-contributors-container"></div>
+	</div>
+</div>
+
+<script type="text/javascript">//<![CDATA[
+var translations = {
+	// Peer表格头部 (来自EasyTier CLI源码)
+	"ipv4": "<%:IPv4 Address%>",
+	"hostname": "<%:Hostname%>", 
+	"cost": "<%:Route Cost%>",
+	"lat(ms)": "<%:Latency(ms)%>",
+	"loss": "<%:Loss Rate%>",
+	"rx": "<%:RX Traffic%>",
+	"tx": "<%:TX Traffic%>", 
+	"tunnel": "<%:Tunnel Protocol%>",
+	"NAT": "<%:NAT Type%>",
+	"version": "<%:Version%>",
+	
+	// Node表格头部
+	"Virtual IP": "<%:Virtual IP%>",
+	"Hostname": "<%:Hostname%>",
+	"Proxy CIDRs": "<%:Proxy CIDRs%>",
+	"Peer ID": "<%:Peer ID%>",
+	"Public IPv4": "<%:Public IPv4%>",
+	"Public IPv6": "<%:Public IPv6%>",
+	"Listener": "<%:Listener%>",
+	"proxy_cidrs": "<%:Proxy CIDRs%>",
+	"next_hop_ipv4": "<%:Next Hop IPv4%>",
+	"next_hop_hostname": "<%:Next Hop Hostname%>",
+	"next_hop_lat": "<%:Next Hop Latency%>",
+	"path_len": "<%:Path Length%>",
+	"path_latency": "<%:Path Latency%>",
+	"next_hop_ipv4_lat_first": "<%:Next Hop IPv4 Lat First%>",
+	"next_hop_hostname_lat_first": "<%:Next Hop Hostname Lat First%>",
+	"path_len_lat_first": "<%:Path Length Lat First%>",
+	"path_latency_lat_first": "<%:Path Latency Lat First%>",
+	"UDP Stun Type": "<%:UDP Stun Type%>",
+	"Interface IPv4": "<%:Interface IPv4%>",
+	"Interface IPv6": "<%:Interface IPv6%>",
+	
+	// Route表格头部
+	"next_hop_ipv4": "<%:Next Hop IPv4%>",
+	"next_hop_hostname": "<%:Next Hop Hostname%>", 
+	"next_hop_lat": "<%:Next Hop Latency%>",
+	"path_len": "<%:Path Length%>",
+	"path_latency": "<%:Path Latency%>",
+	
+	// Connector表格头部
+	"src": "<%:Source%>",
+	"dst": "<%:Destination%>", 
+	"start_time": "<%:Start Time%>",
+	"state": "<%:State%>",
+	"transport_type": "<%:Transport Type%>",
+	"last_update_time": "<%:Last Update Time%>",
+	
+	// PeerCenter表格头部
+	"node_id": "<%:Node ID%>",
+	"direct_peers": "<%:Direct Peers%>",
+	
+	// Stats表格头部
+	"Metric Name": "<%:Metric Name%>",
+	"Value": "<%:Value%>",
+	"Labels": "<%:Labels%>",
+	
+	// Listener相关
+	"Listener": "<%:Listener%>",
+	"status": "<%:Status%>",
+	"client_config_start": "<%:Client Config Start%>",
+	"client_config_end": "<%:Client Config End%>",
+	
+	// 状态值翻译
+	"Local": "<%:Local%>",
+	"PortRestricted": "<%:Port Restricted%>",
+	"NoPat": "<%:No PAT%>", 
+	"DIRECT": "<%:Direct%>",
+	"unknown": "<%:Unknown%>",
+	"Connected": "<%:Connected%>",
+	"Connecting": "<%:Connecting%>",
+	"Disconnected": "<%:Disconnected%>",
+	"Symmetric": "<%:Symmetric%>",
+	"Restricted": "<%:Restricted%>",
+	"FullCone": "<%:Full Cone%>",
+	"AddressRestricted": "<%:Address Restricted%>",
+	"p2p": "<%:P2P%>",
+	"PublicServer_": "<%:Server%>",
+	
+	// STUN相关
+	"StunInfo": "<%:STUN Info%>",
+	"udp_nat_type": "<%:UDP NAT Type%>",
+	"tcp_nat_type": "<%:TCP NAT Type%>",
+	
+	// 错误信息
+	"Error": "<%:Error%>",
+	"Invalid service name": "<%:Invalid Service Name%>",
+	"proto name": "<%:Protocol Name%>",
+	
+	"next_hop_ipv4_lat_first": "<%:Next Hop IPv4 Lat First%>",
+	"next_hop_hostname_lat_first": "<%:Next Hop Hostname Lat First%>",
+	"path_len_lat_first": "<%:Path Length Lat First%>",
+	"path_latency_lat_first": "<%:Path Latency Lat First%>",
+	
+	// 更多CLI输出翻译
+	"response": "<%:Response%>",
+	"ListConnectorResponse": "<%:List Connector Response%>",
+	"connectors": "<%:Connectors%>",
+	"Connector": "<%:Connector%>",
+	"url": "<%:URL%>",
+	"Url": "<%:URL%>",
+	"status": "<%:Status%>",
+	"stun info": "<%:STUN Info%>",
+	"StunInfo": "<%:STUN Info%>",
+	"udp_nat_type": "<%:UDP NAT Type%>",
+	"tcp_nat_type": "<%:TCP NAT Type%>",
+	"last_update_time": "<%:Last Update Time%>",
+	"public_ip": "<%:Public IP%>",
+	"min_port": "<%:Min Port%>",
+	"max_port": "<%:Max Port%>",
+	"Invalid service name": "<%:Invalid Service Name%>",
+	"proto name": "<%:Protocol Name%>",
+	"portal_name": "<%:Portal Name%>",
+	"wireguard": "<%:WireGuard%>",
+	"client_config_start": "<%:Client Config Start%>",
+	"client_config_end": "<%:Client Config End%>",
+	"connected_clients": "<%:Connected Clients%>",
+	"wireguard": "<%:WireGuard%>",
+	"client_config_start": "<%:Client Config Start%>",
+	"client_config_end": "<%:Client Config End%>",
+	"connected_clients": "<%:Connected Clients%>",
+	"AclStats": "<%:ACL Stats%>",
+	"Global": "<%:Global%>",
+	"CacheMaxSize": "<%:Cache Max Size%>",
+	"CacheSize": "<%:Cache Size%>",
+	"ConnTrack": "<%:Connection Track%>",
+	"Rules": "<%:Rules%>",
+	"ListMappedListenerResponse": "<%:List Mapped Listener Response%>",
+	
+	// VPN Portal特殊处理
+	"ERROR: Wireguard VPN Portal Not Started": "<%:ERROR: Wireguard VPN Portal Not Started%>",
+	
+	// 统计指标翻译
+	"compression_bytes_rx_before": "<%:Compression RX Before%>",
+	"compression_bytes_rx_after": "<%:Compression RX After%>", 
+	"compression_bytes_tx_before": "<%:Compression TX Before%>",
+	"compression_bytes_tx_after": "<%:Compression TX After%>",
+	"peer_rpc_client_rx": "<%:Peer RPC Client RX%>",
+	"peer_rpc_client_tx": "<%:Peer RPC Client TX%>",
+	"peer_rpc_server_rx": "<%:Peer RPC Server RX%>",
+	"peer_rpc_server_tx": "<%:Peer RPC Server TX%>",
+	"peer_rpc_duration_ms": "<%:Peer RPC Duration%>",
+	"traffic_bytes_rx": "<%:Traffic Bytes RX%>",
+	"traffic_bytes_tx": "<%:Traffic Bytes TX%>",
+	"traffic_bytes_self_rx": "<%:Traffic Bytes Self RX%>",
+	"traffic_bytes_self_tx": "<%:Traffic Bytes Self TX%>",
+	"traffic_packets_rx": "<%:Traffic Packets RX%>",
+	"traffic_packets_tx": "<%:Traffic Packets TX%>",
+	"traffic_packets_self_rx": "<%:Traffic Packets Self RX%>",
+	"traffic_packets_self_tx": "<%:Traffic Packets Self TX%>",
+	"traffic_packets_forwarded": "<%:Traffic Packets Forwarded%>",
+	"traffic_bytes_forwarded": "<%:Traffic Bytes Forwarded%>",
+	
+	// 标签字段翻译
+	"network_name": "<%:Network Name%>",
+	"dst_peer_id": "<%:Destination Peer ID%>",
+	"src_peer_id": "<%:Source Peer ID%>",
+	"method_name": "<%:Method Name%>",
+	"service_name": "<%:Service Name%>",
+	"success": "<%:Success%>",
+	"error": "<%:Error%>",
+	"failure": "<%:Failure%>",
+	"timeout": "<%:Timeout%>",
+	
+	"STUN": "<%:STUN%>",
+	"ACL": "<%:ACL%>",
+	
+	// 服务名翻译
+	"OspfRouteRpc": "<%:OSPF Route RPC%>",
+	"PeerCenterRpc": "<%:Peer Center RPC%>",
+	
+	// 错误信息翻译
+	"Error": "<%:Error%>",
+	"error": "<%:Error%>",
+	"Caused by": "<%:Caused by%>",
+	"failed to get peer manager client": "<%:failed to get peer manager client%>",
+	"failed to get peer center client": "<%:failed to get peer center client%>",
+	"failed to connect to server": "<%:failed to connect to server%>",
+	"URL": "<%:URL%>",
+	"Connection refused": "<%:Connection refused%>",
+	"scheme": "<%:scheme%>",
+	"cannot_be_a_base": "<%:cannot_be_a_base%>",
+	"username": "<%:username%>",
+	"password": "<%:password%>",
+	"host": "<%:host%>",
+	"port": "<%:port%>",
+	"path": "<%:path%>",
+	"query": "<%:query%>",
+	"fragment": "<%:fragment%>",
+	"Some": "<%:Some%>",
+	"None": "<%:None%>",
+	"Domain": "<%:Domain%>",
+	"Failed to connect to RPC server. Please check if the RPC port is set to 15888 in the configuration.": "<%:Failed to connect to RPC server. Please check if the RPC port is set to 15888 in the configuration.%>",
+	"Configuration File Content": "<%:Configuration File Content%>",
+	
+	// 方法名值翻译
+	"sync_route_info": "<%:Sync Route Info%>",
+	"get_global_peer_map": "<%:Get Global Peer Map%>",
+	"report_peers": "<%:Report Peers%>"
+};
+
+var currentTab = 'node';
+var isRefreshing = false;
+
+function tr(text) {
+	return translations[text] || text;
+}
+
+function escapeHtml(text) {
+	var div = document.createElement('div');
+	div.appendChild(document.createTextNode(text));
+	return div.innerHTML;
+}
+
+function parseTable(content, tabName) {
+	if (!content || content.trim() === '') {
+		return '<div class="et-empty"><%:No data available%></div>';
+	}
+	
+	if (content.indexOf('错误：') === 0) {
+		return '<div class="et-error">' + escapeHtml(content) + '</div>';
+	}
+	
+	// VPN Portal特殊处理
+	if (content.indexOf('ERROR: Wireguard VPN Portal Not Started') !== -1) {
+		return '<div class="et-error">' + escapeHtml(tr('ERROR: Wireguard VPN Portal Not Started')) + '</div>';
+	}
+	
+	// Peer Center错误处理
+	if (content.indexOf('Error: Invalid service name: "PeerCenterRpc"') !== -1) {
+		return '<div class="et-error"><%:Peer Center service not available. This feature requires multiple nodes in the network.%></div>';
+	}
+	
+	// 连接失败错误处理
+	if (content.indexOf('failed to get peer manager client') !== -1 || 
+	    content.indexOf('failed to get peer center client') !== -1 || 
+	    content.indexOf('Connection refused') !== -1) {
+		var translatedContent = content
+			.replace(/failed to get peer manager client/g, tr('failed to get peer manager client'))
+			.replace(/failed to get peer center client/g, tr('failed to get peer center client'))
+			.replace(/failed to connect to server:/g, tr('failed to connect to server') + ':')
+			.replace(/Connection refused/g, tr('Connection refused'))
+			.replace(/\bscheme:/g, tr('scheme') + ':')
+			.replace(/cannot_be_a_base:/g, tr('cannot_be_a_base') + ':')
+			.replace(/\busername:/g, tr('username') + ':')
+			.replace(/\bpassword:/g, tr('password') + ':')
+			.replace(/\bhost:/g, tr('host') + ':')
+			.replace(/\bport:/g, tr('port') + ':')
+			.replace(/\bpath:/g, tr('path') + ':')
+			.replace(/\bquery:/g, tr('query') + ':')
+			.replace(/\bfragment:/g, tr('fragment') + ':')
+			.replace(/Some\(/g, tr('Some') + '(')
+			.replace(/None/g, tr('None'))
+			.replace(/Domain\(/g, tr('Domain') + '(');
+		
+		return '<div class="et-error">' +
+			'<div style="font-weight:600;margin-bottom:8px;">' + tr('Failed to connect to RPC server. Please check if the RPC port is set to 15888 in the configuration.') + '</div>' +
+			'<div style="font-size:12px;opacity:0.9;white-space:pre-wrap;font-family:monospace;line-height:1.6;">' + escapeHtml(translatedContent) + '</div>' +
+			'</div>';
+	}
+	
+	var lines = content.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
+	
+	if (lines.length === 0 || lines[0].indexOf('|') === -1) {
+		// 启动参数不翻译
+		if (tabName === 'cmdline') {
+			var html = '<div class="et-pre">' + escapeHtml(content) + '</div>';
+			
+			// 检查是否使用配置文件启动
+			if (content.indexOf('--config-file') !== -1 || content.match(/-c\s+\//)) {
+				XHR.get('<%=url("admin/vpn/easytier/api_conninfo")%>', null, function(x, data) {
+					if (data && data.config_file) {
+						var configDiv = document.createElement('div');
+						configDiv.className = 'et-pre';
+						configDiv.style.marginTop = '16px';
+						configDiv.style.borderTop = '2px solid var(--border-color)';
+						configDiv.style.paddingTop = '16px';
+						
+						var title = document.createElement('div');
+						title.style.fontWeight = '600';
+						title.style.marginBottom = '8px';
+						title.style.color = 'var(--primary-color)';
+						title.textContent = tr('Configuration File Content') + ':';
+						
+						var contentDiv = document.createElement('pre');
+						contentDiv.style.margin = '0';
+						contentDiv.style.whiteSpace = 'pre-wrap';
+						contentDiv.style.wordBreak = 'break-all';
+						contentDiv.textContent = data.config_file;
+						
+						configDiv.appendChild(title);
+						configDiv.appendChild(contentDiv);
+						
+						var container = document.querySelector('.et-tab-content[data-tab="cmdline"]');
+						if (container) {
+							container.appendChild(configDiv);
+						}
+					}
+				});
+			}
+			
+			return html;
+		}
+		
+		// 对非表格内容进行全面翻译处理
+		var translatedContent = content;
+		
+		// 处理结构化数据翻译
+		for (var key in translations) {
+			if (translations.hasOwnProperty(key)) {
+				var regex = new RegExp('\\b' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+				translatedContent = translatedContent.replace(regex, translations[key]);
+			}
+		}
+		
+		// 处理标签内容翻译 (key=value格式)
+		translatedContent = translatedContent.replace(/(\w+)=/g, function(match, key) {
+			return (translations[key] ? tr(key) : key) + '=';
+		});
+		
+		// 处理带编号的Listener
+		translatedContent = translatedContent.replace(/\bListener\s+\d+\b/g, function(match) {
+			return match.replace('Listener', tr('Listener'));
+		});
+		
+		// 处理PublicServer_包装为标签样式
+		translatedContent = translatedContent.replace(/PublicServer_/g, '<span style="background:#e3f2fd;color:#1976d2;padding:2px 4px;border-radius:4px;font-size:11px;font-weight:500;">' + tr('PublicServer_') + '</span>');
+		
+		// 处理特殊格式
+		translatedContent = translatedContent.replace(/###############\s*([^#]+)\s*###############/g, function(match, p1) {
+			return '############### ' + tr(p1.trim()) + ' ###############';
+		});
+		
+		return '<div class="et-pre">' + (translatedContent.indexOf('<svg') !== -1 || translatedContent.indexOf('<span') !== -1 ? translatedContent : escapeHtml(translatedContent)) + '</div>';
+	}
+	
+	var isNodeTable = tabName === 'node';
+	var isCmdlineTab = tabName === 'cmdline';
+	
+	// 检测列数来判断是否为两列表格
+	var firstLine = lines[0];
+	var firstCells = [];
+	if (firstLine) {
+		var matches = firstLine.match(/\|([^|]*)/g);
+		if (matches) {
+			for (var j = 0; j < matches.length; j++) {
+				firstCells.push(matches[j].replace(/^\|/, '').trim());
+			}
+			if (firstCells.length > 0 && firstCells[firstCells.length - 1] === '') {
+				firstCells.pop();
+			}
+		}
+	}
+	var isTwoColumn = firstCells.length === 2;
+	
+	var tableClass = isNodeTable ? 'et-table node-table' : (isTwoColumn ? 'et-table two-column' : 'et-table');
+	var html = '<div class="et-table-container"><table class="' + tableClass + '">';
+	var rowIndex = 0;
+	var hasHeader = false;
+	
+	for (var i = 0; i < lines.length; i++) {
+		var line = lines[i];
+		if (/^\|[\s-|]+\|$/.test(line)) continue;
+		
+		var cells = [];
+		var matches = line.match(/\|([^|]*)/g);
+		if (matches) {
+			for (var j = 0; j < matches.length; j++) {
+				cells.push(matches[j].replace(/^\|/, '').trim());
+			}
+			// 移除最后一个空单元格（如果存在）
+			if (cells.length > 0 && cells[cells.length - 1] === '') {
+				cells.pop();
+			}
+		}
+		
+		if (cells.length === 0) continue;
+		
+		html += '<tr>';
+		for (var k = 0; k < cells.length; k++) {
+			// 两列表格：所有单元格都用td，不用th
+			var tag = (rowIndex === 0 && !isNodeTable && !isTwoColumn) ? 'th' : 'td';
+			var cellContent = cells[k];
+			
+			// 启动参数不翻译
+			if (!isCmdlineTab) {
+				// 处理带编号的Listener
+				if (cellContent.match(/^Listener\s+\d+$/)) {
+					cellContent = cellContent.replace('Listener', tr('Listener'));
+				} else if (cellContent.indexOf('PublicServer_') !== -1) {
+					// 将PublicServer_包装为标签样式
+					cellContent = cellContent.replace(/PublicServer_/g, '<span style="background:#e3f2fd;color:#1976d2;padding:2px 4px;border-radius:4px;font-size:11px;font-weight:500;">' + tr('PublicServer_') + '</span>');
+				} else {
+					// 处理标签内容翻译 (key=value格式)
+					cellContent = cellContent.replace(/(\w+)=([^,\s]+)/g, function(match, key, value) {
+						var translatedKey = translations[key] ? tr(key) : key;
+						var translatedValue = translations[value] ? tr(value) : value;
+						return translatedKey + '=' + translatedValue;
+					});
+					cellContent = tr(cellContent);
+				}
+			}
+			
+			var display = (cellContent === '' || cellContent.trim() === '') ? '-' : cellContent;
+			// 如果包含HTML标签，不进行HTML转义
+			if (display.indexOf('<svg') !== -1 || display.indexOf('<span') !== -1) {
+				html += '<' + tag + '>' + display + '</' + tag + '>';
+			} else {
+				html += '<' + tag + '>' + escapeHtml(display) + '</' + tag + '>';
+			}
+		}
+		html += '</tr>';
+		rowIndex++;
+	}
+	
+	html += '</table></div>';
+	return html;
+}
+
+function switchTab(tabName) {
+	if (isRefreshing) return;
+	
+	var tabs = document.querySelectorAll('.et-tab');
+	var contents = document.querySelectorAll('.et-tab-content');
+	
+	tabs.forEach(function(tab) {
+		tab.classList.remove('active');
+	});
+	contents.forEach(function(content) {
+		content.classList.remove('active');
+	});
+	
+	var activeTab = document.querySelector('.et-tab[data-tab="' + tabName + '"]');
+	var activeContent = document.getElementById('tab_' + tabName);
+	
+	if (activeTab && activeContent) {
+		activeTab.classList.add('active');
+		activeContent.classList.add('active');
+		currentTab = tabName;
+	}
+}
+
+function refreshConnInfo() {
+	if (isRefreshing) return;
+	
+	isRefreshing = true;
+	var btn = document.getElementById('et_conninfo_refresh');
+	var btnText = btn.querySelector('span');
+	var originalText = btnText.textContent;
+	
+	btn.disabled = true;
+	btn.classList.add('loading');
+	btnText.textContent = '<%:Refreshing...%>';
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "api_conninfo")%>', true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === 4) {
+			isRefreshing = false;
+			btn.disabled = false;
+			btn.classList.remove('loading');
+			btnText.textContent = originalText;
+			
+			if (xhr.status === 200) {
+				try {
+					var data = JSON.parse(xhr.responseText);
+					updateConnInfo(data);
+				} catch (e) {
+					console.error('Failed to parse response:', e);
+				}
+			}
+		}
+	};
+	xhr.send();
+}
+
+function updateConnInfo(data) {
+	if (!data) return;
+	
+	var sections = [
+		{id: 'node', key: 'node'},
+		{id: 'peer', key: 'peer'},
+		{id: 'route', key: 'route'},
+		{id: 'connector', key: 'connector'},
+		{id: 'stun', key: 'stun'},
+		{id: 'peercenter', key: 'peer_center'},
+		{id: 'vpnportal', key: 'vpn_portal'},
+		{id: 'proxy', key: 'proxy'},
+		{id: 'acl', key: 'acl'},
+		{id: 'mappedlistener', key: 'mapped_listener'},
+		{id: 'stats', key: 'stats'},
+		{id: 'cmdline', key: 'cmdline'}
+	];
+	
+	sections.forEach(function(sec) {
+		var el = document.getElementById('tab_' + sec.id);
+		if (el && data[sec.key] !== undefined) {
+			el.innerHTML = parseTable(data[sec.key], sec.id);
+		}
+	});
+}
+
+// 初始化TAB切换事件
+document.addEventListener('DOMContentLoaded', function() {
+	var tabs = document.querySelectorAll('.et-tab');
+	tabs.forEach(function(tab) {
+		tab.addEventListener('click', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var tabName = this.getAttribute('data-tab');
+			if (tabName) {
+				switchTab(tabName);
+			}
+			return false;
+		});
+	});
+	
+	// 加载贡献者
+	loadContributors();
+	
+	// 初始加载数据
+	refreshConnInfo();
+});
+
+// 加载贡献者头像 (ES5)
+function loadContributors() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://api.github.com/repos/EasyTier/EasyTier/contributors', true);
+	xhr.timeout = 5000; // 5秒超时
+	
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			try {
+				var data = JSON.parse(xhr.responseText);
+				var container = document.getElementById('contributors');
+				var section = document.getElementById('contributors-section');
+				
+				if (!container || !section || !data.length) return;
+				
+				container.innerHTML = '';
+				
+				for (var i = 0; i < data.length; i++) {
+					var user = data[i];
+					var a = document.createElement('a');
+					a.href = user.html_url;
+					a.target = '_blank';
+					a.rel = 'noopener noreferrer';
+					
+					var img = document.createElement('img');
+					img.src = user.avatar_url;
+					img.alt = user.login;
+					img.title = user.login + ' (' + user.contributions + ' contributions)';
+					
+					a.appendChild(img);
+					container.appendChild(a);
+				}
+				
+				// 成功加载后显示卡片
+				section.style.display = 'block';
+			} catch (e) {
+				// 失败时保持隐藏
+			}
+		}
+	};
+	
+	xhr.onerror = function() {
+		// 失败时保持隐藏
+	};
+	
+	xhr.ontimeout = function() {
+		// 超时时保持隐藏
+	};
+	
+	xhr.send();
+}
+
+// 自动刷新
+XHR.poll(5, '<%=url("admin", "vpn", "easytier", "api_conninfo")%>', null, function(x, data) {
+	if (!isRefreshing) {
+		updateConnInfo(data);
+	}
+});
+//]]>
+</script>

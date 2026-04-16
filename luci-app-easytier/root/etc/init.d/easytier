@@ -72,15 +72,27 @@ get_tz() {
 fi
 
 check_bin() {
+	# 优先使用 UCI 配置的代理列表（list 类型），否则使用默认值
+	local proxys=""
+	local proxy_list=$(uci -q get easytier.@easytier[0].github_proxys)
+	
+	# 判断是否有多个代理
+	if [ ! -z "$proxy_list" ]; then
+		if [[ "$(grep "list github_proxys" /etc/config/easytier | awk '{print $3}' | wc -l)" -eq 1 ]]; then
+			proxys="$proxy_list"
+		else
+			proxys=$(cat /etc/config/easytier | grep 'list github_proxys' | awk -F 'list github_proxys' '{print $2}' | sed "s/'/\n/g" | tr -d " ' ")
+		fi
+	fi
+	
+	# 如果没有配置代理，使用默认值
+	if [ -z "$proxys" ]; then
+		proxys="https://ghproxy.net/ https://gh-proxy.com/ https://cdn.gh-proxy.com/ https://ghfast.top/"
+	fi
+	
 	curltest=`which curl`
 	user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-	#github加速地址，一行一个 你可以自建改为你自己的
-	proxys="
-	https://ghproxy.net/
-	https://gh-proxy.com/
-	https://cdn.gh-proxy.com/
-	https://ghfast.top/
-	"
+	
 	if [ -z "$curltest" ] || [ ! -s "`which curl`" ] ; then
        		tag="$( wget --no-check-certificate -T 5 -t 3 --user-agent "$user_agent" --max-redirect=0 --output-document=-  https://api.github.com/repos/EasyTier/EasyTier/releases/latest  2>&1 | grep 'tag_name' | cut -d\" -f4 )"
        		[ -z "$tag" ] && tag="$( wget --no-check-certificate -T 5 -t 3 --user-agent "$user_agent" --quiet --output-document=-  https://api.github.com/repos/EasyTier/EasyTier/releases/latest  2>&1 | grep 'tag_name' | cut -d\" -f4 )"
@@ -396,25 +408,7 @@ start_et() {
                 etcmd="$(uci -q get easytier.@easytier[0].etcmd)"
                 echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : easytier-core_${cpucore}开始启动" >>/tmp/easytier.log
                 path=$(dirname "$easytierbin")
-                if [[ -f /tmp/easytier-core || -f /tmp/easytier-cli ]] && [[ "${path:0:4}" != "/tmp" ]]; then
-                   chmod +x /tmp/easytier-core 2>/dev/null
-                   chmod +x /tmp/easytier-cli 2>/dev/null
-		   mkdir -p "$path"
-                   echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 找到上传的程序/tmp/easytier-core，替换为$easytierbin " >>/tmp/easytier.log
-                   upsize="$(du -k /tmp/easytier-core | cut -f1)"
-                   result=$(expr $size - $upsize)
-                   [ -z "$size"] && echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 获取可用空间失败，请使用ssh手动上传至 ${easytierbin} ${path}/easytier-cli" >>/tmp/easytier.log
-                   if [ "$(($(/tmp/easytier-core -h 2>&1 | wc -l)))" -gt 3 ] && [ "$result" -gt 1000 ] ; then
-                     	mv -f /tmp/easytier-core "$easytierbin" 2>/dev/null
-                     	mv -f /tmp/easytier-cli "${path}/easytier-cli" 2>/dev/null
-                    else
-		     	if [ -z "$size" ] && [ "$(($(/tmp/easytier-core -h 2>&1 | wc -l)))" -gt 3 ] ; then
-				mv -f /tmp/easytier-core "$easytierbin" 2>/dev/null
-                     		mv -f /tmp/easytier-cli "${path}/easytier-cli" 2>/dev/null
-		     	fi
-                        echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 无法替换，上传的程序不完整或自定义路径的可用空间不足，当前空间剩余${size}kb" >>/tmp/easytier.log
-                   fi
-                fi
+                
                 if [ ! -f "$easytierbin" ] && [ "$size" -lt 5000 ] && [ ! -z "$size" ] ; then
                     echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 自定义程序路径的可用空间不足，当前可用空间剩余${size}kb,自动切换为内存/tmp/easytier-core" >>/tmp/easytier.log
                     sed -i "/easytierbin/c option easytierbin '/tmp/easytier-core' " /etc/config/easytier 
@@ -761,17 +755,28 @@ start_service() {
         size="$(df -k | awk '/\/overlay$/ {sub(/K$/, "", $4); print $4}')"
 	[ -z "$size" ] && size="$(df -kP /usr/bin | awk 'NR==2 {print $(NF-2) }')"
 	if [ -z "$(uci -q get easytier.@easytier[0].web_enabled)" ] ; then
-		# Migrate old config if needed or just init
-		# For now just set default 0 if not present
 		uci -q set easytier.@easytier[0].web_enabled='0'
 		uci commit easytier
 	fi
 	[ "$(uci -q get easytier.@easytier[0].web_enabled)" = "1" ] && start_web 
 	[ "$(uci -q get easytier.@easytier[0].enabled)" = "1" ] && start_et easytier
-	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 重载防火墙和网络配置...会出现短暂断网现象... " >>/tmp/easytier.log
-	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 重载防火墙和网络配置...会出现短暂断网现象... " >>/tmp/easytierweb.log
-        [ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
-	[ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1
+	
+	# 延迟重载网络配置，避免与拨号等网络事件冲突
+	if [ -n "$(uci changes network)" ] || [ -n "$(uci changes firewall)" ]; then
+		echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 检测到配置变更，将在5秒后后台重载... " >>/tmp/easytier.log
+		(
+			sleep 5
+			# 使用锁文件防止重复重载
+			LOCK_FILE="/var/lock/easytier_reload.lock"
+			if [ ! -f "$LOCK_FILE" ]; then
+				touch "$LOCK_FILE"
+				[ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
+				[ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1
+				echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 网络配置重载完成 " >>/tmp/easytier.log
+				rm -f "$LOCK_FILE"
+			fi
+		) &
+	fi
 
 }
 
@@ -796,8 +801,22 @@ stop_service() {
                 	uci -q delete firewall.easytier_quic >/dev/null 2>&1
                 	uci -q delete firewall.easytier_wireguard >/dev/null 2>&1
                 	uci -q delete firewall.easytier_socks5 >/dev/null 2>&1
-                	[ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
-	        	[ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1 
+                	
+                	# 延迟重载，避免与网络事件冲突
+                	if [ -n "$(uci changes network)" ] || [ -n "$(uci changes firewall)" ]; then
+                		echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 停止服务，将在5秒后后台重载配置... " >>/tmp/easytier.log
+                		(
+                			sleep 5
+                			LOCK_FILE="/var/lock/easytier_reload.lock"
+                			if [ ! -f "$LOCK_FILE" ]; then
+                				touch "$LOCK_FILE"
+                				[ -n "$(uci changes network)" ] && uci commit network && /etc/init.d/network reload >/dev/null 2>&1
+                				[ -n "$(uci changes firewall)" ] && uci commit firewall && /etc/init.d/firewall reload >/dev/null 2>&1
+                				rm -f "$LOCK_FILE"
+                			fi
+                		) &
+                	fi
+                	
                 	rm -rf /tmp/easytier-cli_peer /tmp/easytier-cli_connector /tmp/easytier-cli_stun /tmp/easytier-cli_route /tmp/easytier-cli_acl >/dev/null 2>&1
                 	rm -rf /tmp/easytier-cli_peer-center /tmp/easytier-cli_vpn-portal /tmp/easytier_cmd /tmp/easytier-cli_node /tmp/easytier-cli_mapped_listener >/dev/null 2>&1
                 	rm -rf /tmp/easytier-*.* /tmp/easytier.log >/dev/null 2>&1
@@ -820,6 +839,6 @@ reload_service() {
 service_triggers() {
 	procd_add_reload_trigger "easytier"
 	#如果WAN网络接口上线则触发重新启动easytier
-        procd_add_interface_trigger "interface.*.up" wan /etc/init.d/easytier reload
+        # procd_add_interface_trigger "interface.*.up" wan /etc/init.d/easytier reload
 }
 
