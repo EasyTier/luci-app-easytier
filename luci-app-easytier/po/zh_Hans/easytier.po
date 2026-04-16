@@ -1817,3 +1817,33 @@ msgstr "地址"
 
 msgid "Contributors"
 msgstr "贡献者"
+
+msgid "Traffic Control Bytes RX"
+msgstr "流量控制接收字节数"
+
+msgid "Traffic Control Bytes TX"
+msgstr "流量控制发送字节数"
+
+msgid "Traffic Control Bytes RX By Instance"
+msgstr "按实例统计接收字节数"
+
+msgid "Traffic Control Bytes TX By Instance"
+msgstr "按实例统计发送字节数"
+
+msgid "Traffic Control Packets RX"
+msgstr "流量控制接收数据包"
+
+msgid "Traffic Control Packets TX"
+msgstr "流量控制发送数据包"
+
+msgid "Traffic Control Packets RX By Instance"
+msgstr "按实例统计接收数据包"
+
+msgid "Traffic Control Packets TX By Instance"
+msgstr "按实例统计发送数据包"
+
+msgid "From Instance ID"
+msgstr "来源实例ID"
+
+msgid "To Instance ID"
+msgstr "目标实例ID"
