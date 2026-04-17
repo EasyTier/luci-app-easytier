@@ -35,7 +35,7 @@ local uci = require 'luci.model.uci'.cursor()
 	border-radius: 16px;
 	box-shadow: 0 8px 32px var(--card-shadow);
 	border: 1px solid var(--border-color);
-	margin: 20px 0;
+	margin: 20px 0 20px 0;
 	overflow: hidden;
 	backdrop-filter: blur(10px);
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -403,17 +403,72 @@ local uci = require 'luci.model.uci'.cursor()
 
 /* Contributors Section */
 .et-contributors-section {
-	margin-top: 24px;
+	margin: 20px 0 20px 0;
 	padding: 20px;
 	background: var(--card-bg);
-	border-top: 1px solid var(--border-color);
+	border-radius: 16px;
+	box-shadow: 0 8px 32px var(--card-shadow);
+	border: 1px solid var(--border-color);
+	backdrop-filter: blur(10px);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+}
+
+.et-contributors-section:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 40px var(--card-shadow);
+}
+
+.et-contributors-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
 }
 
 .et-contributors-title {
 	font-size: 16px;
 	font-weight: 600;
 	color: var(--text-primary);
-	margin-bottom: 16px;
+}
+
+.et-contributors-pagination {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 13px;
+	color: var(--text-secondary);
+}
+
+.et-contributors-dots {
+	display: flex;
+	gap: 6px;
+}
+
+.et-contributors-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--border-color);
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.et-contributors-dot.active {
+	background: var(--tab-active);
+	width: 24px;
+	border-radius: 4px;
+}
+
+.et-contributors-dot:hover {
+	background: var(--tab-active);
+	opacity: 0.7;
+}
+
+.et-contributors-wrapper {
+	position: relative;
+	overflow: hidden;
+	min-height: 60px;
 }
 
 .et-contributors-container {
@@ -422,6 +477,19 @@ local uci = require 'luci.model.uci'.cursor()
 	gap: 8px;
 	justify-content: flex-start;
 	align-items: center;
+	opacity: 0;
+	transform: translateX(20px);
+	transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.et-contributors-container.active {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+.et-contributors-container.exit {
+	opacity: 0;
+	transform: translateX(-20px);
 }
 
 .et-contributors-container a {
@@ -442,12 +510,32 @@ local uci = require 'luci.model.uci'.cursor()
 }
 
 .et-contributors-container img:hover {
-	border-color: var(--info);
+	border-color: var(--tab-active);
 }
 
 @media (max-width: 768px) {
 	.et-contributors-section {
 		padding: 16px;
+		margin: 16px 0 16px 0;
+	}
+	
+	.et-contributors-section:hover {
+		transform: none;
+	}
+	
+	.et-contributors-header {
+		flex-direction: column;
+		gap: 12px;
+		align-items: flex-start;
+	}
+	
+	.et-contributors-pagination {
+		width: 100%;
+		justify-content: space-between;
+	}
+	
+	.et-contributors-container {
+		justify-content: center;
 	}
 	
 	.et-contributors-container img {
@@ -557,10 +645,18 @@ local uci = require 'luci.model.uci'.cursor()
 			<%:Collecting data...%>
 		</div>
 	</div>
-	
-	<!-- Contributors Section -->
-	<div id="contributors-section" class="et-contributors-section" style="display: none;">
+</div>
+
+<!-- Contributors Section -->
+<div id="contributors-section" class="et-contributors-section" style="display: none;">
+	<div class="et-contributors-header">
 		<div class="et-contributors-title"><%:Contributors%></div>
+		<div class="et-contributors-pagination">
+			<span id="contributors-page-info"></span>
+			<div id="contributors-dots" class="et-contributors-dots"></div>
+		</div>
+	</div>
+	<div class="et-contributors-wrapper">
 		<div id="contributors" class="et-contributors-container"></div>
 	</div>
 </div>
@@ -700,6 +796,9 @@ var translations = {
 	// VPN Portal特殊处理
 	"ERROR: Wireguard VPN Portal Not Started": "<%:ERROR: Wireguard VPN Portal Not Started%>",
 	
+	// 错误信息翻译
+	"no running instances found": "<%:no running instances found%>",
+	
 	// 统计指标翻译
 	"compression_bytes_rx_before": "<%:Compression RX Before%>",
 	"compression_bytes_rx_after": "<%:Compression RX After%>", 
@@ -806,6 +905,11 @@ function parseTable(content, tabName) {
 	// VPN Portal特殊处理
 	if (content.indexOf('ERROR: Wireguard VPN Portal Not Started') !== -1) {
 		return '<div class="et-error">' + escapeHtml(tr('ERROR: Wireguard VPN Portal Not Started')) + '</div>';
+	}
+	
+	// 未找到运行实例错误处理
+	if (content.indexOf('no running instances found') !== -1) {
+		return '<div class="et-error">' + escapeHtml(tr('no running instances found')) + '</div>';
 	}
 	
 	// Peer Center错误处理
@@ -1104,56 +1208,215 @@ document.addEventListener('DOMContentLoaded', function() {
 	refreshConnInfo();
 });
 
-// 加载贡献者头像 (ES5)
-function loadContributors() {
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', 'https://api.github.com/repos/EasyTier/EasyTier/contributors', true);
-	xhr.timeout = 5000; // 5秒超时
+// 贡献者轮播管理 (ES5)
+var contributorsCarousel = {
+	allContributors: [],
+	currentPage: 0,
+	pageSize: 30,
+	totalPages: 0,
+	autoPlayTimer: null,
+	autoPlayInterval: 3000,
+	container: null,
+	section: null,
+	pageInfo: null,
+	dotsContainer: null,
 	
-	xhr.onload = function() {
-		if (xhr.status === 200) {
-			try {
-				var data = JSON.parse(xhr.responseText);
-				var container = document.getElementById('contributors');
-				var section = document.getElementById('contributors-section');
-				
-				if (!container || !section || !data.length) return;
-				
-				container.innerHTML = '';
-				
-				for (var i = 0; i < data.length; i++) {
-					var user = data[i];
-					var a = document.createElement('a');
-					a.href = user.html_url;
-					a.target = '_blank';
-					a.rel = 'noopener noreferrer';
-					
-					var img = document.createElement('img');
-					img.src = user.avatar_url;
-					img.alt = user.login;
-					img.title = user.login + ' (' + user.contributions + ' contributions)';
-					
-					a.appendChild(img);
-					container.appendChild(a);
+	init: function() {
+		this.container = document.getElementById('contributors');
+		this.section = document.getElementById('contributors-section');
+		this.pageInfo = document.getElementById('contributors-page-info');
+		this.dotsContainer = document.getElementById('contributors-dots');
+		this.setupHoverPause();
+		this.loadData();
+	},
+	
+	setupHoverPause: function() {
+		var self = this;
+		if (!this.section) return;
+		
+		this.section.addEventListener('mouseenter', function() {
+			self.stopAutoPlay();
+		});
+		
+		this.section.addEventListener('mouseleave', function() {
+			self.startAutoPlay();
+		});
+		
+		// 移动端滑动支持
+		this.setupTouchSwipe();
+	},
+	
+	setupTouchSwipe: function() {
+		var self = this;
+		if (!this.container) return;
+		
+		var startX = 0;
+		var startY = 0;
+		var threshold = 50; // 滑动阈值
+		
+		this.container.addEventListener('touchstart', function(e) {
+			self.stopAutoPlay();
+			startX = e.touches[0].clientX;
+			startY = e.touches[0].clientY;
+		});
+		
+		this.container.addEventListener('touchend', function(e) {
+			var endX = e.changedTouches[0].clientX;
+			var endY = e.changedTouches[0].clientY;
+			var deltaX = endX - startX;
+			var deltaY = endY - startY;
+			
+			// 确保是水平滑动
+			if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
+				if (deltaX > 0) {
+					// 右滑 - 上一页
+					var prevPage = (self.currentPage - 1 + self.totalPages) % self.totalPages;
+					self.showPage(prevPage);
+				} else {
+					// 左滑 - 下一页
+					self.nextPage();
 				}
-				
-				// 成功加载后显示卡片
-				section.style.display = 'block';
-			} catch (e) {
-				// 失败时保持隐藏
 			}
+			
+			self.startAutoPlay();
+		});
+	},
+	
+	loadData: function() {
+		var self = this;
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', 'https://api.github.com/repos/EasyTier/EasyTier/contributors?per_page=100', true);
+		xhr.timeout = 10000;
+		
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				try {
+					var data = JSON.parse(xhr.responseText);
+					if (!data || data.length === 0) return;
+					
+					self.allContributors = data;
+					self.totalPages = Math.ceil(data.length / self.pageSize);
+					self.renderDots();
+					self.showPage(0);
+					self.section.style.display = 'block';
+					self.startAutoPlay();
+				} catch (e) {
+					console.error('Failed to parse contributors:', e);
+				}
+			}
+		};
+		
+		xhr.onerror = function() {
+			console.error('Failed to load contributors');
+		};
+		
+		xhr.ontimeout = function() {
+			console.error('Contributors request timeout');
+		};
+		
+		xhr.send();
+	},
+	
+	renderDots: function() {
+		if (!this.dotsContainer) return;
+		this.dotsContainer.innerHTML = '';
+		
+		for (var i = 0; i < this.totalPages; i++) {
+			var dot = document.createElement('div');
+			dot.className = 'et-contributors-dot';
+			dot.setAttribute('data-page', i);
+			
+			var self = this;
+			(function(page) {
+				dot.onclick = function() {
+					self.stopAutoPlay();
+					self.showPage(page);
+					self.startAutoPlay();
+				};
+			})(i);
+			
+			this.dotsContainer.appendChild(dot);
 		}
-	};
+	},
 	
-	xhr.onerror = function() {
-		// 失败时保持隐藏
-	};
+	showPage: function(pageIndex) {
+		var self = this;
+		if (pageIndex < 0 || pageIndex >= this.totalPages) return;
+		
+		// 退出动画
+		this.container.classList.remove('active');
+		this.container.classList.add('exit');
+		
+		setTimeout(function() {
+			self.currentPage = pageIndex;
+			var start = pageIndex * self.pageSize;
+			var end = Math.min(start + self.pageSize, self.allContributors.length);
+			var pageData = self.allContributors.slice(start, end);
+			
+			// 更新内容
+			self.container.innerHTML = '';
+			for (var i = 0; i < pageData.length; i++) {
+				var user = pageData[i];
+				var a = document.createElement('a');
+				a.href = user.html_url;
+				a.target = '_blank';
+				a.rel = 'noopener noreferrer';
+				
+				var img = document.createElement('img');
+				img.src = user.avatar_url;
+				img.alt = user.login;
+				img.title = user.login + ' (' + user.contributions + ' contributions)';
+				
+				a.appendChild(img);
+				self.container.appendChild(a);
+			}
+			
+			// 更新分页信息
+			if (self.pageInfo) {
+				self.pageInfo.textContent = (pageIndex + 1) + ' / ' + self.totalPages;
+			}
+			
+			// 更新指示器
+			var dots = self.dotsContainer.querySelectorAll('.et-contributors-dot');
+			for (var j = 0; j < dots.length; j++) {
+				dots[j].classList.remove('active');
+			}
+			if (dots[pageIndex]) {
+				dots[pageIndex].classList.add('active');
+			}
+			
+			// 进入动画
+			self.container.classList.remove('exit');
+			setTimeout(function() {
+				self.container.classList.add('active');
+			}, 50);
+		}, 600);
+	},
 	
-	xhr.ontimeout = function() {
-		// 超时时保持隐藏
-	};
+	nextPage: function() {
+		var next = (this.currentPage + 1) % this.totalPages;
+		this.showPage(next);
+	},
 	
-	xhr.send();
+	startAutoPlay: function() {
+		var self = this;
+		this.stopAutoPlay();
+		this.autoPlayTimer = setInterval(function() {
+			self.nextPage();
+		}, this.autoPlayInterval);
+	},
+	
+	stopAutoPlay: function() {
+		if (this.autoPlayTimer) {
+			clearInterval(this.autoPlayTimer);
+			this.autoPlayTimer = null;
+		}
+	}
+};
+
+// 加载贡献者
+function loadContributors() {
+	contributorsCarousel.init();
 }
 
 // 自动刷新

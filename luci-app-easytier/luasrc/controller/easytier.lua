@@ -74,6 +74,9 @@ function index()
 	entry({"admin", "vpn", "easytier", "restart_service"}, call("restart_service")).leaf = true
 	entry({"admin", "vpn", "easytier", "toggle_core"}, call("toggle_core")).leaf = true
 	entry({"admin", "vpn", "easytier", "toggle_web"}, call("toggle_web")).leaf = true
+	entry({"admin", "vpn", "easytier", "download_easytier"}, call("download_easytier")).leaf = true
+	entry({"admin", "vpn", "easytier", "download_progress"}, call("download_progress")).leaf = true
+	entry({"admin", "vpn", "easytier", "cancel_download"}, call("cancel_download")).leaf = true
 end
 
 function act_status()
@@ -747,5 +750,391 @@ function toggle_web()
 		luci.sys.exec("/etc/init.d/easytier restart >/dev/null 2>&1 &")
 	end
 	luci.http.prepare_content("application/json")
+	luci.http.write_json({success = true})
+end
+-- 检测CPU架构
+local function detect_arch()
+	local cputype = safe_exec("uname -ms | tr ' ' '_' | tr '[A-Z]' '[a-z]'")
+	local cpucore = ""
+	
+	if cputype:match("linux.*armv.*") then
+		cpucore = "arm"
+	end
+	if cputype:match("linux.*armv7.*") and safe_exec("cat /proc/cpuinfo | grep vfp") ~= "" then
+		cpucore = "armv7"
+	end
+	if cputype:match("linux.*aarch64.*") or cputype:match("linux.*armv8.*") then
+		cpucore = "aarch64"
+	end
+	if cputype:match("linux.*86.*") then
+		cpucore = "i386"
+	end
+	if cputype:match("linux.*86_64.*") then
+		cpucore = "x86_64"
+	end
+	if cputype:match("linux.*mips.*") then
+		local mipstype = safe_exec("echo -n I | hexdump -o 2>/dev/null | awk '{ print substr($2,6,1); exit}'")
+		if mipstype == "0" then
+			cpucore = "mips"
+		else
+			cpucore = "mipsel"
+		end
+	end
+	
+	return cpucore
+end
+
+-- 检查依赖
+local function check_dependencies()
+	local arch = detect_arch()
+	if arch == "" then
+		return false, i18n.translate("Unable to detect CPU architecture")
+	end
+	if arch == "i386" then
+		return false, i18n.translate("No x86-32bit program available")
+	end
+	if safe_exec("which unzip") == "" then
+		return false, i18n.translate("System lacks unzip, cannot download and extract")
+	end
+	return true, arch
+end
+
+-- 获取GitHub镜像列表
+local function get_github_proxies()
+	local uci = require "luci.model.uci".cursor()
+	local proxies = {}
+	
+	-- 从UCI配置读取代理列表
+	local proxy_list = uci:get("easytier", "@easytier[0]", "github_proxys")
+	
+	if proxy_list then
+		if type(proxy_list) == "table" then
+			-- 多个代理
+			for _, proxy in ipairs(proxy_list) do
+				if proxy and proxy ~= "" then
+					table.insert(proxies, proxy)
+				end
+			end
+		else
+			-- 单个代理
+			if proxy_list ~= "" then
+				table.insert(proxies, proxy_list)
+			end
+		end
+	end
+	
+	-- 如果没有配置代理，使用默认值
+	if #proxies == 0 then
+		proxies = {
+			"https://ghproxy.net/",
+			"https://gh-proxy.com/",
+			"https://cdn.gh-proxy.com/",
+			"https://ghfast.top/"
+		}
+	end
+	
+	-- 添加不使用代理的选项（空字符串表示直连）
+	table.insert(proxies, "")
+	
+	return proxies
+end
+
+-- 下载文件
+local function download_file(url, output_path, progress_callback)
+	local download_tools = {"curl", "wget"}
+	
+	for _, tool in ipairs(download_tools) do
+		if safe_exec("which " .. tool) ~= "" then
+			local cmd = ""
+			if tool == "curl" then
+				cmd = string.format("curl -L -k --connect-timeout 30 --max-time 300 -o '%s' '%s'", output_path, url)
+			elseif tool == "wget" then
+				cmd = string.format("wget --no-check-certificate --timeout=30 --tries=3 -O '%s' '%s'", output_path, url)
+			end
+			
+			if progress_callback then
+				progress_callback(50, i18n.translate("Downloading with") .. " " .. tool .. "...")
+			end
+			
+			local result = os.execute(cmd)
+			if result == 0 and nixio.fs.access(output_path) then
+				-- 检查文件大小，确保下载完整
+				local stat = nixio.fs.stat(output_path)
+				if stat and stat.size > 3 * 1024 * 1024 then -- 至少3MB
+					return true
+				end
+			end
+		end
+	end
+	
+	return false
+end
+
+function download_easytier()
+	luci.http.prepare_content("application/json")
+	
+	local json = require "luci.jsonc"
+	local progress_file = "/tmp/easytier_download_progress"
+	
+	-- 检查是否已有下载任务
+	local existing_progress = safe_read_file(progress_file)
+	if existing_progress then
+		local progress_data = json.parse(existing_progress)
+		if progress_data and progress_data.progress > 0 and progress_data.progress < 100 and not progress_data.error then
+			luci.http.write_json({
+				success = true,
+				progress = progress_data.progress,
+				message = i18n.translate("Download task already exists"),
+				url = progress_data.url or ""
+			})
+			return
+		end
+	end
+	
+	local req_data = json.parse(luci.http.content())
+	if not req_data or not req_data.version then
+		luci.http.write_json({success = false, message = i18n.translate("Missing version parameter")})
+		return
+	end
+	
+	local version = req_data.version
+	
+	-- 1. 检查依赖和架构
+	local ok, arch_or_error = check_dependencies()
+	if not ok then
+		luci.http.write_json({success = false, message = arch_or_error})
+		return
+	end
+	
+	local arch = arch_or_error
+	local proxies = get_github_proxies()
+	local download_dir = "/tmp/easytier_download"
+	local zip_file = download_dir .. "/easytier-linux-" .. arch .. "-" .. version .. ".zip"
+	
+	-- 创建下载目录
+	os.execute("mkdir -p " .. download_dir)
+	
+	-- 创建取消标志文件
+	local cancel_file = "/tmp/easytier_download_cancel"
+	os.execute("rm -f " .. cancel_file)
+	
+	-- 创建进度文件标记任务开始
+	local f = io.open(progress_file, "w")
+	if f then
+		f:write(json.stringify({
+			progress = 1,
+			message = "Downloading...",
+			url = "",
+			error = false
+		}))
+		f:close()
+	end
+	
+	-- 检查是否被取消
+	local function check_cancelled()
+		return nixio.fs.access(cancel_file)
+	end
+	
+	-- 2. 循环尝试不同的镜像地址下载、解压、验证
+	local download_success = false
+	local download_url = ""
+	local core_file, cli_file, web_file
+	
+	for _, proxy in ipairs(proxies) do
+		-- 检查是否被取消
+		if check_cancelled() then
+			os.execute("rm -rf " .. download_dir)
+			os.execute("rm -f " .. progress_file)
+			luci.http.write_json({success = false, message = i18n.translate("Download cancelled")})
+			return
+		end
+		
+		download_url = proxy .. "https://github.com/EasyTier/EasyTier/releases/download/" .. version .. "/easytier-linux-" .. arch .. "-" .. version .. ".zip"
+		
+		-- 删除之前的失败文件
+		os.execute("rm -f " .. zip_file)
+		os.execute("rm -rf " .. download_dir .. "/extracted")
+		
+		-- 下载
+		if download_file(download_url, zip_file) then
+			local stat = nixio.fs.stat(zip_file)
+			if stat and stat.size > 10240 then
+				-- 检查是否被取消
+				if check_cancelled() then
+					os.execute("rm -rf " .. download_dir)
+					os.execute("rm -f " .. progress_file)
+					luci.http.write_json({success = false, message = i18n.translate("Download cancelled")})
+					return
+				end
+				
+				-- 解压
+				local extract_dir = download_dir .. "/extracted"
+				os.execute("mkdir -p " .. extract_dir)
+				local unzip_result = os.execute("cd " .. extract_dir .. " && unzip -o " .. zip_file .. " >/dev/null 2>&1")
+				
+				if unzip_result == 0 then
+					-- 检查是否被取消
+					if check_cancelled() then
+						os.execute("rm -rf " .. download_dir)
+						os.execute("rm -f " .. progress_file)
+						luci.http.write_json({success = false, message = i18n.translate("Download cancelled")})
+						return
+					end
+					
+					-- 查找解压后的目录（使用通配符）
+					local find_cmd = "find " .. extract_dir .. " -maxdepth 1 -type d -name 'easytier-linux-*' 2>/dev/null | head -1"
+					local handle = io.popen(find_cmd)
+					local subdir = handle:read("*a"):match("^%s*(.-)%s*$")
+					handle:close()
+					
+					if subdir and subdir ~= "" then
+						core_file = subdir .. "/easytier-core"
+						cli_file = subdir .. "/easytier-cli"
+						web_file = subdir .. "/easytier-web-embed"
+						
+						local files_ok = nixio.fs.access(core_file) and nixio.fs.access(cli_file)
+						if arch ~= "mips" and arch ~= "mipsel" then
+							files_ok = files_ok and nixio.fs.access(web_file)
+						end
+						
+						if files_ok then
+							-- 检查是否被取消
+							if check_cancelled() then
+								os.execute("rm -rf " .. download_dir)
+								os.execute("rm -f " .. progress_file)
+								luci.http.write_json({success = false, message = i18n.translate("Download cancelled")})
+								return
+							end
+							
+							-- 先赋予执行权限，再测试程序
+							local test_files = {core_file, cli_file}
+							if arch ~= "mips" and arch ~= "mipsel" then
+								table.insert(test_files, web_file)
+							end
+							
+							local test_ok = true
+							for _, file in ipairs(test_files) do
+								os.execute("chmod +x " .. file)
+								if not test_binary(file) then
+									test_ok = false
+									break
+								end
+							end
+							
+							if test_ok then
+								download_success = true
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+		
+		-- 删除失败的文件，继续下一个地址
+		os.execute("rm -f " .. zip_file)
+	end
+	
+	if not download_success then
+		os.execute("rm -rf " .. download_dir)
+		os.execute("rm -f " .. progress_file)
+		luci.http.write_json({success = false, message = i18n.translate("All download attempts failed")})
+		return
+	end
+	
+	-- 检查是否被取消（替换前）
+	if check_cancelled() then
+		os.execute("rm -rf " .. download_dir)
+		os.execute("rm -f " .. progress_file)
+		luci.http.write_json({success = false, message = i18n.translate("Download cancelled")})
+		return
+	end
+	
+	-- 3. 从UCI获取路径并安装
+	local uci = require "luci.model.uci".cursor()
+	local easytierbin = uci:get_first("easytier", "easytier", "easytierbin") or "/usr/bin/easytier-core"
+	local easytierwebbin = uci:get_first("easytier", "easytier", "easytierwebbin") or "/usr/bin/easytier-web"
+	
+	local core_dir = easytierbin:match("^(.*/)[^/]+$") or "/usr/bin/"
+	
+	local programs = {
+		{src = core_file, dest = easytierbin},
+		{src = cli_file, dest = core_dir .. "easytier-cli"}
+	}
+	
+	if arch ~= "mips" and arch ~= "mipsel" then
+		table.insert(programs, {src = web_file, dest = easytierwebbin})
+	end
+	
+	-- 安装并验证
+	for _, prog in ipairs(programs) do
+		local result = os.execute("cp " .. prog.src .. " " .. prog.dest .. " 2>/dev/null")
+		if result ~= 0 then
+			os.execute("rm -rf " .. download_dir)
+			os.execute("rm -f " .. progress_file)
+			luci.http.write_json({success = false, message = i18n.translate("Failed to install program") .. ": " .. prog.dest})
+			return
+		end
+		
+		os.execute("chmod +x " .. prog.dest)
+		
+		-- 再次验证安装后的程序
+		if not test_binary(prog.dest) then
+			os.execute("rm -rf " .. download_dir)
+			os.execute("rm -f " .. progress_file)
+			luci.http.write_json({success = false, message = i18n.translate("Program is incomplete or architecture mismatch")})
+			return
+		end
+	end
+	
+	-- 7. 清理临时文件和版本缓存
+	os.execute("rm -rf " .. download_dir)
+	os.execute("rm -f " .. cancel_file)
+	os.execute("rm -f " .. progress_file)
+	nixio.fs.remove("/tmp/easytier.tag")
+	nixio.fs.remove("/tmp/easytierweb.tag")
+	
+	luci.http.write_json({
+		success = true,
+		progress = 100,
+		message = i18n.translate("Download and installation completed")
+	})
+end
+
+function download_progress()
+	luci.http.prepare_content("application/json")
+	
+	local progress_file = "/tmp/easytier_download_progress"
+	local content = safe_read_file(progress_file)
+	
+	if content then
+		local json = require "luci.jsonc"
+		local progress_data = json.parse(content)
+		if progress_data then
+			luci.http.write_json({
+				success = true,
+				progress = progress_data.progress or 0,
+				message = progress_data.message or "",
+				url = progress_data.url or "",
+				error = progress_data.error or false
+			})
+			return
+		end
+	end
+	
+	luci.http.write_json({
+		success = true,
+		progress = 0,
+		message = i18n.translate("Preparing..."),
+		url = "",
+		error = false
+	})
+end
+function cancel_download()
+	luci.http.prepare_content("application/json")
+	
+	-- 创建取消标志文件
+	os.execute("touch /tmp/easytier_download_cancel")
+	
 	luci.http.write_json({success = true})
 end

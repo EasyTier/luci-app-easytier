@@ -369,10 +369,26 @@ local translate = i18n.translate
 			</div>
 		</div>
 		<div style="margin-bottom:16px;">
-			<label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">
-				<%=translate("Fallback Version")%>
+			<label style="display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">
+				<span><%=translate("Fallback Version")%></span>
+				<a href="https://github.com/EasyTier/EasyTier/releases" target="_blank" style="margin-left:8px;line-height:1;">
+					<img alt="" src="https://img.shields.io/github/v/tag/EasyTier/EasyTier?include_prereleases&logo=github&label=pre-releases&link=https%3A%2F%2Fgithub.com%2FEasyTier%2FEasyTier%2Freleases" style="height:13px;vertical-align:middle;">
+				</a>
+				<a href="https://github.com/EasyTier/EasyTier/releases" target="_blank" style="margin-left:4px;line-height:1;">
+					<img alt="" src="https://img.shields.io/github/v/release/EasyTier/EasyTier?logo=github&link=https%3A%2F%2Fgithub.com%2FEasyTier%2FEasyTier%2Freleases" style="height:13px;vertical-align:middle;">
+				</a>
 			</label>
-			<input type="text" id="fallback_version" class="config-input" placeholder="v2.5.0">
+			<div id="version-selector-container" style="display:flex;gap:8px;align-items:center;">
+				<div style="flex:1;">
+					<select id="fallback_version_select" class="config-input" style="display:none;width:100%;">
+						<option value=""><%=translate("Loading versions...")%></option>
+					</select>
+					<input type="text" id="fallback_version" class="config-input" placeholder="v2.6.0" style="display:none;width:100%;">
+				</div>
+				<button type="button" class="upload-btn" onclick="showDownloadModal()" style="padding:8px 16px;min-width:auto;flex-shrink:0;">
+					<%=translate("Online Download")%>
+				</button>
+			</div>
 			<div style="font-size:11px;color:#999;opacity:0.8;margin-top:4px;">
 				<%=translate("Used when unable to fetch the latest version during online download")%>
 			</div>
@@ -407,6 +423,39 @@ local translate = i18n.translate
 	</div>
 	
 	<div class="alert" id="alert_box"></div>
+	
+	<!-- 在线下载模态窗口 -->
+	<div id="download_modal" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3><%=translate("Online Download EasyTier")%></h3>
+			</div>
+			<div class="modal-body">
+				<div style="margin-bottom:16px;">
+					<label style="display:block;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">
+						<%=translate("Download Version")%>
+					</label>
+					<div id="download-version-container">
+						<!-- 这里会动态插入备用版本的输入框 -->
+					</div>
+					<div style="font-size:11px;color:#999;opacity:0.8;margin-top:4px;">
+						<%=translate("Download specified version from GitHub and install to specified path")%>
+					</div>
+				</div>
+				<div class="download-progress" id="download_progress" style="display:none;">
+					<div class="progress-bar">
+						<div class="progress-fill" id="download_progress_fill"></div>
+					</div>
+					<div class="progress-text" id="download_progress_text"><%=translate("Downloading...")%> 0%</div>
+					<div style="font-size:11px;color:#666;margin-top:4px;word-break:break-all;overflow-wrap:break-word;" id="download_url_text"></div>
+				</div>
+			</div>
+			<div class="modal-footer" style="text-align:right;">
+				<button class="upload-btn secondary" onclick="closeDownloadModal()"><%=translate("Close")%></button>
+				<button class="upload-btn" onclick="startDownload()" id="download_confirm_btn"><%=translate("Download")%></button>
+			</div>
+		</div>
+	</div>
 	
 	<div class="upload-info">
 		<div class="upload-info-title"><%=translate("Supported Files")%></div>
@@ -457,6 +506,243 @@ local translate = i18n.translate
 var originalConfig = {};
 
 // 加载配置
+// 版本管理
+var versionManager = {
+	versions: [],
+	isLoaded: false,
+	customValue: '', // 跟踪用户自定义输入
+	
+	init: function() {
+		this.loadVersions();
+	},
+	
+	loadVersions: function() {
+		var self = this;
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', 'https://api.github.com/repos/EasyTier/EasyTier/releases', true);
+		xhr.timeout = 10000;
+		
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				try {
+					var releases = JSON.parse(xhr.responseText);
+					self.versions = releases.map(function(release) {
+						return {
+							tag: release.tag_name,
+							name: release.name || release.tag_name,
+							published: release.published_at,
+							prerelease: release.prerelease
+						};
+					});
+					self.isLoaded = true;
+					self.renderVersionSelect();
+					// 版本加载完成后，重新应用配置中的版本
+					if (self.pendingVersion) {
+						self.setVersion(self.pendingVersion);
+						self.pendingVersion = null;
+					}
+				} catch (e) {
+					self.fallbackToInput();
+				}
+			} else {
+				self.fallbackToInput();
+			}
+		};
+		
+		xhr.onerror = function() {
+			self.fallbackToInput();
+		};
+		
+		xhr.ontimeout = function() {
+			self.fallbackToInput();
+		};
+		
+		xhr.send();
+	},
+	
+	renderVersionSelect: function() {
+		var select = document.getElementById('fallback_version_select');
+		var input = document.getElementById('fallback_version');
+		
+		if (!select || !input) return;
+		
+		select.innerHTML = '';
+		
+		// 添加版本选项
+		for (var i = 0; i < this.versions.length; i++) {
+			var version = this.versions[i];
+			var option = document.createElement('option');
+			option.value = version.tag;
+			var label = version.prerelease ? 
+				'<%=translate("Pre-release")%>' : 
+				'<%=translate("Stable")%>';
+			option.textContent = version.tag + ' (' + label + ')';
+			select.appendChild(option);
+		}
+		
+		// 添加自定义输入选项（最后一个）
+		this.updateCustomOption(select);
+		
+		// 显示选择器
+		select.style.display = 'block';
+		input.style.display = 'none';
+		
+		// 绑定事件
+		var self = this;
+		select.onchange = function() {
+			if (this.value === 'custom') {
+				input.value = self.customValue; // 恢复自定义值
+				input.style.display = 'block';
+				select.style.display = 'none';
+				input.focus();
+			} else {
+				input.value = this.value;
+			}
+		};
+		
+		// 处理点击已选中的自定义输入选项
+		select.addEventListener('click', function(e) {
+			// 检查点击的是否是自定义输入选项
+			if (e.target.tagName === 'OPTION' && e.target.value === 'custom' && this.value === 'custom') {
+				input.value = self.customValue; // 恢复自定义值
+				input.style.display = 'block';
+				select.style.display = 'none';
+				input.focus();
+			}
+		});
+		
+		// 输入框事件
+		input.oninput = function() {
+			// 实时更新自定义值
+			self.customValue = this.value;
+		};
+		
+		input.onblur = function() {
+			// 失去焦点时更新显示格式
+			if (self.isLoaded) {
+				self.updateCustomOption(select);
+				
+				var currentValue = input.value;
+				if (self.isValidVersion(currentValue)) {
+					select.value = currentValue;
+				} else {
+					select.value = 'custom';
+					// 输入框显示为 "值 (自定义输入)" 格式
+					if (currentValue && currentValue.trim() !== '') {
+						input.value = currentValue + ' (<%=translate("Custom Input")%>)';
+					}
+				}
+			}
+		};
+		
+		input.onclick = function() {
+			// 只有在显示格式状态时才弹出选择器
+			var displayValue = input.value;
+			if (displayValue.indexOf(' (') !== -1 && displayValue.indexOf(')') !== -1) {
+				// 当前是显示格式，弹出选择器
+				if (self.isLoaded) {
+					var actualValue = self.customValue || displayValue.replace(/ \(.*\)$/, '');
+					input.value = actualValue; // 恢复原始值
+					
+					self.updateCustomOption(select);
+					
+					// 选择当前值
+					if (self.isValidVersion(actualValue)) {
+						select.value = actualValue;
+					} else {
+						select.value = 'custom';
+					}
+					
+					select.style.display = 'block';
+					input.style.display = 'none';
+				}
+			}
+			// 如果已经是编辑状态（没有格式化显示），不做任何处理
+		};
+	},
+	
+	updateCustomOption: function(select) {
+		// 移除旧的自定义选项
+		var oldCustom = select.querySelector('option[value="custom"]');
+		if (oldCustom) {
+			oldCustom.remove();
+		}
+		
+		// 添加新的自定义选项
+		var customOption = document.createElement('option');
+		customOption.value = 'custom';
+		
+		if (this.customValue && this.customValue.trim() !== '' && !this.isValidVersion(this.customValue)) {
+			// 显示用户自定义的值
+			customOption.textContent = this.customValue + ' (<%=translate("Custom Input")%>)';
+		} else {
+			// 默认显示
+			customOption.textContent = '<%=translate("Custom Input")%>';
+		}
+		
+		select.appendChild(customOption);
+	},
+	
+	fallbackToInput: function() {
+		var select = document.getElementById('fallback_version_select');
+		var input = document.getElementById('fallback_version');
+		
+		if (select && input) {
+			select.style.display = 'none';
+			input.style.display = 'block';
+		}
+	},
+	
+	isValidVersion: function(version) {
+		for (var i = 0; i < this.versions.length; i++) {
+			if (this.versions[i].tag === version) {
+				return true;
+			}
+		}
+		return false;
+	},
+	
+	getCurrentVersion: function() {
+		var input = document.getElementById('fallback_version');
+		// 始终返回输入框的实际值，无论是选择的还是自定义输入的
+		return input ? input.value : '';
+	},
+	
+	setVersion: function(version) {
+		var select = document.getElementById('fallback_version_select');
+		var input = document.getElementById('fallback_version');
+		
+		if (!select || !input) return;
+		
+		input.value = version;
+		// 如果版本不在列表中，设置为自定义值
+		if (!this.isValidVersion(version)) {
+			this.customValue = version;
+		}
+		
+		if (this.isLoaded) {
+			// 更新自定义选项显示
+			this.updateCustomOption(select);
+			
+			// 版本列表已加载，显示下拉选择器
+			if (this.isValidVersion(version)) {
+				// 版本在列表中，直接选中
+				select.value = version;
+			} else {
+				// 版本不在列表中，选择自定义输入
+				select.value = 'custom';
+			}
+			select.style.display = 'block';
+			input.style.display = 'none';
+		} else {
+			// 版本列表未加载，保存待处理的版本
+			this.pendingVersion = version;
+			select.style.display = 'none';
+			input.style.display = 'block';
+		}
+	}
+};
+
 function loadConfig() {
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "get_upload_config")%>', true);
@@ -472,7 +758,7 @@ function loadConfig() {
 				proxyList = Array.isArray(proxys) ? proxys : [];
 				
 				renderProxyList();
-				document.getElementById('fallback_version').value = config.fallback_version || 'v2.6.0';
+				versionManager.setVersion(config.fallback_version || 'v2.6.0');
 				
 				// 保存原始配置
 				originalConfig = {
@@ -523,13 +809,19 @@ function checkDiskSpace(inputId) {
 					if (inputId === 'easytierbin') {
 						if (response.core_size) {
 							sizeHtml += 'easytier-core ' + response.core_size;
+						} else {
+							sizeHtml += '<span style="color:var(--error);opacity:0.6;">easytier-core: <%=translate("Program not found")%></span>';
 						}
 						if (response.cli_size) {
-							sizeHtml += (sizeHtml ? ' | ' : '') + ' easytier-cli ' + response.cli_size;
+							sizeHtml += (sizeHtml ? ' | ' : '') + 'easytier-cli ' + response.cli_size;
+						} else {
+							sizeHtml += (sizeHtml ? ' | ' : '') + '<span style="color:var(--error);opacity:0.6;">easytier-cli: <%=translate("Program not found")%></span>';
 						}
 					} else if (inputId === 'webbin') {
 						if (response.web_size) {
 							sizeHtml = 'easytier-web ' + response.web_size;
+						} else {
+							sizeHtml = '<span style="color:var(--error);opacity:0.6;">easytier-web: <%=translate("Program not found")%></span>';
 						}
 					}
 					sizeDiv.innerHTML = sizeHtml ? '<span style="color:#999;opacity:0.8;"><%=translate("Program size")%>: ' + sizeHtml + '</span>' : '';
@@ -551,7 +843,7 @@ function getCurrentConfig() {
 		easytierbin: document.getElementById('easytierbin').value || '/usr/bin/easytier-core',
 		webbin: document.getElementById('webbin').value || '/usr/bin/easytier-web',
 		github_proxys: JSON.stringify(proxyList),
-		fallback_version: document.getElementById('fallback_version').value || 'v2.6.0'
+		fallback_version: versionManager.getCurrentVersion() || 'v2.6.0'
 	};
 }
 
@@ -576,7 +868,7 @@ function saveConfig() {
 		easytierbin: document.getElementById('easytierbin').value || '/usr/bin/easytier-core',
 		webbin: document.getElementById('webbin').value || '/usr/bin/easytier-web',
 		github_proxys: proxyList,
-		fallback_version: document.getElementById('fallback_version').value || 'v2.6.0'
+		fallback_version: versionManager.getCurrentVersion() || 'v2.6.0'
 	};
 	
 	var xhr = new XMLHttpRequest();
@@ -668,8 +960,6 @@ window.onload = function() {
 	progressText = document.getElementById('progress_text');
 	alertBox = document.getElementById('alert_box');
 	restartModal = document.getElementById('restart_modal');
-	
-	loadConfig();
 	
 	var validNames = ['easytier-core', 'easytier-cli', 'easytier-web', 'easytier-web-embed'];
 
@@ -821,6 +1111,16 @@ function closeModal() {
 	restartModal.classList.remove('show');
 }
 
+function showRestartModal() {
+	var modalTitle = document.querySelector('#restart_modal .modal-title');
+	var modalMessage = document.getElementById('modal_message');
+	
+	modalTitle.textContent = '<%=translate("Download Successful")%>';
+	modalMessage.textContent = '<%=translate("Download completed. Restart service now?")%>';
+	
+	restartModal.classList.add('show');
+}
+
 function restartService() {
 	closeModal();
 	showAlert('info', '<%=translate("Restarting service...")%>');
@@ -841,6 +1141,378 @@ function restartService() {
 	};
 	xhr.send();
 }
+
+// 在线下载功能
+function showDownloadModal() {
+	var modal = document.getElementById('download_modal');
+	var downloadContainer = document.getElementById('download-version-container');
+	var originalContainer = document.getElementById('version-selector-container');
+	
+	// 复制备用版本输入框到模态窗口
+	var clonedContainer = originalContainer.cloneNode(true);
+	clonedContainer.id = 'download-version-selector-container';
+	
+	// 移除在线下载按钮
+	var downloadBtn = clonedContainer.querySelector('button');
+	if (downloadBtn) {
+		downloadBtn.remove();
+	}
+	
+	// 调整样式，移除flex布局
+	clonedContainer.style.display = 'block';
+	var innerDiv = clonedContainer.querySelector('div[style*="flex:1"]');
+	if (innerDiv) {
+		innerDiv.style.flex = 'none';
+	}
+	
+	// 更新ID避免冲突
+	var select = clonedContainer.querySelector('select');
+	var input = clonedContainer.querySelector('input');
+	if (select) select.id = 'download_fallback_version_select';
+	if (input) input.id = 'download_fallback_version';
+	
+	// 清空容器并插入克隆的输入框
+	downloadContainer.innerHTML = '';
+	downloadContainer.appendChild(clonedContainer);
+	
+	// 重新绑定事件处理函数
+	if (select && input && versionManager.isLoaded) {
+		// 复制版本选项
+		select.innerHTML = '';
+		for (var i = 0; i < versionManager.versions.length; i++) {
+			var version = versionManager.versions[i];
+			var option = document.createElement('option');
+			option.value = version.tag;
+			var label = version.prerelease ? 
+				'<%=translate("Pre-release")%>' : 
+				'<%=translate("Stable")%>';
+			option.textContent = version.tag + ' (' + label + ')';
+			select.appendChild(option);
+		}
+		
+		// 添加自定义输入选项
+		var customOption = document.createElement('option');
+		customOption.value = 'custom';
+		if (versionManager.customValue && versionManager.customValue.trim() !== '' && !versionManager.isValidVersion(versionManager.customValue)) {
+			customOption.textContent = versionManager.customValue + ' (<%=translate("Custom Input")%>)';
+		} else {
+			customOption.textContent = '<%=translate("Custom Input")%>';
+		}
+		select.appendChild(customOption);
+		
+		// 绑定事件
+		select.onchange = function() {
+			if (this.value === 'custom') {
+				input.value = versionManager.customValue || '';
+				input.style.display = 'block';
+				select.style.display = 'none';
+				input.focus();
+			} else {
+				input.value = this.value;
+			}
+		};
+		
+		// 处理点击已选中的自定义输入选项
+		select.addEventListener('click', function(e) {
+			if (e.target.tagName === 'OPTION' && e.target.value === 'custom' && this.value === 'custom') {
+				input.value = versionManager.customValue || '';
+				input.style.display = 'block';
+				select.style.display = 'none';
+				input.focus();
+			}
+		});
+		
+		// 输入框事件
+		input.oninput = function() {
+			versionManager.customValue = this.value;
+		};
+		
+		input.onblur = function() {
+			if (versionManager.isLoaded) {
+				// 更新自定义选项显示
+				var oldCustom = select.querySelector('option[value="custom"]');
+				if (oldCustom) {
+					oldCustom.remove();
+				}
+				
+				var customOption = document.createElement('option');
+				customOption.value = 'custom';
+				if (versionManager.customValue && versionManager.customValue.trim() !== '' && !versionManager.isValidVersion(versionManager.customValue)) {
+					customOption.textContent = versionManager.customValue + ' (<%=translate("Custom Input")%>)';
+					input.value = versionManager.customValue + ' (<%=translate("Custom Input")%>)';
+				} else {
+					customOption.textContent = '<%=translate("Custom Input")%>';
+				}
+				select.appendChild(customOption);
+				
+				// 设置选择器的当前值
+				var currentValue = versionManager.customValue || input.value.replace(/ \(.*\)$/, '');
+				if (versionManager.isValidVersion(currentValue)) {
+					select.value = currentValue;
+				} else {
+					select.value = 'custom';
+				}
+			}
+		};
+		
+		input.onclick = function() {
+			var displayValue = input.value;
+			if (displayValue.indexOf(' (') !== -1 && displayValue.indexOf(')') !== -1) {
+				if (versionManager.isLoaded) {
+					var actualValue = versionManager.customValue || displayValue.replace(/ \(.*\)$/, '');
+					input.value = actualValue;
+					
+					// 更新自定义选项
+					var oldCustom = select.querySelector('option[value="custom"]');
+					if (oldCustom) {
+						oldCustom.remove();
+					}
+					
+					var customOption = document.createElement('option');
+					customOption.value = 'custom';
+					if (versionManager.customValue && versionManager.customValue.trim() !== '' && !versionManager.isValidVersion(versionManager.customValue)) {
+						customOption.textContent = versionManager.customValue + ' (<%=translate("Custom Input")%>)';
+					} else {
+						customOption.textContent = '<%=translate("Custom Input")%>';
+					}
+					select.appendChild(customOption);
+					
+					if (versionManager.isValidVersion(actualValue)) {
+						select.value = actualValue;
+					} else {
+						select.value = 'custom';
+					}
+					
+					select.style.display = 'block';
+					input.style.display = 'none';
+				}
+			}
+		};
+	}
+	
+	// 同步当前值
+	var currentValue = versionManager.getCurrentVersion();
+	if (input) {
+		input.value = currentValue;
+		// 如果版本列表未加载，显示输入框
+		if (!versionManager.isLoaded) {
+			input.style.display = 'block';
+			if (select) select.style.display = 'none';
+		}
+	}
+	if (select && versionManager.isLoaded) {
+		if (versionManager.isValidVersion(currentValue)) {
+			select.value = currentValue;
+			select.style.display = 'block';
+			input.style.display = 'none';
+		} else {
+			select.value = 'custom';
+			select.style.display = 'block';
+			input.style.display = 'none';
+		}
+	}
+	
+	modal.classList.add('show');
+	
+	// 检查是否有现有下载任务
+	checkExistingDownload();
+}
+
+function checkExistingDownload() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "download_progress")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			try {
+				var response = JSON.parse(xhr.responseText);
+				if (response.success && response.progress > 0 && response.progress < 100 && !response.error) {
+					// 有进行中的任务，显示进度条和切换按钮
+					var progress = document.getElementById('download_progress');
+					var progressFill = document.getElementById('download_progress_fill');
+					var progressText = document.getElementById('download_progress_text');
+					var confirmBtn = document.getElementById('download_confirm_btn');
+					
+					progress.style.display = 'block';
+					progressFill.style.width = '50%';
+					progressText.textContent = '<%=translate("Downloading...")%> 50%';
+					
+					// 切换按钮为取消下载
+					confirmBtn.textContent = '<%=translate("Cancel Download")%>';
+					confirmBtn.onclick = function() { cancelDownload(); };
+					
+					showAlert('info', '<%=translate("Download task already exists, continuing...")%>');
+				}
+			} catch (e) {
+				// 忽略错误
+			}
+		}
+	};
+	xhr.send();
+}
+
+function closeDownloadModal() {
+	var modal = document.getElementById('download_modal');
+	modal.classList.remove('show');
+	
+	// 重置进度条
+	var progress = document.getElementById('download_progress');
+	progress.style.display = 'none';
+	
+	// 清空下载版本容器
+	var downloadContainer = document.getElementById('download-version-container');
+	downloadContainer.innerHTML = '';
+	
+	// 恢复按钮
+	var confirmBtn = document.getElementById('download_confirm_btn');
+	if (confirmBtn) {
+		confirmBtn.textContent = '<%=translate("Download")%>';
+		confirmBtn.onclick = function() { startDownload(); };
+	}
+}
+
+var downloadCheckTimer = null;
+
+function cancelDownload() {
+	// 调用后端取消下载
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "cancel_download")%>', true);
+	xhr.onload = function() {
+		closeDownloadModal();
+		showAlert('info', '<%=translate("Download cancelled")%>');
+	};
+	xhr.send();
+}
+
+function startDownload() {
+	// 从模态窗口中的输入框获取版本
+	var input = document.getElementById('download_fallback_version');
+	var version = input ? input.value.trim() : '';
+	
+	// 移除显示格式，获取实际版本
+	if (version.indexOf(' (') !== -1) {
+		version = version.replace(/ \(.*\)$/, '');
+	}
+	
+	if (!version) {
+		showAlert('error', '<%=translate("Please enter download version")%>');
+		return;
+	}
+	
+	// 显示进度条
+	var progress = document.getElementById('download_progress');
+	var progressFill = document.getElementById('download_progress_fill');
+	var progressText = document.getElementById('download_progress_text');
+	var urlText = document.getElementById('download_url_text');
+	var confirmBtn = document.getElementById('download_confirm_btn');
+	
+	progress.style.display = 'block';
+	progressFill.style.width = '0%';
+	progressFill.style.backgroundColor = '';
+	progressText.textContent = '<%=translate("Preparing download...")%>';
+	urlText.textContent = '';
+	
+	// 切换按钮为取消下载
+	confirmBtn.textContent = '<%=translate("Cancel Download")%>';
+	confirmBtn.onclick = function() { cancelDownload(); };
+	
+	// 模拟进度条：缓慢随机增长到70-80%
+	var fakeProgress = 0;
+	var fakeTimer = setInterval(function() {
+		if (fakeProgress < 70) {
+			fakeProgress += Math.random() * 3; // 每次增加0-3%
+			if (fakeProgress > 70) fakeProgress = 70;
+			progressFill.style.width = fakeProgress + '%';
+			progressText.textContent = '<%=translate("Downloading...")%> ' + Math.floor(fakeProgress) + '%';
+		}
+	}, 500);
+	
+	// 发送下载请求
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "download_easytier")%>', true);
+	xhr.setRequestHeader('Content-Type', 'application/json');
+	
+	xhr.onload = function() {
+		clearInterval(fakeTimer);
+		
+		if (xhr.status === 200) {
+			try {
+				var response = JSON.parse(xhr.responseText);
+				if (response.success) {
+					// 成功：直接跳到100%
+					progressFill.style.width = '100%';
+					progressText.textContent = '<%=translate("Download completed successfully")%>';
+					
+					// 恢复按钮
+					confirmBtn.textContent = '<%=translate("Download")%>';
+					confirmBtn.onclick = function() { startDownload(); };
+					
+					setTimeout(function() {
+						closeDownloadModal();
+						showAlert('success', '<%=translate("Download and installation completed")%>');
+						// 显示重启确认模态窗口
+						showRestartModal();
+					}, 1000);
+				} else {
+					// 失败：显示错误
+					var errorMsg = response.message || '<%=translate("Download failed")%>';
+					progressText.textContent = errorMsg;
+					progressFill.style.backgroundColor = 'var(--error)';
+					showAlert('error', errorMsg);
+					// 按钮变为重试
+					confirmBtn.textContent = '<%=translate("Retry")%>';
+					confirmBtn.onclick = function() { 
+						// 重置进度条
+						progressFill.style.width = '0%';
+						progressFill.style.backgroundColor = '';
+						progress.style.display = 'none';
+						// 恢复按钮
+						confirmBtn.textContent = '<%=translate("Download")%>';
+						confirmBtn.onclick = function() { startDownload(); };
+						// 重新开始下载
+						startDownload();
+					};
+				}
+			} catch (e) {
+				progressText.textContent = '<%=translate("Download failed")%>';
+				progressFill.style.backgroundColor = 'var(--error)';
+				showAlert('error', '<%=translate("Download failed")%>');
+				// 恢复按钮
+				confirmBtn.textContent = '<%=translate("Download")%>';
+				confirmBtn.onclick = function() { startDownload(); };
+			}
+		} else {
+			progressText.textContent = '<%=translate("Download failed")%>';
+			progressFill.style.backgroundColor = 'var(--error)';
+			showAlert('error', '<%=translate("Download failed")%>');
+			// 恢复按钮
+			confirmBtn.textContent = '<%=translate("Download")%>';
+			confirmBtn.onclick = function() { startDownload(); };
+		}
+	};
+	
+	xhr.onerror = function() {
+		clearInterval(fakeTimer);
+		progressText.textContent = '<%=translate("Download failed")%>';
+		progressFill.style.backgroundColor = 'var(--error)';
+		showAlert('error', '<%=translate("Network error")%>');
+		// 恢复按钮
+		confirmBtn.textContent = '<%=translate("Download")%>';
+		confirmBtn.onclick = function() { startDownload(); };
+	};
+	
+	xhr.send(JSON.stringify({
+		version: version
+	}));
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+	// 先初始化版本管理器（开始获取版本列表）
+	versionManager.init();
+	// 然后加载配置（会调用versionManager.setVersion）
+	loadConfig();
+});
+
 //]]>
 </script>
 

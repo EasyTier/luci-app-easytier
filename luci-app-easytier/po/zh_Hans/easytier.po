@@ -1851,3 +1851,131 @@ msgstr "目标实例ID"
 msgid "Logs"
 msgstr "日志"
 
+msgid "Online Download"
+msgstr "在线下载"
+
+msgid "Online Download EasyTier"
+msgstr "在线下载EasyTier程序"
+
+msgid "Download Version"
+msgstr "下载版本"
+
+msgid "Download specified version from GitHub and install to specified path"
+msgstr "从GitHub下载指定版本的程序安装到指定路径"
+
+msgid "Downloading..."
+msgstr "正在下载..."
+
+msgid "Preparing download..."
+msgstr "准备下载..."
+
+msgid "Download completed successfully"
+msgstr "下载完成"
+
+msgid "Download failed"
+msgstr "下载失败"
+
+msgid "Download and installation completed"
+msgstr "下载安装完成"
+
+msgid "Download completed. Restart service now?"
+msgstr "下载完成，是否立即重启服务？"
+
+msgid "Please enter download version"
+msgstr "请输入下载版本"
+
+msgid "Network error"
+msgstr "网络错误"
+
+msgid "Pre-release"
+msgstr "预发布版"
+
+msgid "Stable"
+msgstr "稳定版"
+
+msgid "Custom Input"
+msgstr "自定义输入"
+
+msgid "Loading versions..."
+msgstr "正在加载版本..."
+
+msgid "Program not found"
+msgstr "程序不存在"
+
+msgid "no running instances found"
+msgstr "未找到正在运行的实例"
+
+msgid "Unable to detect CPU architecture"
+msgstr "无法检测CPU架构"
+
+msgid "No x86-32bit program available"
+msgstr "没有当前x86-32位的程序"
+
+msgid "System lacks unzip, cannot download and extract"
+msgstr "系统缺少 unzip 下载后无法解压"
+
+msgid "Missing version parameter"
+msgstr "缺少版本号参数"
+
+msgid "Starting download..."
+msgstr "开始下载..."
+
+msgid "Trying download URL..."
+msgstr "尝试下载地址..."
+
+msgid "Downloading with"
+msgstr "使用"
+
+msgid "Download completed, extracting..."
+msgstr "下载完成，正在解压..."
+
+msgid "Extraction failed"
+msgstr "解压失败"
+
+msgid "Installing programs..."
+msgstr "正在安装程序..."
+
+msgid "Installation completed"
+msgstr "安装完成"
+
+msgid "Preparing..."
+msgstr "准备中..."
+
+msgid "Downloaded package is incomplete, missing required files"
+msgstr "下载的压缩包不完整，缺少EasyTier相关程序文件"
+
+msgid "Program installation failed, verification failed"
+msgstr "程序安装失败，验证未通过"
+
+msgid "Download task already exists"
+msgstr "已有下载任务正在进行"
+
+msgid "Verifying programs..."
+msgstr "正在验证程序..."
+
+msgid "Program is incomplete or architecture mismatch"
+msgstr "程序不完整或架构不匹配"
+
+msgid "Failed to install program"
+msgstr "程序安装失败"
+
+msgid "Cancel Download"
+msgstr "取消下载"
+
+msgid "Download cancelled"
+msgstr "已取消下载"
+
+msgid "All download attempts failed"
+msgstr "所有下载地址均下载失败，请确认github加速镜像地址有效或使用手动上传"
+
+msgid "Download task already exists, continuing..."
+msgstr "下载任务已存在，继续中..."
+
+msgid "Download Successful"
+msgstr "下载成功"
+
+msgid "Retry"
+msgstr "重试"
+
+msgid "Close"
+msgstr "关闭"
