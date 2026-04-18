@@ -94,14 +94,6 @@ msgstr "检测IP"
 msgid "Check for Updates"
 msgstr "检测更新"
 
-#: applications/luci-app-easytier/luasrc/view/easytier/easytier_log.htm:31
-#: applications/luci-app-easytier/luasrc/view/easytier/easytierweb_log.htm:31
-msgid "Clear Logs"
-msgstr "清除日志"
-
-msgid "Download Log"
-msgstr "下载日志"
-
 #: applications/luci-app-easytier/luasrc/view/easytier/easytier_status.htm:35
 msgid "Collecting data..."
 msgstr "正在获取中..."
@@ -478,12 +470,6 @@ msgstr "监听端口"
 msgid "Listening Protocol"
 msgstr "监听协议"
 
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:710
-msgid ""
-"Listening port of the RESTful server, used as ApiHost by the web frontend. (-"
-"a parameter)"
-msgstr "restful 服务器的监听端口，作为 ApiHost 并被 web 前端使用。（ -a 参数）"
-
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:564
 msgid "Local Startup Parameters"
 msgstr "本机启动参数"
@@ -747,10 +733,6 @@ msgid ""
 "console, for issuing configuration files"
 msgstr "连接web控制台时识别此设备的唯一标识，用于下发配置文件"
 
-#: applications/luci-app-easytier/luasrc/view/easytier/other_upload.htm:4
-msgid "Upload"
-msgstr "上传"
-
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:20
 msgid "Upload Program"
 msgstr "上传程序"
@@ -825,10 +807,6 @@ msgstr "警告"
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:41
 msgid "Web Configuration"
 msgstr "Web配置"
-
-#: applications/luci-app-easytier/luasrc/view/easytier/easytier_status.htm:25
-msgid "Web Console"
-msgstr "Web 控制台"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:726
 msgid "Web Interface Port"
@@ -1037,9 +1015,6 @@ msgstr "自建控制台"
 msgid "All Levels"
 msgstr "全部级别"
 
-msgid "Auto Refresh"
-msgstr "自动刷新"
-
 msgid "Stop Auto Refresh"
 msgstr "停止自动刷新"
 
@@ -1097,9 +1072,6 @@ msgstr "Web 控制台主页"
 msgid "Service not running"
 msgstr "服务未运行"
 
-msgid "Collecting data..."
-msgstr "收集数据..."
-
 msgid "New"
 msgstr "发现新版本"
 
@@ -1120,9 +1092,6 @@ msgstr "请稍候，操作进行中..."
 
 msgid "Restarting service..."
 msgstr "正在重启服务..."
-
-msgid "Upload Program"
-msgstr "上传程序"
 
 msgid "Upload EasyTier Binary"
 msgstr "上传 EasyTier 程序"
@@ -1178,9 +1147,6 @@ msgstr "仅允许上传 easytier 相关程序文件或压缩包（.zip、.tar.gz
 msgid "Upload failed"
 msgstr "上传失败"
 
-msgid "Network error"
-msgstr "网络错误"
-
 msgid "Service restarted successfully"
 msgstr "服务重启成功"
 
@@ -1192,9 +1158,6 @@ msgstr "没有需要保存的更改"
 
 msgid "Configuration"
 msgstr "配置"
-
-msgid "Save Configuration"
-msgstr "保存并应用"
 
 msgid "Configuration saved successfully"
 msgstr "配置保存成功"
@@ -1222,9 +1185,6 @@ msgstr "包含EasyTier相关程序的压缩包"
 
 msgid "Drag *.tar.gz / *.zip / easytier binaries here or click to select file"
 msgstr "支持拖放 *.tar.gz / *.zip 压缩包和 easytier 二进制程序到此处，或点击选择文件"
-
-msgid "Used when unable to fetch the latest version during online download"
-msgstr "在线下载时无法获取最新版本时使用的回退版本"
 
 msgid "Error: Program not running! Please start the program and refresh"
 msgstr "错误：程序未运行！请先启动程序后刷新"
@@ -1276,9 +1236,6 @@ msgstr "GeoIP 数据库路径"
 
 msgid "Connection Information"
 msgstr "连接信息"
-
-msgid "Node Info"
-msgstr "本机信息"
 
 msgid "Peer List"
 msgstr "节点列表"
@@ -1444,9 +1401,6 @@ msgstr "值"
 
 msgid "Labels"
 msgstr "标签"
-
-msgid "Listener"
-msgstr "监听器"
 
 msgid "Client Config Start"
 msgstr "客户端配置开始"
@@ -1688,9 +1642,6 @@ msgstr "无"
 msgid "Domain"
 msgstr "域名"
 
-msgid "Failed to connect to RPC server. Please check if the RPC port is set to 15888 in the configuration."
-msgstr "无法连接到 RPC 服务器，请检查配置中的 RPC 端口是否设置为 15888"
-
 msgid "Configuration File Content"
 msgstr "配置文件内容"
 
@@ -1719,7 +1670,7 @@ msgid "Fallback Version"
 msgstr "备用版本"
 
 msgid "Used when unable to fetch the latest version during online download"
-msgstr "用于无法获取GitHub最新版本时在线下载使用的版本"
+msgstr "用于启动脚本里无法获取GitHub最新版本时在线下载回退使用的版本"
 
 msgid "Save Configuration"
 msgstr "保存并应用"
@@ -1965,6 +1916,9 @@ msgstr "取消下载"
 msgid "Download cancelled"
 msgstr "已取消下载"
 
+msgid "Cancelling download, may take up to 5 minutes to stop the current task"
+msgstr "正在取消下载，当前任务可能需要最多5分钟才能停止"
+
 msgid "All download attempts failed"
 msgstr "所有下载地址均下载失败，请确认github加速镜像地址有效或使用手动上传"
 
@@ -1979,3 +1933,169 @@ msgstr "重试"
 
 msgid "Close"
 msgstr "关闭"
+
+msgid "API Listen Address"
+msgstr "API监听地址"
+
+msgid "Listen address for the RESTful server"
+msgstr "RESTful服务器的监听地址"
+
+msgid "all interfaces"
+msgstr "所有接口"
+
+msgid "localhost only"
+msgstr "仅本地"
+
+msgid "IPv6 all"
+msgstr "IPv6所有接口"
+
+msgid "Web Listen Address"
+msgstr "Web监听地址"
+
+msgid "Listen address for the web dashboard server"
+msgstr "Web控制台服务器的监听地址"
+
+msgid "Only effective when web port differs from API port or addresses differ"
+msgstr "仅在Web端口与API端口不同或地址不同时生效"
+
+msgid "Disable User Registration"
+msgstr "禁用用户注册"
+
+msgid "Prevent new users from registering accounts"
+msgstr "阻止新用户注册账户"
+
+msgid "Allow Auto-create User"
+msgstr "允许自动创建用户"
+
+msgid "Automatically create local user when easytier-core connects with an unknown username"
+msgstr "当easytier-core使用未知用户名连接时自动创建本地用户"
+
+msgid "Enable OIDC Single Sign-On"
+msgstr "启用OIDC单点登录"
+
+msgid "Enable OIDC (OpenID Connect) for single sign-on authentication"
+msgstr "启用OIDC（OpenID Connect）单点登录认证"
+
+msgid "OIDC Issuer URL"
+msgstr "OIDC发行者URL"
+
+msgid "The OIDC issuer URL for single sign-on authentication"
+msgstr "用于单点登录认证的OIDC发行者URL"
+
+msgid "OIDC Client ID"
+msgstr "OIDC客户端ID"
+
+msgid "The OIDC client ID"
+msgstr "OIDC客户端ID"
+
+msgid "OIDC Client Secret"
+msgstr "OIDC客户端密钥"
+
+msgid "The OIDC client secret"
+msgstr "OIDC客户端密钥"
+
+msgid "Can also be set via OIDC_CLIENT_SECRET environment variable"
+msgstr "也可以通过OIDC_CLIENT_SECRET环境变量设置"
+
+msgid "OIDC Redirect URL"
+msgstr "OIDC重定向URL"
+
+msgid "The OIDC redirect URL (callback URL), must match exactly what is registered with your Identity Provider"
+msgstr "OIDC重定向URL（回调URL），必须与身份提供商注册的完全匹配"
+
+msgid "OIDC Username Claim"
+msgstr "OIDC用户名声明"
+
+msgid "The OIDC claim to use as the local username"
+msgstr "用作本地用户名的OIDC声明"
+
+msgid "OIDC Scopes"
+msgstr "OIDC作用域"
+
+msgid "OIDC scopes to request during login"
+msgstr "登录时请求的OIDC作用域"
+
+msgid "Supports comma-separated values"
+msgstr "支持逗号分隔的值"
+
+msgid "OIDC Frontend Base URL"
+msgstr "OIDC前端基础URL"
+
+msgid "Frontend base URL to redirect to after successful OIDC callback"
+msgstr "OIDC回调成功后重定向到的前端基础URL"
+
+msgid "Required when frontend and API are deployed separately"
+msgstr "当前端和API分开部署时需要"
+
+msgid "Disable PKCE"
+msgstr "禁用PKCE"
+
+msgid "Disable PKCE (Proof Key for Code Exchange) for OIDC authentication"
+msgstr "禁用OIDC认证的PKCE（代码交换证明密钥）"
+
+msgid "Enable Webhook Integration"
+msgstr "启用Webhook集成"
+
+msgid "Enable webhook for token validation and event delivery"
+msgstr "启用webhook进行令牌验证和事件传递"
+
+msgid "Webhook URL"
+msgstr "Webhook URL"
+
+msgid "Base URL of the webhook endpoint for token validation and event delivery"
+msgstr "用于令牌验证和事件传递的webhook端点基础URL"
+
+msgid "When set, incoming tokens are validated via this webhook before local fallback"
+msgstr "设置后，传入的令牌将通过此webhook验证，然后再进行本地回退"
+
+msgid "Webhook Secret"
+msgstr "Webhook密钥"
+
+msgid "Shared secret used to authenticate outbound webhook calls"
+msgstr "用于验证出站webhook调用的共享密钥"
+
+msgid "Internal Auth Token"
+msgstr "内部认证令牌"
+
+msgid "Token for X-Internal-Auth header"
+msgstr "X-Internal-Auth头的令牌"
+
+msgid "When set, API requests with this header bypass session authentication"
+msgstr "设置后，带有此头的API请求将绕过会话认证"
+
+msgid "Web Instance ID"
+msgstr "Web实例ID"
+
+msgid "Stable identifier for this easytier-web instance when routing webhook callbacks"
+msgstr "路由webhook回调时此easytier-web实例的稳定标识符"
+
+msgid "Web Instance API Base URL"
+msgstr "Web实例API基础URL"
+
+msgid "Reachable base URL for this easytier-web instance's internal REST API"
+msgstr "此easytier-web实例内部REST API的可访问基础URL"
+
+msgid "Reset Database"
+msgstr "重置数据库"
+
+msgid "Are you sure you want to reset the database?"
+msgstr "确定要重置数据库吗？"
+
+msgid "This will delete all database files and cannot be recovered"
+msgstr "这将删除所有数据库文件，不可恢复"
+
+msgid "Database reset successfully"
+msgstr "数据库重置成功"
+
+msgid "Reset failed"
+msgstr "重置失败"
+
+msgid "No database files found or deletion failed"
+msgstr "未找到数据库文件或删除失败"
+
+msgid "Database Reset Successful"
+msgstr "数据库重置成功"
+
+msgid "Restart service to apply changes?"
+msgstr "重启服务以生效？"
+

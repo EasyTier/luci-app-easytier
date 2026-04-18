@@ -372,7 +372,7 @@ local translate = i18n.translate
 			<label style="display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">
 				<span><%=translate("Fallback Version")%></span>
 				<a href="https://github.com/EasyTier/EasyTier/releases" target="_blank" style="margin-left:8px;line-height:1;">
-					<img alt="" src="https://img.shields.io/github/v/tag/EasyTier/EasyTier?include_prereleases&logo=github&label=pre-releases&link=https%3A%2F%2Fgithub.com%2FEasyTier%2FEasyTier%2Freleases" style="height:13px;vertical-align:middle;">
+					<img alt="" src="https://img.shields.io/github/v/tag/EasyTier/EasyTier?include_prereleases&logo=github&label=tag&link=https%3A%2F%2Fgithub.com%2FEasyTier%2FEasyTier%2Freleases" style="height:13px;vertical-align:middle;">
 				</a>
 				<a href="https://github.com/EasyTier/EasyTier/releases" target="_blank" style="margin-left:4px;line-height:1;">
 					<img alt="" src="https://img.shields.io/github/v/release/EasyTier/EasyTier?logo=github&link=https%3A%2F%2Fgithub.com%2FEasyTier%2FEasyTier%2Freleases" style="height:13px;vertical-align:middle;">
@@ -1378,7 +1378,7 @@ function cancelDownload() {
 	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "cancel_download")%>', true);
 	xhr.onload = function() {
 		closeDownloadModal();
-		showAlert('info', '<%=translate("Download cancelled")%>');
+		showAlert('info', '<%=translate("Cancelling download, may take up to 5 minutes to stop the current task")%>');
 	};
 	xhr.send();
 }

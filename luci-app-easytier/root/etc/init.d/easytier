@@ -658,10 +658,34 @@ start_web() {
 	api_port="$(uci -q get easytier.@easytier[0].web_api_port)"
 	html_port="$(uci -q get easytier.@easytier[0].web_html_port)"
 	weblog="$(uci -q get easytier.@easytier[0].web_weblog)"
+	weblog="${weblog:-off}"
 	api_host="$(uci -q get easytier.@easytier[0].web_api_host)"
 	geoip_db="$(uci -q get easytier.@easytier[0].web_geoip_db)"
 	fw_web="$(uci -q get easytier.@easytier[0].web_fw_web || echo 0)"
 	fw_api="$(uci -q get easytier.@easytier[0].web_fw_api || echo 0)"
+	
+	api_addr="$(uci -q get easytier.@easytier[0].web_api_addr)"
+	html_addr="$(uci -q get easytier.@easytier[0].web_html_addr)"
+	disable_registration="$(uci -q get easytier.@easytier[0].web_disable_registration || echo 0)"
+	allow_auto_create_user="$(uci -q get easytier.@easytier[0].web_allow_auto_create_user || echo 0)"
+	# OIDC配置
+	oidc_enabled="$(uci -q get easytier.@easytier[0].web_oidc_enabled || echo 0)"
+	oidc_issuer_url="$(uci -q get easytier.@easytier[0].web_oidc_issuer_url)"
+	oidc_client_id="$(uci -q get easytier.@easytier[0].web_oidc_client_id)"
+	oidc_client_secret="$(uci -q get easytier.@easytier[0].web_oidc_client_secret)"
+	oidc_redirect_url="$(uci -q get easytier.@easytier[0].web_oidc_redirect_url)"
+	oidc_username_claim="$(uci -q get easytier.@easytier[0].web_oidc_username_claim)"
+	oidc_scopes="$(uci -q get easytier.@easytier[0].web_oidc_scopes)"
+	oidc_frontend_base_url="$(uci -q get easytier.@easytier[0].web_oidc_frontend_base_url)"
+	oidc_disable_pkce="$(uci -q get easytier.@easytier[0].web_oidc_disable_pkce || echo 0)"
+	# Webhook配置
+	webhook_enabled="$(uci -q get easytier.@easytier[0].web_webhook_enabled || echo 0)"
+	webhook_url="$(uci -q get easytier.@easytier[0].web_webhook_url)"
+	webhook_secret="$(uci -q get easytier.@easytier[0].web_webhook_secret)"
+	internal_auth_token="$(uci -q get easytier.@easytier[0].web_internal_auth_token)"
+	web_instance_id="$(uci -q get easytier.@easytier[0].web_web_instance_id)"
+	web_instance_api_base_url="$(uci -q get easytier.@easytier[0].web_web_instance_api_base_url)"
+	
 	procd_open_instance "easytier_web"
 	get_tz
 	[ -z "$SET_TZ" ] || procd_set_param env TZ="$SET_TZ"
@@ -676,6 +700,31 @@ start_web() {
 		web_cmd="${web_cmd} --no-web"
 	else
 		web_cmd="${web_cmd} -l $html_port"
+	fi
+	# 基础配置参数
+	[ -n "$api_addr" ] && [ "$api_addr" != "0.0.0.0" ] && web_cmd="${web_cmd} --api-server-addr $api_addr"
+	[ -n "$html_addr" ] && [ "$html_addr" != "0.0.0.0" ] && web_cmd="${web_cmd} --web-server-addr $html_addr"
+	[ "$disable_registration" = "1" ] && web_cmd="${web_cmd} --disable-registration"
+	[ "$allow_auto_create_user" = "1" ] && web_cmd="${web_cmd} --allow-auto-create-user"
+	# OIDC配置参数
+	if [ "$oidc_enabled" = "1" ] ; then
+		[ -z "$oidc_issuer_url" ] || web_cmd="${web_cmd} --oidc-issuer-url $oidc_issuer_url"
+		[ -z "$oidc_client_id" ] || web_cmd="${web_cmd} --oidc-client-id $oidc_client_id"
+		[ -z "$oidc_client_secret" ] || web_cmd="${web_cmd} --oidc-client-secret $oidc_client_secret"
+		[ -z "$oidc_redirect_url" ] || web_cmd="${web_cmd} --oidc-redirect-url $oidc_redirect_url"
+		[ -z "$oidc_username_claim" ] || web_cmd="${web_cmd} --oidc-username-claim $oidc_username_claim"
+		[ -z "$oidc_scopes" ] || web_cmd="${web_cmd} --oidc-scopes \"$oidc_scopes\""
+		[ -z "$oidc_frontend_base_url" ] || web_cmd="${web_cmd} --oidc-frontend-base-url $oidc_frontend_base_url"
+		[ "$oidc_disable_pkce" = "1" ] && web_cmd="${web_cmd} --oidc-disable-pkce"
+	fi
+	
+	# Webhook配置参数
+	if [ "$webhook_enabled" = "1" ] ; then
+		[ -z "$webhook_url" ] || web_cmd="${web_cmd} --webhook-url $webhook_url"
+		[ -z "$webhook_secret" ] || web_cmd="${web_cmd} --webhook-secret $webhook_secret"
+		[ -z "$internal_auth_token" ] || web_cmd="${web_cmd} --internal-auth-token $internal_auth_token"
+		[ -z "$web_instance_id" ] || web_cmd="${web_cmd} --web-instance-id $web_instance_id"
+		[ -z "$web_instance_api_base_url" ] || web_cmd="${web_cmd} --web-instance-api-base-url $web_instance_api_base_url"
 	fi
 	if [ "$weblog" != "off" ] ; then
 		web_cmd="${web_cmd} --console-log-level $weblog"	

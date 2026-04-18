@@ -8,6 +8,12 @@
 
 OpenWrt LuCI界面，用于管理 [EasyTier](https://github.com/EasyTier/EasyTier) - 一个简单、安全、去中心化的内网穿透VPN组网方案。
 
+## UI 预览
+
+<img width="1584" height="2523" alt="image" src="https://github.com/user-attachments/assets/afa1d31b-cb97-4502-a5ac-2ada8c09f78d" />
+
+<img width="1386" height="1758" alt="image" src="https://github.com/user-attachments/assets/c65bf3fe-5c8b-42c3-8093-96c076350846" />
+
 ## ✨ 特性
 
 - 🎨 现代化UI设计，支持亮色/暗色主题自动切换
