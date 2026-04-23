@@ -44,7 +44,7 @@ while true; do
         break
     fi
     sleep $((time))
-    [ "$(du -k /log/easytier.log | cut -f1)" = "1000" ] && echo " " >/tmp/easytier.log
+    [ "$(du -k /tmp/easytier.log | cut -f1)" = "1000" ] && echo " " >/tmp/easytier.log
 done
 EOF
         chmod +x /tmp/easytier_check
@@ -165,7 +165,7 @@ check_config() {
                    get_tz
 		   [ -z "$SET_TZ" ] || procd_set_param env TZ="$SET_TZ"
 		   procd_set_param command /bin/sh -c "
-			${easytierbin} -c ${config_file} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
+			cd /tmp ; ${easytierbin} -c ${config_file} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
 			ET_CORE_PID=\$!
 			{
 			while true; do
@@ -583,7 +583,7 @@ start_et() {
 				[ -z "$desvice_name" ] || core_cmd="${core_cmd} --hostname $desvice_name"
 			fi
 	     		procd_set_param command /bin/sh -c "
-			${easytierbin} ${core_cmd} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
+			cd /tmp ; ${easytierbin} ${core_cmd} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
 			ET_CORE_PID=\$!
 			{
 			while true; do
@@ -636,6 +636,7 @@ start_et() {
 
 start_web() {
 	webbin="$(uci -q get easytier.@easytier[0].webbin)"
+	path=$(dirname "$webbin")
 	if [ -f /tmp/easytier-web-embed ] ; then
 		echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : 找到上传的easytier-web程序，替换${webbin} " >>/tmp/easytierweb.log
 		mv -f /tmp/easytier-web-embed "$webbin"
@@ -730,7 +731,7 @@ start_web() {
 		web_cmd="${web_cmd} --console-log-level $weblog"	
 	fi
 	procd_set_param command /bin/sh -c "
-		${webbin} ${web_cmd} >> /tmp/easytierweb.log 2>&1 &
+		cd /tmp ; ${webbin} ${web_cmd} >> /tmp/easytierweb.log 2>&1 &
 		ET_WEB_PID=\$!
 		{
 			while true; do
