@@ -1072,7 +1072,7 @@ msgstr "Web 控制台主页"
 msgid "Service not running"
 msgstr "服务未运行"
 
-msgid "New"
+msgid "New Version"
 msgstr "发现新版本"
 
 msgid "Unknown"

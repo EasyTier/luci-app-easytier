@@ -649,7 +649,7 @@ function renderService(name, data, isRunning) {
 		var displayVersion = data.version === 'unknown' ? '<%=translate("Unknown")%>' : data.version;
 		html += '<span>' + (displayVersion || '-') + '</span>';
 		if (!versionInfo.match && versionInfo.latest && data.version !== 'unknown') {
-			html += '<span class="et-version-badge"><%=translate("New")%>: ' + versionInfo.latest + '</span>';
+			html += '<span class="et-version-badge"><%=translate("New Version")%>: ' + versionInfo.latest + '</span>';
 		}
 		html += '</div>';
 		html += '</div></div>';
