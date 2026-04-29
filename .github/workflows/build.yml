@@ -88,7 +88,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
-          PACKAGES: easytier easytier-web luci-app-easytier
+          PACKAGES: easytier easytier-noweb luci-app-easytier
           #NO_DEFAULT_FEEDS: 1
           NO_REFRESH_CHECK: 1
           NO_SHFMT_CHECK: 1
@@ -119,12 +119,7 @@ jobs:
           mkdir -p release
           for dir in artifacts/*; do
             name=$(basename "$dir")
-            # 基础包 (easytier + luci-app-easytier, 不含 web)
-            zip -j "release/EasyTier-${{ env.TAG }}-${name}-noweb.zip" "$dir"/easytier_*.ipk "$dir"/easytier-[0-9]*.apk "$dir"/luci-app-easytier* 2>/dev/null || true
-            # Web 包 (easytier-web + luci-app-easytier), 仅在有 easytier-web 包时生成
-            if ls "$dir"/easytier-web_*.ipk "$dir"/easytier-web-[0-9]*.apk 2>/dev/null; then
-              zip -j "release/EasyTier-${{ env.TAG }}-${name}-web.zip" "$dir"/easytier-web_*.ipk "$dir"/easytier-web-[0-9]*.apk "$dir"/luci-app-easytier* 2>/dev/null || true
-            fi
+            zip -j "release/EasyTier-${{ env.TAG }}-${name}.zip" "$dir"/*.ipk "$dir"/*.apk 2>/dev/null || true
           done
           echo "build_time=$(TZ=UTC-8 date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
 
