@@ -36,6 +36,8 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
+RSTRIP:=:
+
 define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=Network
@@ -73,10 +75,13 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-core $(1)/usr/bin/easytier-core
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-cli $(1)/usr/bin/easytier-cli
+	$(CP) $(PKG_BUILD_DIR)/easytier-core $(1)/usr/bin/
+	chmod 0755 $(1)/usr/bin/easytier-core
+	$(CP) $(PKG_BUILD_DIR)/easytier-cli $(1)/usr/bin/
+	chmod 0755 $(1)/usr/bin/easytier-cli
 ifdef CONFIG_EASYTIER_INCLUDE_WEBCONSOLE
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/easytier-web-embed $(1)/usr/bin/easytier-web
+	$(CP) $(PKG_BUILD_DIR)/easytier-web-embed $(1)/usr/bin/easytier-web
+	chmod 0755 $(1)/usr/bin/easytier-web
 endif
 endef
 
