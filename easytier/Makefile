@@ -41,7 +41,6 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Network
 	TITLE:=A simple, decentralized mesh VPN with WireGuard support.
 	DEPENDS:=@(x86_64||arm||aarch64||mipsel||mips) +kmod-tun
-	CONFLICTS:=easytier-web
 	URL:=https://github.com/EasyTier/EasyTier
 	MENU:=1
 endef
@@ -53,15 +52,14 @@ endef
 define Package/easytier-web
 	SECTION:=net
 	CATEGORY:=Network
-	TITLE:=EasyTier with Web Console (includes easytier-core, easytier-cli and easytier-web).
 	DEPENDS:=@(x86_64||arm||aarch64) +kmod-tun
-	CONFLICTS:=easytier
+	TITLE:=A simple, decentralized mesh VPN with WireGuard support (with Web Console).
 	URL:=https://github.com/EasyTier/EasyTier
 	MENU:=1
 endef
 
 define Package/easytier-web/description
-  EasyTier with Web Console support. Includes easytier-core, easytier-cli and easytier-web-embed.
+  EasyTier with Web Console. Includes easytier-core, easytier-cli and easytier-web.
 endef
 
 define Build/Prepare
