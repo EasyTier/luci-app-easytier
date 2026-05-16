@@ -408,8 +408,8 @@ function escapeHtml(text) {
 
 function refreshLog() {
 	var url = currentLog === 'core' 
-		? '<%=url("admin/vpn/easytier/get_log")%>'
-		: '<%=url("admin/vpn/easytier/get_wlog")%>';
+		? '<%=url("admin/services/easytier/get_log")%>'
+		: '<%=url("admin/services/easytier/get_wlog")%>';
 	
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', url, true);
@@ -446,8 +446,8 @@ function refreshLog() {
 
 function updateLogSize() {
 	var url = currentLog === 'core' 
-		? '<%=url("admin/vpn/easytier/get_log_size")%>'
-		: '<%=url("admin/vpn/easytier/get_wlog_size")%>';
+		? '<%=url("admin/services/easytier/get_log_size")%>'
+		: '<%=url("admin/services/easytier/get_wlog_size")%>';
 	
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', url, true);
@@ -473,8 +473,8 @@ function updateLogSize() {
 
 function clearCurrentLog() {
 	var url = currentLog === 'core'
-		? '<%=url("admin/vpn/easytier/clear_log")%>'
-		: '<%=url("admin/vpn/easytier/clear_wlog")%>';
+		? '<%=url("admin/services/easytier/clear_log")%>'
+		: '<%=url("admin/services/easytier/clear_wlog")%>';
 	
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', url, true);

@@ -745,7 +745,7 @@ var versionManager = {
 
 function loadConfig() {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "get_upload_config")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "get_upload_config")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			try {
@@ -795,7 +795,7 @@ function checkDiskSpace(inputId) {
 	dir = dir ? dir[1] : '/tmp';
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "get_disk_space")%>', true);
+	xhr.open('POST', '<%=url("admin", "services", "easytier", "get_disk_space")%>', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
 	xhr.onload = function() {
 		if (xhr.status === 200) {
@@ -872,7 +872,7 @@ function saveConfig() {
 	};
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "save_upload_config")%>', true);
+	xhr.open('POST', '<%=url("admin", "services", "easytier", "save_upload_config")%>', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
 	xhr.onload = function() {
 		if (xhr.status === 200) {
@@ -1033,7 +1033,7 @@ function uploadFile(file) {
 	formData.append('file', file);
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "upload_binary")%>', true);
+	xhr.open('POST', '<%=url("admin", "services", "easytier", "upload_binary")%>', true);
 	
 	xhr.upload.onprogress = function(event) {
 		if (event.lengthComputable) {
@@ -1126,7 +1126,7 @@ function restartService() {
 	showAlert('info', '<%=translate("Restarting service...")%>');
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "restart_service")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "restart_service")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			setTimeout(function() {
@@ -1320,7 +1320,7 @@ function showDownloadModal() {
 
 function checkExistingDownload() {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "download_progress")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "download_progress")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			try {
@@ -1375,7 +1375,7 @@ var downloadCheckTimer = null;
 function cancelDownload() {
 	// 调用后端取消下载
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "cancel_download")%>', true);
+	xhr.open('POST', '<%=url("admin", "services", "easytier", "cancel_download")%>', true);
 	xhr.onload = function() {
 		closeDownloadModal();
 		showAlert('info', '<%=translate("Cancelling download, may take up to 5 minutes to stop the current task")%>');
@@ -1428,7 +1428,7 @@ function startDownload() {
 	
 	// 发送下载请求
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "download_easytier")%>', true);
+	xhr.open('POST', '<%=url("admin", "services", "easytier", "download_easytier")%>', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
 	
 	xhr.onload = function() {

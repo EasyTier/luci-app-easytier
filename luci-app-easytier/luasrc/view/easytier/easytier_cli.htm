@@ -1063,6 +1063,46 @@ function parseTable(content, tabName) {
 	var lines = content.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
 	
 	if (lines.length === 0 || lines[0].indexOf('|') === -1) {
+		// 启动参数不翻译
+		if (tabName === 'cmdline') {
+			var html = '<div class="et-pre">' + escapeHtml(content) + '</div>';
+			
+			// 检查是否使用配置文件启动
+			if (content.indexOf('--config-file') !== -1 || content.match(/-c\s+\//)) {
+				XHR.get('<%=url("admin/services/easytier/api_conninfo")%>', null, function(x, data) {
+					if (data && data.config_file) {
+						var configDiv = document.createElement('div');
+						configDiv.className = 'et-pre';
+						configDiv.style.marginTop = '16px';
+						configDiv.style.borderTop = '2px solid var(--border-color)';
+						configDiv.style.paddingTop = '16px';
+						
+						var title = document.createElement('div');
+						title.style.fontWeight = '600';
+						title.style.marginBottom = '8px';
+						title.style.color = 'var(--primary-color)';
+						title.textContent = tr('Configuration File Content') + ':';
+						
+						var contentDiv = document.createElement('pre');
+						contentDiv.style.margin = '0';
+						contentDiv.style.whiteSpace = 'pre-wrap';
+						contentDiv.style.wordBreak = 'break-all';
+						contentDiv.textContent = data.config_file;
+						
+						configDiv.appendChild(title);
+						configDiv.appendChild(contentDiv);
+						
+						var container = document.querySelector('.et-tab-content[data-tab="cmdline"]');
+						if (container) {
+							container.appendChild(configDiv);
+						}
+					}
+				});
+			}
+			
+			return html;
+		}
+		
 		// 对非表格内容进行全面翻译处理
 		var translatedContent = content;
 		
@@ -1214,7 +1254,7 @@ function refreshConnInfo() {
 	btnText.textContent = '<%:Refreshing...%>';
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "api_conninfo")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "api_conninfo")%>', true);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState === 4) {
 			isRefreshing = false;
@@ -1495,7 +1535,7 @@ function loadContributors() {
 }
 
 // 自动刷新
-XHR.poll(5, '<%=url("admin", "vpn", "easytier", "api_conninfo")%>', null, function(x, data) {
+XHR.poll(5, '<%=url("admin", "services", "easytier", "api_conninfo")%>', null, function(x, data) {
 	if (!isRefreshing) {
 		updateConnInfo(data);
 	}

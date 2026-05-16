@@ -738,7 +738,7 @@ function confirmRestart() {
 	showToast('<%=translate("Restarting service...")%>');
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "restart_service")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "restart_service")%>', true);
 	xhr.onload = function() {
 		setTimeout(function() { 
 			actionCooldown = false;
@@ -770,7 +770,7 @@ function toggleCore(enabled) {
 	setControlsDisabled(true);
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "toggle_core")%>?enabled=' + (enabled ? '1' : '0'), true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "toggle_core")%>?enabled=' + (enabled ? '1' : '0'), true);
 	xhr.onload = function() {
 		setTimeout(function() { 
 			actionCooldown = false;
@@ -796,7 +796,7 @@ function toggleWeb(enabled) {
 	setControlsDisabled(true);
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "toggle_web")%>?enabled=' + (enabled ? '1' : '0'), true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "toggle_web")%>?enabled=' + (enabled ? '1' : '0'), true);
 	xhr.onload = function() {
 		setTimeout(function() { 
 			actionCooldown = false;
@@ -982,7 +982,7 @@ function updateTunInterface(coreRunning, noTun, devName) {
 	var ifname = devName || 'tun0';
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "get_tun_info")%>?ifname=' + encodeURIComponent(ifname), true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "get_tun_info")%>?ifname=' + encodeURIComponent(ifname), true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			try {
@@ -1074,7 +1074,7 @@ function updateTunInterface(coreRunning, noTun, devName) {
 }
 
 var firstLoad = true;
-XHR.poll(3, '<%=url("admin", "vpn", "easytier", "api_status")%>', null, function(x, data) {
+XHR.poll(3, '<%=url("admin", "services", "easytier", "api_status")%>', null, function(x, data) {
 	updateStatus(data);
 	
 	updateTunInterface(data.crunning, data.no_tun, data.dev_name);
@@ -1132,7 +1132,7 @@ function closeVersionModal() {
 function confirmRefreshVersion() {
 	closeVersionModal();
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "clear_version_cache")%>?type=' + currentVersionType, true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "clear_version_cache")%>?type=' + currentVersionType, true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			XHR.poll(0);

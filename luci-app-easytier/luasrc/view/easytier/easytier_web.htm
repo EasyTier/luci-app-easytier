@@ -797,7 +797,7 @@ function hideAlert() {
 
 function loadConfig() {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "get_web_config")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "get_web_config")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			var data = JSON.parse(xhr.responseText);
@@ -907,7 +907,7 @@ function saveConfig() {
 	}
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "save_web_config")%>', true);
+	xhr.open('POST', '<%=url("admin", "services", "easytier", "save_web_config")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			showAlert('success', '<%:Configuration saved successfully%>');
@@ -940,7 +940,7 @@ function toggleWebhookFields() {
 
 function checkWebStatus() {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "check_web_status")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "check_web_status")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			var data = JSON.parse(xhr.responseText);
@@ -984,7 +984,7 @@ function confirmResetDb() {
 	var dbPath = document.getElementById('web_db_path').value || '/etc/easytier/et.db';
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "reset_database")%>', true);
+	xhr.open('POST', '<%=url("admin", "services", "easytier", "reset_database")%>', true);
 	xhr.setRequestHeader('Content-Type', 'application/json');
 	xhr.onload = function() {
 		closeResetDbModal();
@@ -1013,7 +1013,7 @@ function confirmResetDb() {
 
 function checkWebStatusForRestart(deletedFiles) {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "check_web_status")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "check_web_status")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			try {
@@ -1061,7 +1061,7 @@ function restartWebService() {
 	showAlert('info', '<%:Restarting service...%>');
 	
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "restart_service")%>', true);
+	xhr.open('GET', '<%=url("admin", "services", "easytier", "restart_service")%>', true);
 	xhr.onload = function() {
 		if (xhr.status === 200) {
 			setTimeout(function() {
