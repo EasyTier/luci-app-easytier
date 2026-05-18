@@ -1,0 +1,1088 @@
+<%
+local util = require "luci.util"
+local uci = require "luci.model.uci".cursor()
+-%>
+<%+header%>
+
+<style>
+:root {
+	--card-bg: #ffffff;
+	--border-color: #e0e0e0;
+	--text-primary: #333333;
+	--text-secondary: #666666;
+	--success: #4CAF50;
+	--error: #F44336;
+	--info: #2196F3;
+	--warning: #FF9800;
+	--hover-bg: #f5f5f5;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--card-bg: #1e1e1e;
+		--border-color: #3e3e3e;
+		--text-primary: #e0e0e0;
+		--text-secondary: #b0b0b0;
+		--success: #66BB6A;
+		--error: #EF5350;
+		--info: #42A5F5;
+		--warning: #FFA726;
+		--hover-bg: #2a2a2a;
+	}
+}
+
+.web-console-container {
+	max-width: 1200px;
+	margin: 20px auto;
+	padding: 0 20px;
+}
+
+.web-card {
+	background: var(--card-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 16px;
+	padding: 28px;
+	margin-bottom: 24px;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+	transition: box-shadow 0.3s ease;
+}
+
+.web-card:hover {
+	box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.web-card h3 {
+	margin: 0 0 24px 0;
+	color: var(--text-primary);
+	font-size: 20px;
+	font-weight: 600;
+	border-bottom: 3px solid var(--info);
+	padding-bottom: 14px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.web-card h3::before {
+	content: "⚙️";
+	font-size: 24px;
+}
+
+.form-row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.form-group {
+	margin-bottom: 24px;
+}
+
+.form-group label {
+	display: block;
+	margin-bottom: 10px;
+	color: var(--text-primary);
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.form-group .description {
+	display: block;
+	margin-top: 6px;
+	color: var(--text-secondary);
+	font-size: 12px;
+	line-height: 1.6;
+	padding-left: 0;
+	opacity: 0.8;
+}
+
+.form-group .description a {
+	color: var(--info);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.form-group .description a:hover {
+	text-decoration: underline;
+}
+
+.form-control {
+	width: 100%;
+	padding: 12px 16px;
+	border: 2px solid var(--border-color);
+	border-radius: 8px;
+	background: var(--card-bg);
+	color: var(--text-primary);
+	font-size: 14px;
+	transition: all 0.2s ease;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.form-control:focus {
+	outline: none;
+	border-color: var(--info);
+	box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.form-control:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background: var(--hover-bg);
+}
+
+.checkbox-wrapper {
+	display: block;
+	padding: 12px 16px;
+	background: var(--hover-bg);
+	border-radius: 8px;
+	transition: background 0.2s;
+	position: relative;
+	min-height: 26px;
+}
+
+.checkbox-wrapper:hover {
+	background: var(--border-color);
+}
+
+.checkbox-wrapper label {
+	margin: 0 !important;
+	cursor: pointer;
+	user-select: none;
+	display: block;
+	line-height: 26px;
+	padding-right: 60px;
+}
+
+.checkbox-wrapper label::before {
+	display: none;
+}
+
+/* iOS风格开关 */
+.switch {
+	position: absolute;
+	width: 48px;
+	height: 26px;
+	right: 16px;
+	top: 12px;
+}
+
+.switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+	position: absolute;
+}
+
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	width: 48px;
+	height: 26px;
+	background-color: #ccc;
+	-webkit-transition: 0.3s;
+	transition: 0.3s;
+	border-radius: 26px;
+}
+
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 20px;
+	width: 20px;
+	left: 3px;
+	top: 3px;
+	background-color: white;
+	-webkit-transition: 0.3s;
+	transition: 0.3s;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+	background-color: var(--info);
+}
+
+input:checked + .slider:before {
+	-webkit-transform: translateX(22px);
+	-ms-transform: translateX(22px);
+	transform: translateX(22px);
+}
+
+input:disabled + .slider {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.btn {
+	padding: 12px 28px;
+	border: none;
+	border-radius: 8px;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+	transform: translateY(0);
+}
+
+.btn-primary {
+	background: var(--info);
+	color: white;
+}
+
+.btn-primary::before {
+	content: "💾";
+}
+
+.btn-success {
+	background: var(--success);
+	color: white;
+}
+
+.btn-success::before {
+	content: "🔄";
+}
+
+.btn-group {
+	display: flex;
+	gap: 16px;
+	margin-top: 32px;
+	padding-top: 24px;
+	border-top: 2px dashed var(--border-color);
+}
+
+.iframe-container {
+	width: 100%;
+	height: 800px;
+	border: 2px solid var(--border-color);
+	border-radius: 12px;
+	overflow: hidden;
+	background: var(--card-bg);
+	box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.iframe-container iframe {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 16px;
+	border-radius: 20px;
+	font-size: 13px;
+	font-weight: 600;
+	margin-left: auto;
+}
+
+.status-badge::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	animation: pulse 2s infinite;
+}
+
+.status-running {
+	background: rgba(76, 175, 80, 0.15);
+	color: var(--success);
+}
+
+.status-running::before {
+	background: var(--success);
+}
+
+.status-stopped {
+	background: rgba(244, 67, 54, 0.15);
+	color: var(--error);
+}
+
+.status-stopped::before {
+	background: var(--error);
+	animation: none;
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+.loading-spinner {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	border: 2px solid rgba(255,255,255,0.3);
+	border-top-color: white;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+.btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none !important;
+}
+
+.alert {
+	padding: 14px 20px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
+	z-index: 10000;
+	min-width: 320px;
+	max-width: 500px;
+	text-align: center;
+	box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+	opacity: 0;
+	-webkit-transition: opacity 0.3s ease-in-out;
+	transition: opacity 0.3s ease-in-out;
+	pointer-events: none;
+}
+
+.alert.show {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.alert-success {
+	background: var(--success);
+	color: white;
+	border: none;
+}
+
+.alert-error {
+	background: var(--error);
+	color: white;
+	border: none;
+}
+
+.alert-info {
+	background: var(--info);
+	color: white;
+	border: none;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0,0,0,0.5);
+	z-index: 9999;
+	align-items: center;
+	justify-content: center;
+}
+
+.modal.show {
+	display: flex;
+}
+
+.modal-content {
+	background: var(--card-bg);
+	border-radius: 12px;
+	padding: 24px;
+	max-width: 500px;
+	width: 90%;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.modal-title {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--text-primary);
+	margin-bottom: 16px;
+}
+
+.modal-message {
+	font-size: 14px;
+	color: var(--text-secondary);
+	margin-bottom: 24px;
+	line-height: 1.6;
+}
+
+.modal-buttons {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+}
+
+.modal-btn {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.modal-btn:hover {
+	opacity: 0.9;
+}
+
+.modal-btn-primary {
+	background: var(--info);
+	color: white;
+}
+
+.modal-btn-secondary {
+	background: var(--border-color);
+	color: var(--text-primary);
+}
+</style>
+
+<div class="web-console-container">
+	<div class="web-card">
+		<h3><%:Self-hosted Web Console%></h3>
+
+		<form id="webConsoleForm">
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_enabled"><%:Enable Self-hosted Web Console%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_enabled" name="web_enabled">
+						<span class="slider"></span>
+					</label>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="web_db_path"><%:Database File Path%></label>
+				<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;">
+					<input type="text" class="form-control" id="web_db_path" name="web_db_path" placeholder="/etc/easytier/et.db" style="flex:1;min-width:200px;">
+					<button type="button" class="btn" onclick="showResetDbModal()" style="background:var(--error);color:white;padding:12px 16px;white-space:nowrap;">
+						<%:Reset Database%>
+					</button>
+				</div>
+				<span class="description"><%:Path to the sqlite3 database file used to store all data. (-d parameter)%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_protocol"><%:Listening Protocol%></label>
+				<select class="form-control" id="web_protocol" name="web_protocol">
+					<option value="udp">UDP</option>
+					<option value="tcp">TCP</option>
+					<option value="ws">WS</option>
+					<option value="wss">WSS</option>
+				</select>
+				<span class="description"><%:Configure the server's listening protocol for easytier-core to connect. (-p parameter)%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_port"><%:Server Port%></label>
+				<input type="number" class="form-control" id="web_port" name="web_port" placeholder="22020" min="1" max="65535">
+				<span class="description"><%:Configure the server's listening port for easytier-core to connect. (-c parameter)%></span>
+			</div>
+		
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_fw_web"><%:WAN access to WEB%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_fw_web" name="web_fw_web">
+						<span class="slider"></span>
+					</label>
+				</div>
+				<span class="description"><%:Automatically add firewall rules to allow WAN access to this WEB console%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_api_port"><%:API Port%></label>
+				<input type="number" class="form-control" id="web_api_port" name="web_api_port" placeholder="11211" min="1" max="65535">
+				<span class="description"><%:Listening port of the RESTful server, used as ApiHost by the web frontend. (-a parameter)%></span>
+			</div>
+			
+			<div class="form-group">
+				<label for="web_api_addr"><%:API Listen Address%></label>
+				<input type="text" class="form-control" id="web_api_addr" name="web_api_addr" placeholder="0.0.0.0">
+				<span class="description"><%:Listen address for the RESTful server%>. (--api-server-addr <%:parameter%>)<br>
+					<%:Example%>: 0.0.0.0 (<%:all interfaces%>), 127.0.0.1 (<%:localhost only%>), :: (<%:IPv6 all%>)</span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_html_port"><%:Web Interface Port%></label>
+				<input type="number" class="form-control" id="web_html_port" name="web_html_port" placeholder="11211" min="1" max="65535">
+				<span class="description"><%:Frontend listening port for the web dashboard server. Leave empty to disable. (-l parameter)%></span>
+			</div>
+			
+			<div class="form-group">
+				<label for="web_html_addr"><%:Web Listen Address%></label>
+				<input type="text" class="form-control" id="web_html_addr" name="web_html_addr" placeholder="0.0.0.0">
+				<span class="description"><%:Listen address for the web dashboard server%>. (--web-server-addr <%:parameter%>)<br>
+					<%:Only effective when web port differs from API port or addresses differ%></span>
+			</div>
+
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_fw_api"><%:WAN access to API%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_fw_api" name="web_fw_api">
+						<span class="slider"></span>
+					</label>
+				</div>
+				<span class="description"><%:Automatically add firewall rules to allow WAN access to the API control page%></span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_api_host"><%:Default API Server URL%></label>
+				<input type="text" class="form-control" id="web_api_host" name="web_api_host" placeholder="http://192.168.1.1:11211">
+				<span class="description"><%:The URL of the API server, used for connecting the web frontend%>. (--api-host <%:parameter%>)<br>
+				<%:Example%>: http://[<%:current device IP or domain%>]:[<%:API port%>]</span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_geoip_db"><%:GEOIP Database Path%></label>
+				<input type="text" class="form-control" id="web_geoip_db" name="web_geoip_db" placeholder="/etc/easytier/GeoLite.mmdb">
+				<span class="description"><%:GeoIP2 database file path used to locate the client%>. <%:Defaults to an embedded file (country-level information only)%>.<br>
+				<%:Recommended%>: <a href="https://github.com/P3TERX/GeoLite.mmdb" target="_blank">https://github.com/P3TERX/GeoLite.mmdb</a> (--geoip-db <%:parameter%>)</span>
+			</div>
+			
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_disable_registration"><%:Disable User Registration%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_disable_registration" name="web_disable_registration">
+						<span class="slider"></span>
+					</label>
+				</div>
+				<span class="description"><%:Prevent new users from registering accounts%>. (--disable-registration <%:parameter%>)</span>
+			</div>
+
+			<div class="form-group">
+				<div class="checkbox-wrapper">
+					<label for="web_allow_auto_create_user"><%:Allow Auto-create User%></label>
+					<label class="switch">
+						<input type="checkbox" id="web_allow_auto_create_user" name="web_allow_auto_create_user">
+						<span class="slider"></span>
+					</label>
+				</div>
+				<span class="description"><%:Automatically create local user when easytier-core connects with an unknown username%>. (--allow-auto-create-user <%:parameter%>)</span>
+			</div>
+
+			<div class="form-group">
+				<label for="web_weblog"><%:Log Level%></label>
+				<select class="form-control" id="web_weblog" name="web_weblog">
+					<option value="off"><%:Off%></option>
+					<option value="error"><%:Error%></option>
+					<option value="warn"><%:Warning%></option>
+					<option value="info"><%:Info%></option>
+					<option value="debug"><%:Debug%></option>
+					<option value="trace"><%:Trace%></option>
+				</select>
+				<span class="description"><%:Runtime log located at%> /tmp/easytierweb.log, <%:viewable in the log section%>.<br>
+				<%:Log levels%>: <%:Error%> < <%:Warning%> < <%:Info%> < <%:Debug%> < <%:Trace%></span>
+			</div>
+			
+			<!-- OIDC单点登录配置 -->
+			<div style="margin-top:32px;padding-top:24px;border-top:2px dashed var(--border-color);">
+				<div class="form-group">
+					<div class="checkbox-wrapper">
+						<label for="web_oidc_enabled"><%:Enable OIDC Single Sign-On%></label>
+						<label class="switch">
+							<input type="checkbox" id="web_oidc_enabled" name="web_oidc_enabled" onchange="toggleOIDCFields()">
+							<span class="slider"></span>
+						</label>
+					</div>
+					<span class="description"><%:Enable OIDC (OpenID Connect) for single sign-on authentication%></span>
+				</div>
+
+				<div id="oidc_fields" style="display:none;">
+					<div class="form-group">
+						<label for="web_oidc_issuer_url"><%:OIDC Issuer URL%> *</label>
+						<input type="text" class="form-control" id="web_oidc_issuer_url" name="web_oidc_issuer_url" placeholder="https://auth.example.com">
+						<span class="description"><%:The OIDC issuer URL for single sign-on authentication%>. (--oidc-issuer-url <%:parameter%>)</span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_oidc_client_id"><%:OIDC Client ID%> *</label>
+						<input type="text" class="form-control" id="web_oidc_client_id" name="web_oidc_client_id" placeholder="easytier-client">
+						<span class="description"><%:The OIDC client ID%>. (--oidc-client-id <%:parameter%>)</span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_oidc_client_secret"><%:OIDC Client Secret%> *</label>
+						<input type="password" class="form-control" id="web_oidc_client_secret" name="web_oidc_client_secret" placeholder="your-client-secret">
+						<span class="description"><%:The OIDC client secret%>. (--oidc-client-secret <%:parameter%>)<br>
+						<%:Can also be set via OIDC_CLIENT_SECRET environment variable%></span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_oidc_redirect_url"><%:OIDC Redirect URL%> *</label>
+						<input type="text" class="form-control" id="web_oidc_redirect_url" name="web_oidc_redirect_url" placeholder="http://your-domain.com:11211/api/v1/auth/oidc/callback">
+						<span class="description"><%:The OIDC redirect URL (callback URL), must match exactly what is registered with your Identity Provider%>. (--oidc-redirect-url <%:parameter%>)<br>
+						<%:Example%>: http://your-domain.com:11211/api/v1/auth/oidc/callback</span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_oidc_username_claim"><%:OIDC Username Claim%></label>
+						<input type="text" class="form-control" id="web_oidc_username_claim" name="web_oidc_username_claim" placeholder="preferred_username">
+						<span class="description"><%:The OIDC claim to use as the local username%>. (--oidc-username-claim <%:parameter%>)<br>
+						<%:Default%>: preferred_username</span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_oidc_scopes"><%:OIDC Scopes%></label>
+						<input type="text" class="form-control" id="web_oidc_scopes" name="web_oidc_scopes" placeholder="openid profile">
+						<span class="description"><%:OIDC scopes to request during login%>. (--oidc-scopes <%:parameter%>)<br>
+						<%:Supports comma-separated values%>. <%:Default%>: openid profile</span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_oidc_frontend_base_url"><%:OIDC Frontend Base URL%></label>
+						<input type="text" class="form-control" id="web_oidc_frontend_base_url" name="web_oidc_frontend_base_url" placeholder="http://your-domain.com:11211">
+						<span class="description"><%:Frontend base URL to redirect to after successful OIDC callback%>. (--oidc-frontend-base-url <%:parameter%>)<br>
+						<%:Required when frontend and API are deployed separately%></span>
+					</div>
+
+					<div class="form-group">
+						<div class="checkbox-wrapper">
+							<label for="web_oidc_disable_pkce"><%:Disable PKCE%></label>
+							<label class="switch">
+								<input type="checkbox" id="web_oidc_disable_pkce" name="web_oidc_disable_pkce">
+								<span class="slider"></span>
+							</label>
+						</div>
+						<span class="description"><%:Disable PKCE (Proof Key for Code Exchange) for OIDC authentication%>. (--oidc-disable-pkce <%:parameter%>)</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Webhook高级配置 -->
+			<div style="margin-top:32px;padding-top:24px;border-top:2px dashed var(--border-color);">
+				<div class="form-group">
+					<div class="checkbox-wrapper">
+						<label for="web_webhook_enabled"><%:Enable Webhook Integration%></label>
+						<label class="switch">
+							<input type="checkbox" id="web_webhook_enabled" name="web_webhook_enabled" onchange="toggleWebhookFields()">
+							<span class="slider"></span>
+						</label>
+					</div>
+					<span class="description"><%:Enable webhook for token validation and event delivery%></span>
+				</div>
+
+				<div id="webhook_fields" style="display:none;">
+					<div class="form-group">
+						<label for="web_webhook_url"><%:Webhook URL%></label>
+						<input type="text" class="form-control" id="web_webhook_url" name="web_webhook_url" placeholder="https://webhook.example.com/easytier">
+						<span class="description"><%:Base URL of the webhook endpoint for token validation and event delivery%>. (--webhook-url <%:parameter%>)<br>
+						<%:When set, incoming tokens are validated via this webhook before local fallback%></span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_webhook_secret"><%:Webhook Secret%></label>
+						<input type="password" class="form-control" id="web_webhook_secret" name="web_webhook_secret" placeholder="your-webhook-secret">
+						<span class="description"><%:Shared secret used to authenticate outbound webhook calls%>. (--webhook-secret <%:parameter%>)</span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_internal_auth_token"><%:Internal Auth Token%></label>
+						<input type="password" class="form-control" id="web_internal_auth_token" name="web_internal_auth_token" placeholder="your-internal-token">
+						<span class="description"><%:Token for X-Internal-Auth header%>. (--internal-auth-token <%:parameter%>)<br>
+						<%:When set, API requests with this header bypass session authentication%></span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_web_instance_id"><%:Web Instance ID%></label>
+						<input type="text" class="form-control" id="web_web_instance_id" name="web_web_instance_id" placeholder="instance-1">
+						<span class="description"><%:Stable identifier for this easytier-web instance when routing webhook callbacks%>. (--web-instance-id <%:parameter%>)</span>
+					</div>
+
+					<div class="form-group">
+						<label for="web_web_instance_api_base_url"><%:Web Instance API Base URL%></label>
+						<input type="text" class="form-control" id="web_web_instance_api_base_url" name="web_web_instance_api_base_url" placeholder="http://192.168.1.1:11211">
+						<span class="description"><%:Reachable base URL for this easytier-web instance's internal REST API%>. (--web-instance-api-base-url <%:parameter%>)</span>
+					</div>
+				</div>
+			</div>
+			
+			
+			<div class="btn-group">
+				<button type="button" class="btn btn-primary" onclick="saveConfig()"><%:Save Configuration%></button>
+			</div>
+		</form>
+	</div>
+
+	<div class="web-card" id="consoleCard" style="display:none;">
+		<div class="iframe-container">
+			<iframe id="webConsoleFrame"></iframe>
+		</div>
+	</div>
+</div>
+
+<!-- 提示框 -->
+<div id="alert_box" class="alert"></div>
+
+<!-- 重置数据库模态窗口 -->
+<div class="modal" id="reset_db_modal">
+	<div class="modal-content">
+		<div class="modal-title" style="color:var(--error);">⚠️ <%:Warning%></div>
+		<div class="modal-message">
+			<div style="color:var(--error);font-weight:600;margin-bottom:12px;">
+				<%:Are you sure you want to reset the database?%>
+			</div>
+			<div style="font-size:13px;line-height:1.6;color:var(--text-secondary);">
+				<%:This will delete all database files and cannot be recovered%>:<br>
+				<code id="reset_db_files" style="display:block;margin-top:8px;padding:8px;background:var(--hover-bg);border-radius:4px;word-break:break-all;font-size:12px;"></code>
+			</div>
+		</div>
+		<div class="modal-buttons">
+			<button class="modal-btn modal-btn-secondary" onclick="closeResetDbModal()"><%:Cancel%></button>
+			<button class="modal-btn" onclick="confirmResetDb()" style="background:var(--error);color:white;"><%:Delete%></button>
+		</div>
+	</div>
+</div>
+
+<!-- 重启服务模态窗口 -->
+<div class="modal" id="restart_web_modal">
+	<div class="modal-content">
+		<div class="modal-title"><%:Database Reset Successful%></div>
+		<div class="modal-message">
+			<pre id="restart_web_message" style="white-space:pre-wrap;word-break:break-all;font-size:13px;line-height:1.6;"></pre>
+		</div>
+		<div class="modal-buttons">
+			<button class="modal-btn modal-btn-secondary" onclick="closeRestartModal()"><%:Later%></button>
+			<button class="modal-btn modal-btn-primary" onclick="restartWebService()"><%:Restart Now%></button>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">//<![CDATA[
+var originalConfig = {};
+
+function showAlert(type, message) {
+	var alertBox = document.getElementById('alert_box');
+	if (!alertBox) return;
+	
+	alertBox.className = 'alert alert-' + type + ' show';
+	alertBox.textContent = message;
+	
+	setTimeout(function() {
+		hideAlert();
+	}, 3000);
+}
+
+function hideAlert() {
+	var alertBox = document.getElementById('alert_box');
+	if (!alertBox) return;
+	alertBox.className = 'alert';
+}
+
+function loadConfig() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "get_web_config")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			var data = JSON.parse(xhr.responseText);
+			document.getElementById('web_enabled').checked = data.web_enabled === '1';
+			document.getElementById('web_db_path').value = data.web_db_path || '/etc/easytier/et.db';
+			document.getElementById('web_protocol').value = data.web_protocol || 'udp';
+			document.getElementById('web_port').value = data.web_port || '22020';
+			document.getElementById('web_fw_web').checked = data.web_fw_web === '1';
+			document.getElementById('web_api_port').value = data.web_api_port || '11211';
+			document.getElementById('web_api_addr').value = data.web_api_addr || '0.0.0.0';
+			document.getElementById('web_html_port').value = data.web_html_port || '11211';
+			document.getElementById('web_html_addr').value = data.web_html_addr || '0.0.0.0';
+			document.getElementById('web_fw_api').checked = data.web_fw_api === '1';
+			document.getElementById('web_api_host').value = data.web_api_host || '';
+			document.getElementById('web_geoip_db').value = data.web_geoip_db || '';
+			document.getElementById('web_disable_registration').checked = data.web_disable_registration === '1';
+			document.getElementById('web_allow_auto_create_user').checked = data.web_allow_auto_create_user === '1';
+			document.getElementById('web_weblog').value = data.web_weblog || 'off';
+			
+			// OIDC配置
+			document.getElementById('web_oidc_enabled').checked = data.web_oidc_enabled === '1';
+			document.getElementById('web_oidc_issuer_url').value = data.web_oidc_issuer_url || '';
+			document.getElementById('web_oidc_client_id').value = data.web_oidc_client_id || '';
+			document.getElementById('web_oidc_client_secret').value = data.web_oidc_client_secret || '';
+			document.getElementById('web_oidc_redirect_url').value = data.web_oidc_redirect_url || '';
+			document.getElementById('web_oidc_username_claim').value = data.web_oidc_username_claim || 'preferred_username';
+			document.getElementById('web_oidc_scopes').value = data.web_oidc_scopes || 'openid profile';
+			document.getElementById('web_oidc_frontend_base_url').value = data.web_oidc_frontend_base_url || '';
+			document.getElementById('web_oidc_disable_pkce').checked = data.web_oidc_disable_pkce === '1';
+			toggleOIDCFields();
+		
+			// Webhook配置
+			document.getElementById('web_webhook_enabled').checked = data.web_webhook_enabled === '1';
+			document.getElementById('web_webhook_url').value = data.web_webhook_url || '';
+			document.getElementById('web_webhook_secret').value = data.web_webhook_secret || '';
+			document.getElementById('web_internal_auth_token').value = data.web_internal_auth_token || '';
+			document.getElementById('web_web_instance_id').value = data.web_web_instance_id || '';
+			document.getElementById('web_web_instance_api_base_url').value = data.web_web_instance_api_base_url || '';
+			toggleWebhookFields();
+			
+			// 保存原始配置
+			originalConfig = JSON.parse(JSON.stringify(data));
+			
+			checkWebStatus();
+		}
+	};
+	xhr.send();
+}
+
+function getCurrentConfig() {
+	return {
+		web_enabled: document.getElementById('web_enabled').checked ? '1' : '0',
+		web_db_path: document.getElementById('web_db_path').value,
+		web_protocol: document.getElementById('web_protocol').value,
+		web_port: document.getElementById('web_port').value,
+		web_fw_web: document.getElementById('web_fw_web').checked ? '1' : '0',
+		web_api_port: document.getElementById('web_api_port').value,
+		web_api_addr: document.getElementById('web_api_addr').value,
+		web_html_port: document.getElementById('web_html_port').value,
+		web_html_addr: document.getElementById('web_html_addr').value,
+		web_fw_api: document.getElementById('web_fw_api').checked ? '1' : '0',
+		web_api_host: document.getElementById('web_api_host').value,
+		web_geoip_db: document.getElementById('web_geoip_db').value,
+		web_disable_registration: document.getElementById('web_disable_registration').checked ? '1' : '0',
+		web_allow_auto_create_user: document.getElementById('web_allow_auto_create_user').checked ? '1' : '0',
+		web_weblog: document.getElementById('web_weblog').value,
+		// OIDC
+		web_oidc_enabled: document.getElementById('web_oidc_enabled').checked ? '1' : '0',
+		web_oidc_issuer_url: document.getElementById('web_oidc_issuer_url').value,
+		web_oidc_client_id: document.getElementById('web_oidc_client_id').value,
+		web_oidc_client_secret: document.getElementById('web_oidc_client_secret').value,
+		web_oidc_redirect_url: document.getElementById('web_oidc_redirect_url').value,
+		web_oidc_username_claim: document.getElementById('web_oidc_username_claim').value,
+		web_oidc_scopes: document.getElementById('web_oidc_scopes').value,
+		web_oidc_frontend_base_url: document.getElementById('web_oidc_frontend_base_url').value,
+		web_oidc_disable_pkce: document.getElementById('web_oidc_disable_pkce').checked ? '1' : '0',
+		// Webhook
+		web_webhook_enabled: document.getElementById('web_webhook_enabled').checked ? '1' : '0',
+		web_webhook_url: document.getElementById('web_webhook_url').value,
+		web_webhook_secret: document.getElementById('web_webhook_secret').value,
+		web_internal_auth_token: document.getElementById('web_internal_auth_token').value,
+		web_web_instance_id: document.getElementById('web_web_instance_id').value,
+		web_web_instance_api_base_url: document.getElementById('web_web_instance_api_base_url').value
+	};
+}
+
+function isConfigChanged() {
+	var current = getCurrentConfig();
+	for (var key in originalConfig) {
+		if (originalConfig[key] !== current[key]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function saveConfig() {
+	if (!isConfigChanged()) {
+		showAlert('info', '<%:No changes to save%>');
+		return;
+	}
+	
+	var formData = new FormData();
+	var config = getCurrentConfig();
+	for (var key in config) {
+		formData.append(key, config[key]);
+	}
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "save_web_config")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			showAlert('success', '<%:Configuration saved successfully%>');
+			originalConfig = getCurrentConfig();
+		} else {
+			showAlert('error', '<%:Save failed%>');
+		}
+	};
+	xhr.onerror = function() {
+		showAlert('error', '<%:Save failed%>');
+	};
+	xhr.send(formData);
+}
+
+function toggleOIDCFields() {
+	var enabled = document.getElementById('web_oidc_enabled').checked;
+	var fields = document.getElementById('oidc_fields');
+	if (fields) {
+		fields.style.display = enabled ? 'block' : 'none';
+	}
+}
+
+function toggleWebhookFields() {
+	var enabled = document.getElementById('web_webhook_enabled').checked;
+	var fields = document.getElementById('webhook_fields');
+	if (fields) {
+		fields.style.display = enabled ? 'block' : 'none';
+	}
+}
+
+function checkWebStatus() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "check_web_status")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			var data = JSON.parse(xhr.responseText);
+			var consoleCard = document.getElementById('consoleCard');
+			var iframe = document.getElementById('webConsoleFrame');
+			
+			if (data.running && data.port) {
+				var newSrc = 'http://' + window.location.hostname + ':' + data.port;
+				// 只在URL变化或iframe未加载时才更新，避免闪烁
+				if (!iframe.src || iframe.src.indexOf(':' + data.port) === -1) {
+					iframe.src = newSrc;
+				}
+				consoleCard.style.display = 'block';
+			} else {
+				consoleCard.style.display = 'none';
+				if (iframe.src) {
+					iframe.src = '';
+				}
+			}
+		}
+	};
+	xhr.send();
+}
+
+function showResetDbModal() {
+	var dbPath = document.getElementById('web_db_path').value || '/etc/easytier/et.db';
+	var files = [
+		dbPath,
+		dbPath + '-wal',
+		dbPath + '-shm'
+	];
+	document.getElementById('reset_db_files').textContent = files.join('\n');
+	document.getElementById('reset_db_modal').classList.add('show');
+}
+
+function closeResetDbModal() {
+	document.getElementById('reset_db_modal').classList.remove('show');
+}
+
+function confirmResetDb() {
+	var dbPath = document.getElementById('web_db_path').value || '/etc/easytier/et.db';
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', '<%=url("admin", "vpn", "easytier", "reset_database")%>', true);
+	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.onload = function() {
+		closeResetDbModal();
+		if (xhr.status === 200) {
+			try {
+				var response = JSON.parse(xhr.responseText);
+				if (response.success) {
+					// 检查web服务是否运行
+					checkWebStatusForRestart(response.deleted_files);
+				} else {
+					showAlert('error', response.message || '<%:Reset failed%>');
+				}
+			} catch (e) {
+				showAlert('error', '<%:Reset failed%>');
+			}
+		} else {
+			showAlert('error', '<%:Reset failed%>');
+		}
+	};
+	xhr.onerror = function() {
+		closeResetDbModal();
+		showAlert('error', '<%:Network error%>');
+	};
+	xhr.send(JSON.stringify({db_path: dbPath}));
+}
+
+function checkWebStatusForRestart(deletedFiles) {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "check_web_status")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			try {
+				var data = JSON.parse(xhr.responseText);
+				if (data.running) {
+					// Web服务正在运行，弹出重启确认
+					showRestartModal(deletedFiles);
+				} else {
+					// Web服务未运行，只显示成功提示
+					var message = '<%:Database reset successfully%>\n' + deletedFiles.join('\n');
+					showAlert('success', message);
+				}
+			} catch (e) {
+				// 检查失败，只显示成功提示
+				var message = '<%:Database reset successfully%>\n' + deletedFiles.join('\n');
+				showAlert('success', message);
+			}
+		} else {
+			// 检查失败，只显示成功提示
+			var message = '<%:Database reset successfully%>\n' + deletedFiles.join('\n');
+			showAlert('success', message);
+		}
+	};
+	xhr.onerror = function() {
+		// 检查失败，只显示成功提示
+		var message = '<%:Database reset successfully%>\n' + deletedFiles.join('\n');
+		showAlert('success', message);
+	};
+	xhr.send();
+}
+
+function showRestartModal(deletedFiles) {
+	var modal = document.getElementById('restart_web_modal');
+	var message = document.getElementById('restart_web_message');
+	message.textContent = '<%:Database reset successfully%>\n' + deletedFiles.join('\n') + '\n\n<%:Restart service to apply changes?%>';
+	modal.classList.add('show');
+}
+
+function closeRestartModal() {
+	document.getElementById('restart_web_modal').classList.remove('show');
+}
+
+function restartWebService() {
+	closeRestartModal();
+	showAlert('info', '<%:Restarting service...%>');
+	
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '<%=url("admin", "vpn", "easytier", "restart_service")%>', true);
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			setTimeout(function() {
+				showAlert('success', '<%:Service restarted successfully%>');
+			}, 2000);
+		} else {
+			showAlert('error', '<%:Restart failed%>');
+		}
+	};
+	xhr.onerror = function() {
+		showAlert('error', '<%:Restart failed%>');
+	};
+	xhr.send();
+}
+
+
+window.addEventListener('load', function() {
+	loadConfig();
+	checkWebStatus();
+	setInterval(checkWebStatus, 10000);
+});
+//]]></script>
+
+<%+footer%>

@@ -33,30 +33,37 @@ jobs:
           - openwrt-24.10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Cache OpenWrt SDK
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             /opt/openwrt-sdk-${{ matrix.arch }}-${{ matrix.sdk }}
             dl
           key: sdk-${{ matrix.arch }}-${{ matrix.sdk }}
           
-      - name: Overwrite i18n file
+      - name: Create i18n uci-defaults file
         run: |
+          mkdir -p luci-app-easytier/root/etc/uci-defaults
           cat > luci-app-easytier/root/etc/uci-defaults/luci-i18n-easytier-zh-cn << 'EOF'
           #!/bin/sh
+          uci -q batch << EOI
+          set luci.languages.zh_cn='简体中文 (Simplified Chinese)'
+          commit luci
+          EOI
+          rm -f /tmp/luci-indexcache /tmp/luci-modulecache/*
           exit 0
           EOF
+          chmod +x luci-app-easytier/root/etc/uci-defaults/luci-i18n-easytier-zh-cn
           
       - name: Building packages
         uses: openwrt/gh-action-sdk@main
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
-          PACKAGES: easytier luci-app-easytier
+          PACKAGES: easytier easytier-noweb luci-app-easytier
           #NO_DEFAULT_FEEDS: 1
           NO_REFRESH_CHECK: 1
           NO_SHFMT_CHECK: 1
@@ -64,20 +71,34 @@ jobs:
           V: s
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: EasyTier-${{ matrix.arch }}-${{ matrix.sdk }}
-          path: bin/packages/${{ matrix.arch }}/packages_ci/
+          name: ${{ matrix.arch }}-${{ matrix.sdk }}
+          path: bin/packages/${{ matrix.arch }}/packages_ci/*
 
-      - name: Create compress files
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event.inputs.tag != '' }}
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release info
         run: |
           sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p release
+          for dir in artifacts/*; do
+            name=$(basename "$dir")
+            zip -j "release/EasyTier-${{ env.TAG }}-${name}.zip" "$dir"/*.ipk "$dir"/*.apk 2>/dev/null || true
+          done
           echo "build_time=$(TZ=UTC-8 date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
-          #tar -zcvf EasyTier-${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
-          zip -j EasyTier-${{ env.TAG }}-${{ matrix.arch }}-${{ matrix.sdk }}.zip bin/packages/${{ matrix.arch }}/packages_ci/*
 
       - name: Release
-        if: ${{ github.event.inputs.tag != '' }}
         uses: softprops/action-gh-release@v2
         with:
             token: ${{ secrets.GITHUB_TOKEN }}
@@ -93,5 +114,6 @@ jobs:
              ${{ github.event.inputs.text }}
            
             tag_name: ${{ env.TAG }}
-            files: EasyTier-${{ env.TAG }}-${{ matrix.arch }}-${{ matrix.sdk }}.zip
+            files: release/*.zip
  
+

@@ -2,7 +2,8 @@
   "luci-app-easytier": {
     "description": "Grant UCI access for luci-app-easytier",
     "read": {
-      "uci": [ "easytier" ]
+      "uci": [ "easytier" ],
+      "cgi-io": [ "upload" ]
     },
     "write": {
       "uci": [ "easytier" ]

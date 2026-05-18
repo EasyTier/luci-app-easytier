@@ -1,25 +1,3 @@
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:648
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:666
-msgid ""
-"- Program /tmp/easytier-cli uploaded successfully, restart the plugin to "
-"take effect"
-msgstr "- 程序/tmp/easytier-cli上传成功，重启一次插件才生效"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:640
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:658
-msgid ""
-"- Program /tmp/easytier-core uploaded successfully, restart the plugin to "
-"take effect"
-msgstr "- 程序/tmp/easytier-core上传成功，重启一次插件才生效"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:654
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:672
-msgid ""
-"- Program /tmp/easytier-web uploaded successfully, restart the plugin to "
-"take effect"
-msgstr "- 程序/tmp/easytier-web上传成功，重启一次插件才生效"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:5
 msgid ""
 "A simple, secure, decentralized VPN solution for intranet penetration, "
 "implemented in Rust using the Tokio framework. Project URL: <a href="
@@ -29,14 +7,12 @@ msgid ""
 "cgi-bin/qm/qr?"
 "_wv=1027&k=jhP2Z4UsEZ8wvfGPLrs0VwLKn_uz0Q_p&authKey=OGKSQLfg61YPCpVQuvx"
 "%2BxE7hUKBVBEVi9PljrDKbHlle6xqOXx8sOwPPTncMambK&noverify=0&group_code=949700262\" "
-"target=\"_blank\">QQ Group</a>&nbsp;&nbsp;<a href=\"https://doc.oee.icu"
-"\" target=\"_blank\">Beginner Tutorial</a>"
+"target=\"_blank\">QQ Group</a>&nbsp;&nbsp;">Beginner Tutorial</a>"
 msgstr ""
 "一个简单、安全、去中心化的内网穿透 VPN 组网方案，使用 Rust 语言和 Tokio 框架实现。 "
 "项目地址：<a href=\"https://github.com/EasyTier/EasyTier\" target=\"_blank\">github.com/EasyTier/EasyTier</a>&nbsp;&nbsp;"
 "<a href=\"http://easytier.cn\" target=\"_blank\">官网文档</a>&nbsp;&nbsp;"
 "<a href=\"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jhP2Z4UsEZ8wvfGPLrs0VwLKn_uz0Q_p&authKey=OGKSQLfg61YPCpVQuvx%2BxE7hUKBVBEVi9PljrDKbHlle6xqOXx8sOwPPTncMambK&noverify=0&group_code=949700262\" target=\"_blank\">QQ群</a>&nbsp;&nbsp;"
-"<a href=\"https://doc.oee.icu\" target=\"_blank\">菜鸟教程</a>"
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:720
 msgid "API Port"
 msgstr "API端口"
@@ -73,6 +49,24 @@ msgstr "允许从局域网 lan 到虚拟网络 EasyTier 的流量"
 msgid "Allow traffic from WAN to EasyTier virtual network"
 msgstr "允许从广域网 wan 到虚拟网络 EasyTier 的流量"
 
+msgid "System lacks unzip package, cannot extract zip archive"
+msgstr "当前系统缺少unzip包无法解压zip程序包"
+
+msgid "Not a valid EasyTier program or architecture mismatch"
+msgstr "上传的不是有效easytier程序或架构不匹配"
+
+msgid "Not a valid EasyTier program"
+msgstr "不是有效的easytier程序"
+
+msgid "easytier-web is not used by this plugin, please upload easytier-web-embed"
+msgstr "easytier-web不是当前插件自建控制台所使用的程序，请上传easytier-web-embed程序"
+
+msgid "Successfully installed"
+msgstr "成功安装"
+
+msgid "Processing uploaded file, please wait..."
+msgstr "正在处理上传的程序，请稍候..."
+
 #: applications/luci-app-easytier/luasrc/view/easytier/easytier_log.htm:30
 #: applications/luci-app-easytier/luasrc/view/easytier/easytierweb_log.htm:30
 msgid "Auto Refresh"
@@ -100,60 +94,9 @@ msgstr "检测IP"
 msgid "Check for Updates"
 msgstr "检测更新"
 
-#: applications/luci-app-easytier/luasrc/view/easytier/easytier_log.htm:31
-#: applications/luci-app-easytier/luasrc/view/easytier/easytierweb_log.htm:31
-msgid "Clear Logs"
-msgstr "清除日志"
-
-msgid "Download Log"
-msgstr "下载日志"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:469
-msgid "Click the button to refresh and view STUN information"
-msgstr "点击按钮刷新，执行 STUN 测试"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:546
-msgid "Click the button to refresh and view TCP/KCP proxy information"
-msgstr "点击按钮刷新，查看 TCP/KCP 代理状态"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:450
-msgid "Click the button to refresh and view connector information"
-msgstr "点击按钮刷新，查看管理连接器"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:412
-msgid "Click the button to refresh and view local node information"
-msgstr "点击按钮刷新，查看本机信息"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:431
-msgid "Click the button to refresh and view peer information"
-msgstr "点击按钮刷新，查看对等节点信息"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:508
-msgid "Click the button to refresh and view peer-center information"
-msgstr "点击按钮刷新，查看全局对等节点信息"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:489
-msgid "Click the button to refresh and view route information"
-msgstr "点击按钮刷新，查看路由信息"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:565
-msgid ""
-"Click the button to refresh and view the complete local startup parameters"
-msgstr "点击按钮刷新，查看本机完整启动参数"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:527
-msgid "Click the button to refresh and view vpn-portal information"
-msgstr "点击按钮刷新，查看VPN 门户（WireGuard）信息"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:584
-msgid ""
-"Click the button to start checking for updates and refresh the version "
-"display in the status bar above"
-msgstr "点击按钮开始检测更新，刷新上方状态栏版本显示"
-
 #: applications/luci-app-easytier/luasrc/view/easytier/easytier_status.htm:35
 msgid "Collecting data..."
-msgstr "收集数据..."
+msgstr "正在获取中..."
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:39
 msgid "Default"
@@ -336,11 +279,6 @@ msgstr "不创建TUN设备，可以使用子网代理访问节点（ --no-tun �
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:252
 msgid "Do not use IPv6 (--disable-ipv6 parameter)"
 msgstr "不使用ipv6 （--disable-ipv6 参数）"
-
-#: applications/luci-app-easytier/luasrc/controller/easytier.lua:9
-#: applications/luci-app-easytier/luasrc/controller/easytier.lua:10
-msgid "EasyTier"
-msgstr "EasyTier"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:14
 msgid "EasyTier Configuration"
@@ -532,12 +470,6 @@ msgstr "监听端口"
 msgid "Listening Protocol"
 msgstr "监听协议"
 
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:710
-msgid ""
-"Listening port of the RESTful server, used as ApiHost by the web frontend. (-"
-"a parameter)"
-msgstr "restful 服务器的监听端口，作为 ApiHost 并被 web 前端使用。（ -a 参数）"
-
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:564
 msgid "Local Startup Parameters"
 msgstr "本机启动参数"
@@ -594,7 +526,7 @@ msgstr "无TUN模式"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:411
 msgid "Node Info"
-msgstr "node信息"
+msgstr "本机信息"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:136
 msgid ""
@@ -647,18 +579,6 @@ msgid ""
 "Path to the sqlite3 database file used to store all data. (-d parameter)"
 msgstr " sqlite3 数据库文件路径, 用于保存所有数据。（ -d 参数）"
 
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:430
-msgid "Peer Info"
-msgstr "Peer 信息"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:101
-msgid "Peer Nodes"
-msgstr "对等节点"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:507
-msgid "Peer-Center Info"
-msgstr "peer-center信息"
-
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:353
 msgid "Port Forwarding"
 msgstr "端口转发"
@@ -676,11 +596,6 @@ msgstr "程序日志"
 msgid "Public Addresses of Specified Listeners"
 msgstr "指定监听器的公网地址"
 
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:27
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:696
-msgid "Quickly restart once without modifying any parameters"
-msgstr "在没有修改参数的情况下快速重新启动一次"
-
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:127
 msgid ""
 "RPC portal address used for management. 0 means a random port, 12345 means "
@@ -691,20 +606,8 @@ msgstr ""
 "用于管理的 RPC 门户地址。0 表示随机端口，12345 表示监听本地主机的 12345 端口，0.0.0.0:12345 表示在所有接口上监听 12345 端口。<br>"
 "默认值为 0，建议选 15888 防止无法获取状态信息 （-r 参数）"
 
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:25
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:26
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:694
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:695
 msgid "Restart"
 msgstr "重启"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:288
-msgid "Route CIDR"
-msgstr "路由CIDR"
-
-#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:488
-msgid "Route Info"
-msgstr "Route信息"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:370
 msgid ""
@@ -830,10 +733,6 @@ msgid ""
 "console, for issuing configuration files"
 msgstr "连接web控制台时识别此设备的唯一标识，用于下发配置文件"
 
-#: applications/luci-app-easytier/luasrc/view/easytier/other_upload.htm:4
-msgid "Upload"
-msgstr "上传"
-
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:20
 msgid "Upload Program"
 msgstr "上传程序"
@@ -908,10 +807,6 @@ msgstr "警告"
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:41
 msgid "Web Configuration"
 msgstr "Web配置"
-
-#: applications/luci-app-easytier/luasrc/view/easytier/easytier_status.htm:25
-msgid "Web Console"
-msgstr "Web 控制台"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:726
 msgid "Web Interface Port"
@@ -988,7 +883,7 @@ msgstr "easytier-web程序路径"
 
 #: applications/luci-app-easytier/luasrc/controller/easytier.lua:14
 msgid "web log"
-msgstr "web日志"
+msgstr "控制台日志"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:264
 msgid "zstd"
@@ -1046,41 +941,1169 @@ msgid "Extra Parameters"
 msgstr "额外参数"
 
 msgid "Additional command-line arguments passed to the backend process"
-msgstr "传递给后端进程的额外命令行参数"
+msgstr "运行easytier-core时额外增加的命令参数"
 
 msgid "ACL rules"
 msgstr "ACL 规则"
 
-msgid "Click the button to refresh and view ACL rules information"
-msgstr "点击按钮刷新，查看 ACL 规则统计信息"
-
-msgid "Mapped listener"
-msgstr "Mapped listener信息"
-
-msgid "Click the button to refresh and view manage mapped listeners"
-msgstr "点击按钮刷新，查看管理映射的监听器"
-
 msgid "Encryption Algorithm"
 msgstr "加密算法"
 
-msgid "encryption algorithm to use, supported: xor, chacha20, aes-gcm, aes-gcm-256, openssl-aes128-gcm, openssl-aes256-gcm, openssl-chacha20. default (aes-gcm) (--encryption-algorithm parameter)"
-msgstr "使用的加密算法，支持：xor、chacha20、aes-gcm、aes-gcm-256、openssl-aes128-gcm、openssl-aes256-gcm、openssl-chacha20。默认（aes-gcm）(--encryption-algorithm 参数)"
-
-msgid "Stats"
-msgstr "Stats统计信息"
-
-msgid "Click the button to refresh and view statistics information"
-msgstr "点击按钮刷新，查看统计信息"
+msgid "encryption algorithm to use, supported: xor, chacha20, aes-gcm, aes-256-gcm, openssl-aes-gcm, openssl-chacha20, openssl-aes-256-gcm. default (aes-gcm) (--encryption-algorithm parameter)"
+msgstr "使用的加密算法，支持：xor、chacha20、aes-gcm、aes-256-gcm、openssl-aes-gcm、openssl-chacha20、openssl-aes-256-gcm。默认（aes-gcm）(--encryption-algorithm 参数)"
 
 msgid "WAN access to WEB"
 msgstr "外网连接WEB"
 
 msgid "Automatically add firewall rules to allow WAN access to this WEB console"
-msgstr "自动添加防火墙端口放行规则，外网可连接此WEB控制台"
+msgstr "自动添加防火墙端口放行规则，外网可通过服务端口连接此WEB控制台"
 
 msgid "WAN access to API"
 msgstr "外网访问API"
 
 msgid "Automatically add firewall rules to allow WAN access to the API control page"
-msgstr "自动添加防火墙端口放行规则，外网可访问API控制页面"
+msgstr "自动添加防火墙端口放行规则，外网可通过API端口访问API控制页面"
 
+msgid "P2P only"
+msgstr "仅P2P"
+
+msgid "only communicate with peers that already establish p2p connection. (--p2p-only parameter)"
+msgstr "仅与已经建立P2P连接的对等节点通信（ --p2p-only 参数）"
+
+msgid "Disable TCP"
+msgstr "禁用TCP"
+
+msgid "Disable TCP hole punching (--disable-tcp-hole-punching parameter)"
+msgstr "禁用TCP打洞功能（ --disable-tcp-hole-punching 参数）"
+
+msgid "Disable sym"
+msgstr "禁用sym"
+
+msgid "if true, disable udp nat hole punching for symmetric nat (NAT4), which is based on birthday attack and may be blocked by ISP. (--disable-sym-hole-punching parameter)"
+msgstr "如果为true，则禁用基于生日攻击的对称NAT (NAT4) UDP 打洞功能，该打洞方式可能会被运营商封锁（ --disable-sym-hole-punching 参数）"
+
+msgid "UDP whitelist"
+msgstr "UDP 端口白名单"
+
+msgid "udp port whitelist. Supports single ports (53) and ranges (5000-6000). (--udp-whitelist parameter)"
+msgstr "UDP 端口白名单。支持单个端口（53）和范围（5000-6000）（ --udp-whitelist 参数）"
+
+msgid "TCP whitelist"
+msgstr "TCP 端口白名单"
+
+msgid "tcp port whitelist. Supports single ports (53) and ranges (5000-6000). (--tcp-whitelist parameter)"
+msgstr "TCP 端口白名单。支持单个端口（53）和范围（5000-6000）（ --tcp-whitelist 参数）"
+
+msgid "Disable relay kcp"
+msgstr "禁止节点转发 KCP"
+
+msgid "If true, disable relay kcp packets. avoid consuming too many bandwidth. default is false. (--disable-relay-kcp parameter)"
+msgstr "如果开启，则禁止节点转发 KCP 数据包，防止过度消耗流量。默认关闭（ --disable-relay-kcp 参数）"
+
+msgid "Relay foreign network kcp"
+msgstr "转发 KCP"
+
+msgid "If true, allow relay kcp packets from foreign network. default is false (not forward foreign network kcp packets). (--enable-relay-foreign-network-kcp parameter)"
+msgstr "如果开启，则作为共享节点时也可以转发其他网络的 KCP 数据包。默认关闭（不转发）（ --enable-relay-foreign-network-kcp 参数）"
+
+msgid "EasyTier Core"
+msgstr "EasyTier 配置"
+
+msgid "EasyTier Web"
+msgstr "自建控制台"
+
+msgid "All Levels"
+msgstr "全部级别"
+
+msgid "Stop Auto Refresh"
+msgstr "停止自动刷新"
+
+msgid "Start Auto Refresh"
+msgstr "开启自动刷新"
+
+msgid "Clear Logs"
+msgstr "清除日志"
+
+msgid "Download Log"
+msgstr "下载日志"
+
+msgid "Loading logs..."
+msgstr "加载日志中..."
+
+msgid "No logs available"
+msgstr "暂无日志"
+
+msgid "Logs cleared"
+msgstr "日志已清除"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Running"
+msgstr "运行中"
+
+msgid "Stopped"
+msgstr "已停止"
+
+msgid "Memory"
+msgstr "内存"
+
+msgid "Uptime"
+msgstr "运行时长"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "Refresh Version"
+msgstr "刷新版本"
+
+msgid "Clear cached version and fetch latest version from GitHub?"
+msgstr "清除缓存版本信息以重新获取版本号信息？"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Confirm"
+msgstr "确认"
+
+msgid "Web Console"
+msgstr "Web 控制台主页"
+
+msgid "Service not running"
+msgstr "服务未运行"
+
+msgid "New Version"
+msgstr "发现新版本"
+
+msgid "Unknown"
+msgstr "未知"
+
+msgid "Quick Actions"
+msgstr "快捷操作"
+
+msgid "Restart Service"
+msgstr "重启服务"
+
+msgid "Restart EasyTier service?"
+msgstr "确认重启 EasyTier 服务？"
+
+msgid "Please wait, operation in progress..."
+msgstr "请稍候，操作进行中..."
+
+msgid "Restarting service..."
+msgstr "正在重启服务..."
+
+msgid "Upload EasyTier Binary"
+msgstr "上传 EasyTier 程序"
+
+msgid "Drag and drop file here or click to browse"
+msgstr "拖放文件到此处或点击浏览"
+
+msgid "Select File"
+msgstr "选择文件"
+
+msgid "Uploading..."
+msgstr "上传中..."
+
+msgid "Supported Files"
+msgstr "支持的文件"
+
+msgid "Core service binary"
+msgstr "核心服务程序"
+
+msgid "Command line tool"
+msgstr "连接信息获取工具"
+
+msgid "Web console binary"
+msgstr "Web 控制台程序"
+
+msgid "Embedded web console"
+msgstr "内嵌 Web 的控制台"
+
+msgid "Download from"
+msgstr "程序下载地址"
+
+msgid "Upload Successful"
+msgstr "上传成功"
+
+msgid "Binary uploaded successfully. Restart the service to apply changes?"
+msgstr "程序上传成功，是否立即重启服务以使用新版本？"
+
+msgid "Restart the service to apply changes?"
+msgstr "是否立即重启服务以使用新版本？"
+
+msgid "Later"
+msgstr "稍后"
+
+msgid "Restart Now"
+msgstr "立即重启"
+
+msgid "Invalid file name"
+msgstr "无效的文件名"
+
+msgid "Only easytier binaries or compressed archives (.zip, .tar.gz, .tar) are allowed"
+msgstr "仅允许上传 easytier 相关程序文件或压缩包（.zip、.tar.gz、.tar）"
+
+msgid "Upload failed"
+msgstr "上传失败"
+
+msgid "Service restarted successfully"
+msgstr "服务重启成功"
+
+msgid "Restart failed"
+msgstr "重启失败"
+
+msgid "No changes to save"
+msgstr "没有需要保存的更改"
+
+msgid "Configuration"
+msgstr "配置"
+
+msgid "Configuration saved successfully"
+msgstr "配置保存成功"
+
+msgid "Save failed"
+msgstr "保存失败"
+
+msgid "Recommended"
+msgstr "推荐"
+
+msgid "Will be ignored, use embed version instead"
+msgstr "由于未内嵌WEB静态页面此程序将被忽略，请上传使用内嵌版本"
+
+msgid "Note"
+msgstr "注意"
+
+msgid "Files will be uploaded to the paths specified above"
+msgstr "程序文件将上传到上方指定的程序路径"
+
+msgid "EasyTier console uses easytier-web-embed. The easytier-web binary will be rejected during upload validation."
+msgstr "EasyTier 自建控制台使用 easytier-web-embed 上传成功后会更名为easytier-web使用，上传的 easytier-web 程序将在验证时被忽略"
+
+msgid "Compressed archive containing binaries"
+msgstr "包含EasyTier相关程序的压缩包"
+
+msgid "Drag *.tar.gz / *.zip / easytier binaries here or click to select file"
+msgstr "支持拖放 *.tar.gz / *.zip 压缩包和 easytier 二进制程序到此处，或点击选择文件"
+
+msgid "Error: Program not running! Please start the program and refresh"
+msgstr "错误：程序未运行！请先启动程序后刷新"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Failed to connect to RPC server. Please check if the RPC port is set to 15888 in the configuration."
+msgstr "无法连接到 RPC 服务器，请检查配置中 RPC 端口是否设置为 15888"
+
+msgid "Self-hosted Web Console"
+msgstr "自建 Web 控制台"
+
+msgid "Enable Self-hosted Web Console"
+msgstr "启用EasyTier-web控制台"
+
+msgid "Log Level"
+msgstr "日志级别"
+
+msgid "Runtime log located at"
+msgstr "运行日志位于"
+
+msgid "viewable in the log section"
+msgstr "可在上方日志页面查看"
+
+msgid "Log levels"
+msgstr "日志详细程度"
+
+msgid "parameter"
+msgstr "参数"
+
+msgid "Example"
+msgstr "示例"
+
+msgid "current device IP or domain"
+msgstr "当前设备IP或解析的域名"
+
+msgid "API port"
+msgstr "API端口"
+
+msgid "GeoIP2 database file path used to locate the client"
+msgstr "GeoIP2 数据库文件路径，用于查找客户端所在位置"
+
+msgid "Defaults to an embedded file (country-level information only)"
+msgstr "默认使用内嵌文件（仅包含国家级别信息）"
+
+msgid "GEOIP Database Path"
+msgstr "GeoIP 数据库路径"
+
+msgid "Connection Information"
+msgstr "连接信息"
+
+msgid "Peer List"
+msgstr "节点列表"
+
+msgid "Route Info"
+msgstr "路由信息"
+
+msgid "STUN"
+msgstr "STUN信息"
+
+msgid "Peer Center"
+msgstr "节点中心"
+
+msgid "VPN Portal"
+msgstr "Wireguard管理"
+
+msgid "Proxy"
+msgstr "代理信息"
+
+msgid "ACL"
+msgstr "ACL规则"
+
+msgid "Mapped Listener"
+msgstr "映射监听"
+
+msgid "Statistics"
+msgstr "统计数据"
+
+msgid "Command Line"
+msgstr "启动参数"
+
+msgid "Copy"
+msgstr "复制"
+
+msgid "Copied"
+msgstr "已复制"
+
+msgid "Duplicate extra parameter"
+msgstr "重复的额外参数"
+
+msgid "IPv4 Address"
+msgstr "IPv4地址"
+
+msgid "Route Cost"
+msgstr "路由"
+
+msgid "Latency(ms)"
+msgstr "延迟(ms)"
+
+msgid "Loss Rate"
+msgstr "丢包率"
+
+msgid "RX Traffic"
+msgstr "下载"
+
+msgid "TX Traffic"
+msgstr "上传"
+
+msgid "Tunnel Protocol"
+msgstr "协议"
+
+msgid "NAT Type"
+msgstr "NAT类型"
+
+msgid "ERROR: Wireguard VPN Portal Not Started"
+msgstr "错误：WireGuard VPN 门户未启动"
+
+msgid "Refresh"
+msgstr "立即刷新"
+
+msgid "EasyTier Status"
+msgstr "EasyTier 状态总览"
+
+msgid "Virtual IP"
+msgstr "虚拟IP"
+
+msgid "Proxy CIDRs"
+msgstr "代理网段"
+
+msgid "Peer ID"
+msgstr "节点ID"
+
+msgid "Public IPv4"
+msgstr "公网IPv4"
+
+msgid "Public IPv6"
+msgstr "公网IPv6"
+
+msgid "Listener"
+msgstr "监听器"
+
+msgid "Next Hop IPv4"
+msgstr "下一跳IPv4"
+
+msgid "Interface IPv4"
+msgstr "接口IPv4"
+
+msgid "Interface IPv6"
+msgstr "接口IPv6"
+
+msgid "UDP Stun Type"
+msgstr "UDP NAT类型"
+
+msgid "Port Restricted"
+msgstr "端口受限型"
+
+msgid "No PAT"
+msgstr "无端口映射"
+
+msgid "Direct"
+msgstr "直连"
+
+msgid "Connected"
+msgstr "已连接"
+
+msgid "Connecting"
+msgstr "连接中"
+
+msgid "Disconnected"
+msgstr "已断开连接"
+
+msgid "Next Hop Hostname"
+msgstr "下一跳主机名"
+
+msgid "Next Hop Latency"
+msgstr "下一跳延迟"
+
+msgid "Path Length"
+msgstr "路径长度"
+
+msgid "Path Latency"
+msgstr "路径延迟"
+
+msgid "Next Hop IPv4 Lat First"
+msgstr "下一跳 IPv4（延迟优先）"
+
+msgid "Path Length Lat First"
+msgstr "路径长度（延迟优先）"
+
+msgid "Path Latency Lat First"
+msgstr "路径延迟（延迟优先）"
+
+msgid "Source"
+msgstr "源地址"
+
+msgid "Destination"
+msgstr "目标地址"
+
+msgid "Start Time"
+msgstr "开始时间"
+
+msgid "State"
+msgstr "状态"
+
+msgid "Transport Type"
+msgstr "传输协议"
+
+msgid "Last Update Time"
+msgstr "最后更新时间"
+
+msgid "Node ID"
+msgstr "节点ID"
+
+msgid "Direct Peers"
+msgstr "直连节点"
+
+msgid "Metric Name"
+msgstr "指标名称"
+
+msgid "Value"
+msgstr "值"
+
+msgid "Labels"
+msgstr "标签"
+
+msgid "Client Config Start"
+msgstr "客户端配置开始"
+
+msgid "Client Config End"
+msgstr "客户端配置结束"
+
+msgid "Local"
+msgstr "本机"
+
+msgid "Symmetric"
+msgstr "对称型"
+
+msgid "Restricted"
+msgstr "受限型"
+
+msgid "Full Cone"
+msgstr "全锥型"
+
+msgid "Address Restricted"
+msgstr "地址受限型"
+
+msgid "P2P"
+msgstr "P2P"
+
+msgid "Server"
+msgstr "服务器"
+
+msgid "UDP NAT Type"
+msgstr "UDP NAT 类型"
+
+msgid "TCP NAT Type"
+msgstr "TCP NAT 类型"
+
+msgid "Invalid Service Name"
+msgstr "无效的服务名称"
+
+msgid "Protocol Name"
+msgstr "协议名称"
+
+msgid "Next Hop Hostname Lat First"
+msgstr "下一跳主机名（延迟优先）"
+
+msgid "Response"
+msgstr "响应"
+
+msgid "List Connector Response"
+msgstr "连接器列表响应"
+
+msgid "Connectors"
+msgstr "连接器"
+
+msgid "Connector"
+msgstr "连接器"
+
+msgid "URL"
+msgstr "地址"
+
+msgid "Public IP"
+msgstr "公网IP"
+
+msgid "Min Port"
+msgstr "最小端口"
+
+msgid "Max Port"
+msgstr "最大端口"
+
+msgid "Portal Name"
+msgstr "门户名称"
+
+msgid "WireGuard"
+msgstr "WireGuard"
+
+msgid "Connected Clients"
+msgstr "已连接客户端"
+
+msgid "ACL Stats"
+msgstr "ACL 统计数据"
+
+msgid "Global"
+msgstr "全局"
+
+msgid "Cache Max Size"
+msgstr "缓存最大大小"
+
+msgid "Cache Size"
+msgstr "缓存大小"
+
+msgid "Connection Track"
+msgstr "连接追踪"
+
+msgid "Rules"
+msgstr "规则"
+
+msgid "List Mapped Listener Response"
+msgstr "列出映射监听器响应"
+
+msgid "Compression RX Before"
+msgstr "接收前压缩"
+
+msgid "Compression RX After"
+msgstr "接收后压缩"
+
+msgid "Compression TX Before"
+msgstr "发送前压缩"
+
+msgid "Compression TX After"
+msgstr "发送后压缩"
+
+msgid "Peer RPC Client RX"
+msgstr "节点 RPC 客户端接收流量"
+
+msgid "Peer RPC Client TX"
+msgstr "节点 RPC 客户端发送流量"
+
+msgid "Peer RPC Server RX"
+msgstr "节点 RPC 服务端接收流量"
+
+msgid "Peer RPC Server TX"
+msgstr "节点 RPC 服务端发送流量"
+
+msgid "Peer RPC Duration"
+msgstr "节点 RPC 持续时间"
+
+msgid "Traffic Bytes RX"
+msgstr "接收流量字节"
+
+msgid "Traffic Bytes TX"
+msgstr "发送流量字节"
+
+msgid "Traffic Bytes Self RX"
+msgstr "本机接收流量字节"
+
+msgid "Traffic Bytes Self TX"
+msgstr "本机发送流量字节"
+
+msgid "Traffic Packets RX"
+msgstr "接收数据包数"
+
+msgid "Traffic Packets TX"
+msgstr "发送数据包数"
+
+msgid "Traffic Packets Self RX"
+msgstr "本机接收数据包数"
+
+msgid "Traffic Packets Self TX"
+msgstr "本机发送数据包数"
+
+msgid "Traffic Packets Forwarded"
+msgstr "转发数据包数"
+
+msgid "Traffic Bytes Forwarded"
+msgstr "转发流量字节"
+
+msgid "Destination Peer ID"
+msgstr "目标节点ID"
+
+msgid "Source Peer ID"
+msgstr "源节点ID"
+
+msgid "Method Name"
+msgstr "方法名"
+
+msgid "Service Name"
+msgstr "服务名"
+
+msgid "Success"
+msgstr "成功"
+
+msgid "Failure"
+msgstr "失败"
+
+msgid "Timeout"
+msgstr "超时"
+
+msgid "Sync Route Info"
+msgstr "同步路由信息"
+
+msgid "Get Global Peer Map"
+msgstr "获取全局节点映射表"
+
+msgid "Report Peers"
+msgstr "上报节点信息"
+
+msgid "OSPF Route RPC"
+msgstr "OSPF路由RPC"
+
+msgid "Peer Center RPC"
+msgstr "节点中心RPC"
+
+msgid "Caused by"
+msgstr "由以下原因引起："
+
+msgid "failed to get peer manager client"
+msgstr "无法获取节点管理客户端"
+
+msgid "failed to get peer center client"
+msgstr "无法获取节点中心客户端"
+
+msgid "failed to connect to server"
+msgstr "无法连接到服务器"
+
+msgid "Connection refused"
+msgstr "连接被拒绝"
+
+msgid "scheme"
+msgstr "方式"
+
+msgid "cannot_be_a_base"
+msgstr "不能作为基础节点"
+
+msgid "username"
+msgstr "用户名"
+
+msgid "password"
+msgstr "密码"
+
+msgid "host"
+msgstr "主机地址"
+
+msgid "port"
+msgstr "端口"
+
+msgid "path"
+msgstr "路径"
+
+msgid "query"
+msgstr "查询"
+
+msgid "fragment"
+msgstr "片段"
+
+msgid "Some"
+msgstr "有"
+
+msgid "None"
+msgstr "无"
+
+msgid "Domain"
+msgstr "域名"
+
+msgid "Configuration File Content"
+msgstr "配置文件内容"
+
+msgid "No data available"
+msgstr "暂无数据"
+
+msgid "Peer Center service not available. This feature requires multiple nodes in the network."
+msgstr "节点中心服务不可用，此功能要求网络中包含多个节点。"
+
+msgid "Refreshing..."
+msgstr "正在刷新..."
+
+msgid "Failed to parse response:"
+msgstr "解析响应失败："
+
+msgid "GitHub Proxy URLs"
+msgstr "GitHub 加速镜像地址"
+
+msgid "Add"
+msgstr "添加"
+
+msgid "Used to accelerate GitHub downloads when fetching binaries online"
+msgstr "用于从GitHub在线下载EasyTier程序使用镜像加速GitHub"
+
+msgid "Fallback Version"
+msgstr "备用版本"
+
+msgid "Used when unable to fetch the latest version during online download"
+msgstr "用于启动脚本里无法获取GitHub最新版本时在线下载回退使用的版本"
+
+msgid "Save Configuration"
+msgstr "保存并应用"
+
+msgid "No proxy configured, using default proxy"
+msgstr "未配置加速镜像，将使用脚本内默认地址，可能会失效"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Please enter proxy URL"
+msgstr "请输入一个加速镜像地址！"
+
+msgid "Invalid URL format"
+msgstr "地址格式不正确！"
+
+msgid "Proxy already exists"
+msgstr "镜像地址已存在！"
+
+msgid "The URL of the API server, used for connecting the web frontend"
+msgstr "API 服务器的 URL，用于 web 前端连接"
+
+msgid "Peer Nodes"
+msgstr "节点/服务器"
+
+msgid "Route CIDR"
+msgstr "路由CIDR"
+
+msgid "Auto Configure Interface"
+msgstr "自动配置接口"
+
+msgid "Automatically create and configure the EasyTier network interface"
+msgstr "自动创建并配置 EasyTier 网络接口"
+
+msgid "Interface Netmask"
+msgstr "接口子网掩码"
+
+msgid "Subnet mask for the EasyTier interface (default: 255.0.0.0)"
+msgstr "EasyTier 接口的子网掩码（默认值：255.0.0.0）"
+
+msgid "Auto Configure Firewall"
+msgstr "自动配置防火墙"
+
+msgid "Automatically add and manage firewall rules"
+msgstr "自动添加和管理防火墙规则"
+
+msgid "Invalid JSON data"
+msgstr "无效的 JSON 数据"
+
+msgid "No file uploaded"
+msgstr "未上传文件"
+
+msgid "binary file(s)"
+msgstr "个二进制程序"
+
+msgid "Failed to move file. Insufficient space or permission denied"
+msgstr "移动文件失败。空间不足或权限不足。"
+
+msgid "Binary uploaded successfully to"
+msgstr "二进制文件已成功上传至"
+
+
+msgid "If the device has insufficient storage space, the upload may fail and existing programs may be deleted. Please ensure adequate free space before uploading."
+msgstr "如果当前设备内部可用空间不足时，可能无法成功处理上传的程序并导致现有的程序被清除，请确保有足够的可用空间后再上传"
+
+msgid "Available space"
+msgstr "当前路径可用空间"
+
+msgid "Unable to query disk space"
+msgstr "无法查询此路径磁盘空间"
+
+msgid "Program size"
+msgstr "程序大小"
+
+msgid "Virtual Network Interface"
+msgstr "虚拟网卡接口"
+
+msgid "Real-time Traffic"
+msgstr "实时流量"
+
+msgid "Download"
+msgstr "下载"
+
+msgid "Upload"
+msgstr "上传"
+
+msgid "Total Download"
+msgstr "总下载量"
+
+msgid "Total Upload"
+msgstr "总上传量"
+
+msgid "Address"
+msgstr "地址"
+
+msgid "Contributors"
+msgstr "贡献者"
+
+msgid "Traffic Control Bytes RX"
+msgstr "流量控制接收字节数"
+
+msgid "Traffic Control Bytes TX"
+msgstr "流量控制发送字节数"
+
+msgid "Traffic Control Bytes RX By Instance"
+msgstr "按实例统计接收字节数"
+
+msgid "Traffic Control Bytes TX By Instance"
+msgstr "按实例统计发送字节数"
+
+msgid "Traffic Control Packets RX"
+msgstr "流量控制接收数据包"
+
+msgid "Traffic Control Packets TX"
+msgstr "流量控制发送数据包"
+
+msgid "Traffic Control Packets RX By Instance"
+msgstr "按实例统计接收数据包"
+
+msgid "Traffic Control Packets TX By Instance"
+msgstr "按实例统计发送数据包"
+
+msgid "From Instance ID"
+msgstr "来源实例ID"
+
+msgid "To Instance ID"
+msgstr "目标实例ID"
+
+msgid "Logs"
+msgstr "日志"
+
+msgid "Online Download"
+msgstr "在线下载"
+
+msgid "Online Download EasyTier"
+msgstr "在线下载EasyTier程序"
+
+msgid "Download Version"
+msgstr "下载版本"
+
+msgid "Download specified version from GitHub and install to specified path"
+msgstr "从GitHub下载指定版本的程序安装到指定路径"
+
+msgid "Downloading..."
+msgstr "正在下载..."
+
+msgid "Preparing download..."
+msgstr "准备下载..."
+
+msgid "Download completed successfully"
+msgstr "下载完成"
+
+msgid "Download failed"
+msgstr "下载失败"
+
+msgid "Download and installation completed"
+msgstr "下载安装完成"
+
+msgid "Download completed. Restart service now?"
+msgstr "下载完成，是否立即重启服务？"
+
+msgid "Please enter download version"
+msgstr "请输入下载版本"
+
+msgid "Network error"
+msgstr "网络错误"
+
+msgid "Pre-release"
+msgstr "预发布版"
+
+msgid "Stable"
+msgstr "稳定版"
+
+msgid "Custom Input"
+msgstr "自定义输入"
+
+msgid "Loading versions..."
+msgstr "正在加载版本..."
+
+msgid "Program not found"
+msgstr "程序不存在"
+
+msgid "no running instances found"
+msgstr "未找到正在运行的实例"
+
+msgid "Unable to detect CPU architecture"
+msgstr "无法检测CPU架构"
+
+msgid "No x86-32bit program available"
+msgstr "没有当前x86-32位的程序"
+
+msgid "System lacks unzip, cannot download and extract"
+msgstr "系统缺少 unzip 下载后无法解压"
+
+msgid "Missing version parameter"
+msgstr "缺少版本号参数"
+
+msgid "Starting download..."
+msgstr "开始下载..."
+
+msgid "Trying download URL..."
+msgstr "尝试下载地址..."
+
+msgid "Downloading with"
+msgstr "使用"
+
+msgid "Download completed, extracting..."
+msgstr "下载完成，正在解压..."
+
+msgid "Extraction failed"
+msgstr "解压失败"
+
+msgid "Installing programs..."
+msgstr "正在安装程序..."
+
+msgid "Installation completed"
+msgstr "安装完成"
+
+msgid "Preparing..."
+msgstr "准备中..."
+
+msgid "Downloaded package is incomplete, missing required files"
+msgstr "下载的压缩包不完整，缺少EasyTier相关程序文件"
+
+msgid "Program installation failed, verification failed"
+msgstr "程序安装失败，验证未通过"
+
+msgid "Download task already exists"
+msgstr "已有下载任务正在进行"
+
+msgid "Verifying programs..."
+msgstr "正在验证程序..."
+
+msgid "Program is incomplete or architecture mismatch"
+msgstr "程序不完整或架构不匹配"
+
+msgid "Failed to install program"
+msgstr "程序安装失败"
+
+msgid "Cancel Download"
+msgstr "取消下载"
+
+msgid "Download cancelled"
+msgstr "已取消下载"
+
+msgid "Cancelling download, may take up to 5 minutes to stop the current task"
+msgstr "正在取消下载，当前任务可能需要最多5分钟才能停止"
+
+msgid "All download attempts failed"
+msgstr "所有下载地址均下载失败，请确认github加速镜像地址有效或使用手动上传"
+
+msgid "Download task already exists, continuing..."
+msgstr "下载任务已存在，继续中..."
+
+msgid "Download Successful"
+msgstr "下载成功"
+
+msgid "Retry"
+msgstr "重试"
+
+msgid "Close"
+msgstr "关闭"
+
+msgid "API Listen Address"
+msgstr "API监听地址"
+
+msgid "Listen address for the RESTful server"
+msgstr "RESTful服务器的监听地址"
+
+msgid "all interfaces"
+msgstr "所有接口"
+
+msgid "localhost only"
+msgstr "仅本地"
+
+msgid "IPv6 all"
+msgstr "IPv6所有接口"
+
+msgid "Web Listen Address"
+msgstr "Web监听地址"
+
+msgid "Listen address for the web dashboard server"
+msgstr "Web控制台服务器的监听地址"
+
+msgid "Only effective when web port differs from API port or addresses differ"
+msgstr "仅在Web端口与API端口不同或地址不同时生效"
+
+msgid "Disable User Registration"
+msgstr "禁用用户注册"
+
+msgid "Prevent new users from registering accounts"
+msgstr "阻止新用户注册账户"
+
+msgid "Allow Auto-create User"
+msgstr "允许自动创建用户"
+
+msgid "Automatically create local user when easytier-core connects with an unknown username"
+msgstr "当easytier-core使用未知用户名连接时自动创建本地用户"
+
+msgid "Enable OIDC Single Sign-On"
+msgstr "启用OIDC单点登录"
+
+msgid "Enable OIDC (OpenID Connect) for single sign-on authentication"
+msgstr "启用OIDC（OpenID Connect）单点登录认证"
+
+msgid "OIDC Issuer URL"
+msgstr "OIDC发行者URL"
+
+msgid "The OIDC issuer URL for single sign-on authentication"
+msgstr "用于单点登录认证的OIDC发行者URL"
+
+msgid "OIDC Client ID"
+msgstr "OIDC客户端ID"
+
+msgid "The OIDC client ID"
+msgstr "OIDC客户端ID"
+
+msgid "OIDC Client Secret"
+msgstr "OIDC客户端密钥"
+
+msgid "The OIDC client secret"
+msgstr "OIDC客户端密钥"
+
+msgid "Can also be set via OIDC_CLIENT_SECRET environment variable"
+msgstr "也可以通过OIDC_CLIENT_SECRET环境变量设置"
+
+msgid "OIDC Redirect URL"
+msgstr "OIDC重定向URL"
+
+msgid "The OIDC redirect URL (callback URL), must match exactly what is registered with your Identity Provider"
+msgstr "OIDC重定向URL（回调URL），必须与身份提供商注册的完全匹配"
+
+msgid "OIDC Username Claim"
+msgstr "OIDC用户名声明"
+
+msgid "The OIDC claim to use as the local username"
+msgstr "用作本地用户名的OIDC声明"
+
+msgid "OIDC Scopes"
+msgstr "OIDC作用域"
+
+msgid "OIDC scopes to request during login"
+msgstr "登录时请求的OIDC作用域"
+
+msgid "Supports comma-separated values"
+msgstr "支持逗号分隔的值"
+
+msgid "OIDC Frontend Base URL"
+msgstr "OIDC前端基础URL"
+
+msgid "Frontend base URL to redirect to after successful OIDC callback"
+msgstr "OIDC回调成功后重定向到的前端基础URL"
+
+msgid "Required when frontend and API are deployed separately"
+msgstr "当前端和API分开部署时需要"
+
+msgid "Disable PKCE"
+msgstr "禁用PKCE"
+
+msgid "Disable PKCE (Proof Key for Code Exchange) for OIDC authentication"
+msgstr "禁用OIDC认证的PKCE（代码交换证明密钥）"
+
+msgid "Enable Webhook Integration"
+msgstr "启用Webhook集成"
+
+msgid "Enable webhook for token validation and event delivery"
+msgstr "启用webhook进行令牌验证和事件传递"
+
+msgid "Webhook URL"
+msgstr "Webhook URL"
+
+msgid "Base URL of the webhook endpoint for token validation and event delivery"
+msgstr "用于令牌验证和事件传递的webhook端点基础URL"
+
+msgid "When set, incoming tokens are validated via this webhook before local fallback"
+msgstr "设置后，传入的令牌将通过此webhook验证，然后再进行本地回退"
+
+msgid "Webhook Secret"
+msgstr "Webhook密钥"
+
+msgid "Shared secret used to authenticate outbound webhook calls"
+msgstr "用于验证出站webhook调用的共享密钥"
+
+msgid "Internal Auth Token"
+msgstr "内部认证令牌"
+
+msgid "Token for X-Internal-Auth header"
+msgstr "X-Internal-Auth头的令牌"
+
+msgid "When set, API requests with this header bypass session authentication"
+msgstr "设置后，带有此头的API请求将绕过会话认证"
+
+msgid "Web Instance ID"
+msgstr "Web实例ID"
+
+msgid "Stable identifier for this easytier-web instance when routing webhook callbacks"
+msgstr "路由webhook回调时此easytier-web实例的稳定标识符"
+
+msgid "Web Instance API Base URL"
+msgstr "Web实例API基础URL"
+
+msgid "Reachable base URL for this easytier-web instance's internal REST API"
+msgstr "此easytier-web实例内部REST API的可访问基础URL"
+
+msgid "Reset Database"
+msgstr "重置数据库"
+
+msgid "Are you sure you want to reset the database?"
+msgstr "确定要重置数据库吗？"
+
+msgid "This will delete all database files and cannot be recovered"
+msgstr "这将删除所有数据库文件，不可恢复"
+
+msgid "Database reset successfully"
+msgstr "数据库重置成功"
+
+msgid "Reset failed"
+msgstr "重置失败"
+
+msgid "No database files found or deletion failed"
+msgstr "未找到数据库文件或删除失败"
+
+msgid "Database Reset Successful"
+msgstr "数据库重置成功"
+
+msgid "Restart service to apply changes?"
+msgstr "重启服务以生效？"
