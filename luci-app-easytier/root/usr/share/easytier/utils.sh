@@ -48,14 +48,17 @@ manage_log_size() {
 	local logfile="$1"
 	local max_size_kb="${2:-5120}"
 	local keep_lines="${3:-500}"
+	local check_interval="${4:-10}"
 	
 	while true; do
 		local log_size=$(ls -l "$logfile" 2>/dev/null | awk '{print int($5/1024)}')
 		if [ "${log_size:-0}" -gt "$max_size_kb" ]; then
-			tail -n "$keep_lines" "$logfile" > "${logfile}.tmp"
-			mv "${logfile}.tmp" "$logfile"
+			if tail -n "$keep_lines" "$logfile" > "${logfile}.tmp"; then
+				cat "${logfile}.tmp" > "$logfile"
+			fi
+			rm -f "${logfile}.tmp"
 		fi
-		sleep 300
+		sleep "$check_interval"
 	done
 }
 

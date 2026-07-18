@@ -365,19 +365,19 @@ function get_log()
 end
 
 function get_log_size()
-    local size = luci.sys.exec("[ -f '/tmp/easytier.log' ] && stat -c%s /tmp/easytier.log 2>/dev/null || echo 0")
+    local size = luci.sys.exec("[ -f '/tmp/easytier.log' ] && wc -c < /tmp/easytier.log 2>/dev/null || echo 0")
     luci.http.prepare_content("application/json")
     luci.http.write_json({size = tonumber(size) or 0})
 end
 
 function get_wlog_size()
-    local size = luci.sys.exec("[ -f '/tmp/easytierweb.log' ] && stat -c%s /tmp/easytierweb.log 2>/dev/null || echo 0")
+    local size = luci.sys.exec("[ -f '/tmp/easytierweb.log' ] && wc -c < /tmp/easytierweb.log 2>/dev/null || echo 0")
     luci.http.prepare_content("application/json")
     luci.http.write_json({size = tonumber(size) or 0})
 end
 
 function clear_log()
-	luci.sys.call("echo '' >/tmp/easytier.log")
+	luci.sys.call(": >/tmp/easytier.log; rm -f /tmp/easytier.log.[0-9]*")
 end
 
 local function test_binary(path)
@@ -582,7 +582,7 @@ function get_wlog()
 end
 
 function clear_wlog()
-	luci.sys.call("echo '' >/tmp/easytierweb.log")
+	luci.sys.call(": >/tmp/easytierweb.log")
 end
 
 function clear_version_cache()

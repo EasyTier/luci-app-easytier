@@ -44,7 +44,6 @@ while true; do
         break
     fi
     sleep $((time))
-    [ "$(du -k /tmp/easytier.log | cut -f1)" = "1000" ] && echo " " >/tmp/easytier.log
 done
 EOF
         chmod +x /tmp/easytier_check
@@ -174,18 +173,10 @@ check_config() {
                    get_tz
 		   [ -z "$SET_TZ" ] || procd_set_param env TZ="$SET_TZ"
 		   procd_set_param command /bin/sh -c "
-			cd /tmp ; ${easytierbin} -c ${config_file} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
+			. /usr/share/easytier/utils.sh
+			cd /tmp ; ET_FILE_LOG_LEVEL=off ET_FILE_LOG_DIR=/tmp/easytier-internal-log ET_FILE_LOG_SIZE=1 ET_FILE_LOG_COUNT=1 ${easytierbin} -c ${config_file} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
 			ET_CORE_PID=\$!
-			{
-			while true; do
-				LOG_SIZE=\$(ls -l /tmp/easytier.log | awk '{print int(\$5/1024)}')
-				if [ \$LOG_SIZE -gt 5120 ]; then
-					tail -n 500 /tmp/easytier.log > /tmp/easytier.log.tmp
-					mv /tmp/easytier.log.tmp /tmp/easytier.log
-				fi
-				sleep 300
-			done
-			} &
+			manage_log_size /tmp/easytier.log 5120 500 &
 			LOG_MANAGEMENT_PID=\$!
 			trap \"kill -TERM \$ET_CORE_PID; kill -TERM \$LOG_MANAGEMENT_PID; exit\" SIGINT SIGTERM EXIT
 			wait \$ET_CORE_PID
@@ -597,18 +588,10 @@ EOF
 				[ -z "$desvice_name" ] || core_cmd="${core_cmd} --hostname $(shell_quote "$desvice_name")"
 			fi
 	     		procd_set_param command /bin/sh -c "
-			cd /tmp ; ${easytierbin} ${core_cmd} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
+			. /usr/share/easytier/utils.sh
+			cd /tmp ; ET_FILE_LOG_LEVEL=off ET_FILE_LOG_DIR=/tmp/easytier-internal-log ET_FILE_LOG_SIZE=1 ET_FILE_LOG_COUNT=1 ${easytierbin} ${core_cmd} --console-log-level ${log} >> /tmp/easytier.log 2>&1 &
 			ET_CORE_PID=\$!
-			{
-			while true; do
-				LOG_SIZE=\$(ls -l /tmp/easytier.log | awk '{print int(\$5/1024)}')
-				if [ \$LOG_SIZE -gt 5120 ]; then
-					tail -n 500 /tmp/easytier.log > /tmp/easytier.log.tmp
-					mv /tmp/easytier.log.tmp /tmp/easytier.log
-				fi
-				sleep 300
-			done
-			} &
+			manage_log_size /tmp/easytier.log 5120 500 &
 			LOG_MANAGEMENT_PID=\$!
 			trap \"kill -TERM \$ET_CORE_PID; kill -TERM \$LOG_MANAGEMENT_PID; exit\" SIGINT SIGTERM EXIT
 			wait \$ET_CORE_PID
@@ -746,18 +729,10 @@ start_web() {
 		web_cmd="${web_cmd} --console-log-level $weblog"	
 	fi
 	procd_set_param command /bin/sh -c "
+		. /usr/share/easytier/utils.sh
 		cd /tmp ; ${webbin} ${web_cmd} >> /tmp/easytierweb.log 2>&1 &
 		ET_WEB_PID=\$!
-		{
-			while true; do
-				LOG_SIZE=\$(ls -l /tmp/easytierweb.log | awk '{print int(\$5/1024)}')
-				if [ \$LOG_SIZE -gt 5120 ]; then
-					tail -n 500 /tmp/easytierweb.log > /tmp/easytierweb.log.tmp
-					mv /tmp/easytierweb.log.tmp /tmp/easytierweb.log
-				fi
-				sleep 300
-			done
-		} &
+		manage_log_size /tmp/easytierweb.log 5120 500 &
 		LOG_MANAGEMENT_PID=\$!
 		trap \"kill -TERM \$ET_WEB_PID; kill -TERM \$LOG_MANAGEMENT_PID; exit\" SIGINT SIGTERM EXIT
 		wait \$ET_WEB_PID
@@ -815,8 +790,10 @@ start_service() {
            mipstype=$(echo -n I | hexdump -o 2>/dev/null | awk '{ print substr($2,6,1); exit}') 
            [ "$mipstype" = "0" ] && cpucore="mips" || cpucore="mipsel" 
         fi
-        echo "" >/tmp/easytier.log
-	echo "" >/tmp/easytierweb.log
+        rm -f /tmp/easytier.log.[0-9]*
+        rm -rf /tmp/easytier-internal-log
+        : >/tmp/easytier.log
+	: >/tmp/easytierweb.log
         size="$(df -k | awk '/\/overlay$/ {sub(/K$/, "", $4); print $4}')"
 	[ -z "$size" ] && size="$(df -kP /usr/bin | awk 'NR==2 {print $(NF-2) }')"
 	if [ -z "$(uci -q get easytier.@easytier[0].web_enabled)" ] ; then
@@ -884,7 +861,10 @@ stop_service() {
                 	
                 	rm -rf /tmp/easytier-cli_peer /tmp/easytier-cli_connector /tmp/easytier-cli_stun /tmp/easytier-cli_route /tmp/easytier-cli_acl >/dev/null 2>&1
                 	rm -rf /tmp/easytier-cli_peer-center /tmp/easytier-cli_vpn-portal /tmp/easytier_cmd /tmp/easytier-cli_node /tmp/easytier-cli_mapped_listener >/dev/null 2>&1
-                	rm -rf /tmp/easytier-*.* /tmp/easytier.log >/dev/null 2>&1
+				rm -rf /tmp/easytier-*.* >/dev/null 2>&1
+				rm -f /tmp/easytier.log.[0-9]* >/dev/null 2>&1
+				rm -rf /tmp/easytier-internal-log >/dev/null 2>&1
+				: >/tmp/easytier.log
                 	echo "$(date '+%Y-%m-%d %H:%M:%S') easytier : easytier-core 停止运行" >>/tmp/easytier.log
 		fi
 		if [ "$(uci -q get easytier.@easytier[0].web_enabled)" = "0" ] ; then
