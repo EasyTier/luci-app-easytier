@@ -1743,7 +1743,7 @@ msgstr "二进制文件已成功上传至"
 
 
 msgid "If the device has insufficient storage space, the upload may fail and existing programs may be deleted. Please ensure adequate free space before uploading."
-msgstr "如果当前设备内部可用空间不足时，可能无法成功处理上传的程序并导致现有的程序被清除，请确保有足够的可用空间后再上传"
+msgstr "当前设备内部可用空间不足时，可能无法成功处理上传的程序并导致现有的程序被清除，请确保有足够的可用空间后再上传"
 
 msgid "Available space"
 msgstr "当前路径可用空间"
