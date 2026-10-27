@@ -452,6 +452,10 @@ msgid ""
 "pinged."
 msgstr "检测间隔的时间，每隔多久检测指定的IP通断一次"
 
+#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:67
+msgid "Join with an admin-issued credential: connections are encrypted automatically and expire on their own. If you did not receive one, use the network secret instead."
+msgstr "使用临时凭证加入网络：连接自动加密，到期自动失效。如果你没有收到凭证，请改用网络密钥。"
+
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:256
 msgid ""
 "Latency-first mode: attempts to forward traffic via the lowest latency path. "
@@ -527,6 +531,10 @@ msgstr "无TUN模式"
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:411
 msgid "Node Info"
 msgstr "本机信息"
+
+#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:63
+msgid "Noise-encrypted handshake between nodes; peers must support secure mode"
+msgstr "节点间使用 Noise 加密握手与身份认证；对端节点需支持安全模式"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:136
 msgid ""
@@ -633,6 +641,10 @@ msgstr "SOCKS5端口"
 msgid "STUN Info"
 msgstr "STUN信息"
 
+#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:62
+msgid "Secure Mode"
+msgstr "安全模式"
+
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:687
 msgid "Self-hosted Web Server"
 msgstr "自建Web控制台"
@@ -698,6 +710,10 @@ msgid ""
 "parameter)"
 msgstr "连接对等节点时使用的默认协议（--default-protocol 参数）"
 
+#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:70
+msgid "Temporary Credential"
+msgstr "临时凭证"
+
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:188
 msgid "The hostname used to identify this device (--hostname parameter)"
 msgstr "用于标识此设备的主机名 （--hostname 参数）"
@@ -740,6 +756,10 @@ msgstr "上传程序"
 #: applications/luci-app-easytier/luasrc/view/easytier/other_upload.htm:2
 msgid "Upload Program:"
 msgstr "上传程序："
+
+#: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:66
+msgid "Use Temporary Credential"
+msgstr "使用临时凭证"
 
 #: applications/luci-app-easytier/luasrc/model/cbi/easytier.lua:276
 msgid "Use Userspace TCP/IP Stack"

@@ -59,12 +59,26 @@ network_name.placeholder = "easytier-name"
 network_name.maxlength = 64
 network_name:depends("etcmd", "etcmd")
 
+secure_mode = s:taboption("general", Flag, "secure_mode", translate("Secure Mode"),
+        translate("Noise-encrypted handshake between nodes; peers must support secure mode"))
+secure_mode:depends("etcmd", "etcmd")
+
+use_credential = s:taboption("general", Flag, "use_credential", translate("Use Temporary Credential"),
+        translate("Join with an admin-issued credential: connections are encrypted automatically and expire on their own. If you did not receive one, use the network secret instead."))
+use_credential:depends("secure_mode", "1")
+
+credential_secret = s:taboption("general", Value, "credential_secret", translate("Temporary Credential"))
+credential_secret.password = true
+credential_secret.placeholder = "easytier-password"
+credential_secret.maxlength = 128
+credential_secret:depends("use_credential", "1")
+
 network_secret = s:taboption("general", Value, "network_secret", translate("Network Secret"),
         translate("Network secret used to verify whether this node belongs to the VPN network (--network-secret parameter)"))
 network_secret.password = true
 network_secret.placeholder = "easytier-password"
 network_secret.maxlength = 128
-network_secret:depends("etcmd", "etcmd")
+network_secret:depends({ etcmd = "etcmd", use_credential = 0 })
 
 ip_dhcp = s:taboption("general", Flag, "ip_dhcp", translate("Enable DHCP"),
         translate("IP address will be automatically determined and assigned by EasyTier, starting from 10.0.0.1 by default. "
